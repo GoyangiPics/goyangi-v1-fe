@@ -1,0 +1,32 @@
+# Not actually a workspace — this file exists because pnpm 11 made
+# "ignored build scripts" fatal and requires the approved-builds list to
+# live here (not in package.json) per the pnpm/json-prefer-workspace-settings
+# lint rule.
+
+shellEmulator: true
+trustPolicy: no-downgrade
+
+# Swap Vite's internals for the Rust bundler (Rolldown). Experimental but
+# Nuxt-supported since 4.1 — delete this override to fall back to stock Vite.
+overrides:
+  vite: npm:rolldown-vite@^7
+
+# semver@6.3.1 (July 2023, transitive via @babel/core) predates npm provenance
+# and trips the downgrade check as a false positive — excluded, not trusted less.
+trustPolicyExclude:
+  - semver@6.3.1
+
+allowBuilds:
+  '@parcel/watcher': true
+  better-sqlite3: true
+  esbuild: true
+  unrs-resolver: true
+  # vue-demi's postinstall just links the Vue 3 entry — safe.
+  vue-demi: true
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - better-sqlite3
+  - esbuild
+  - unrs-resolver
+  - vue-demi

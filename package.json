@@ -1,0 +1,49 @@
+{
+  "name": "goyangi-v1-fe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "start": "node .output/server/index.mjs",
+    "postinstall": "nuxt prepare",
+    "lint": "oxlint --deny-warnings",
+    "lint:fix": "oxlint --deny-warnings --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "typecheck": "nuxt typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typegen": "pocketbase-typegen --json ../goyangi-v1-be/pb_schema.json --out app/types/pocketbase-types.ts"
+  },
+  "dependencies": {
+    "@internationalized/date": "^3.12.2",
+    "@nuxt/fonts": "^0.14.0",
+    "@nuxt/ui": "^4.9.0",
+    "@pinia/nuxt": "^0.11.3",
+    "nuxt": "^4.4.8",
+    "pinia-plugin-persistedstate": "^4.7.1",
+    "pocketbase": "^0.27.0",
+    "tailwindcss": "^4.3.2",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "^1.2.116",
+    "@iconify-json/simple-icons": "^1.2.89",
+    "@vueuse/core": "^14.3.0",
+    "@vueuse/nuxt": "^14.3.0",
+    "oxfmt": "^0.57.0",
+    "oxlint": "^1.72.0",
+    "pocketbase-typegen": "^1.5.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^3.3.6"
+  },
+  "engines": {
+    "node": ">=26.0.0"
+  },
+  "packageManager": "pnpm@11.1.1"
+}

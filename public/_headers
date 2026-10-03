@@ -1,0 +1,16 @@
+# Response headers for the Cloudflare Pages deploy. Pages reads this file from
+# the build output; nothing else serves it (the dev server ignores it).
+#
+# The safe set: nothing here restricts where scripts or media may load from, so
+# nothing on the site can stop working. The full Content-Security-Policy
+# allowlist (script-src, img-src, media-src against api./cdn.goyangi.pics,
+# Google Fonts, Discord avatars) is a separate change that needs its own test
+# round — the only CSP directive here is frame-ancestors, which stops other
+# sites framing goyangi for clickjacking and has no bearing on what the page
+# itself loads.
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Content-Security-Policy: frame-ancestors 'self'
