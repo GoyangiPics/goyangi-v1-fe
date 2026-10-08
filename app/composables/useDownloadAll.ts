@@ -49,10 +49,17 @@ export function renditionCount(
  * current page, not the whole set or collection. That is the behaviour the set
  * page has always had.
  */
+/**
+ * One bulk download at a time, page-wide. Module-level because the set-wide
+ * download starts from a card's context menu, and every card has its own
+ * instance of this composable — a per-instance flag let two sets download
+ * interleaved, and left the set page's button idle while one ran.
+ */
+const isDownloadingAll = ref(false)
+
 export function useDownloadAll() {
   const toast = useToast()
-
-  const isDownloadingAll = ref(false)
+  const pb = usePocketBase()
 
   /**
    * Fetches each item's chosen rendition in turn.
@@ -69,45 +76,112 @@ export function useDownloadAll() {
     if (isDownloadingAll.value) return
     isDownloadingAll.value = true
     try {
-      const label = RENDITION_LABEL[rendition]
-      let count = 0
-      let skipped = 0
-
-      for (const item of items) {
-        const url = renditionUrl(item, rendition)
-        // Still encoding, or — for SD — a record predating that rendition.
-        if (!url) {
-          skipped++
-          continue
-        }
-        await downloadFile(url)
-        count++
-      }
-
-      if (count === 0) {
-        toast.add({
-          title: 'Nothing to download',
-          description: `None of these items has ${label === 'SD' ? 'an SD' : 'an HD'} file.`,
-          color: 'warning',
-          duration: 3000,
-        })
-        return
-      }
-
-      toast.add({
-        title: 'Done!',
-        // The skipped count is stated rather than swallowed: silently handing
-        // over fewer files than there are items on screen reads as a failure.
-        description:
-          `Downloaded ${count} ${label} file${count === 1 ? '' : 's'}.` +
-          (skipped > 0 ? ` ${skipped} had no ${label} version and were skipped.` : ''),
-        color: skipped > 0 ? 'warning' : 'success',
-        duration: skipped > 0 ? 4000 : 2000,
-      })
+      await run(items, rendition)
     } finally {
       isDownloadingAll.value = false
     }
   }
 
-  return { isDownloadingAll, downloadAll }
+  /**
+   * Downloads every item in a set — all of it, not a page of it — from wherever
+   * the set's items aren't on screen: a card's context menu on a listing.
+   *
+   * Shows a progress toast, which the set page's button doesn't need: there the
+   * button's own spinner says something is happening, whereas a menu closes the
+   * moment it's clicked and would otherwise leave a minutes-long run invisible.
+   */
+  async function downloadAllIn(target: { setId: string }, rendition: DownloadRendition = 'hd') {
+    if (isDownloadingAll.value) {
+      toast.add({
+        title: 'Already downloading',
+        description: 'Wait for the current download to finish.',
+        color: 'info',
+        duration: 2000,
+      })
+      return
+    }
+    isDownloadingAll.value = true
+    try {
+      let items: DownloadableItem[]
+      try {
+        items = await pb.collection('contents').getFullList<DownloadableItem>({
+          filter: pb.filter('set={:id}', { id: target.setId }),
+          fields: 'id,original,sd',
+          sort: 'created',
+          requestKey: null,
+        })
+      } catch (error) {
+        console.error('Error loading items to download:', error)
+        toast.add({
+          title: 'Error',
+          description: 'Could not load the set to download.',
+          color: 'error',
+          duration: 3000,
+        })
+        return
+      }
+      await run(items, rendition, { progress: true })
+    } finally {
+      isDownloadingAll.value = false
+    }
+  }
+
+  async function run(
+    items: readonly DownloadableItem[],
+    rendition: DownloadRendition,
+    opts: { progress?: boolean } = {},
+  ) {
+    const label = RENDITION_LABEL[rendition]
+    const total = renditionCount(items, rendition)
+    let count = 0
+    let skipped = 0
+
+    // duration: 0 on every update — see useLikeAll for why it has to be repeated.
+    const progress =
+      opts.progress && total > 0
+        ? toast.add({
+            title: `Downloading ${label} files…`,
+            description: `0/${total}`,
+            color: 'info',
+            duration: 0,
+          })
+        : null
+
+    for (const item of items) {
+      const url = renditionUrl(item, rendition)
+      // Still encoding, or — for SD — a record predating that rendition.
+      if (!url) {
+        skipped++
+        continue
+      }
+      await downloadFile(url)
+      count++
+      if (progress) toast.update(progress.id, { description: `${count}/${total}`, duration: 0 })
+    }
+
+    if (count === 0) {
+      toast.add({
+        title: 'Nothing to download',
+        description: `None of these items has ${label === 'SD' ? 'an SD' : 'an HD'} file.`,
+        color: 'warning',
+        duration: 3000,
+      })
+      return
+    }
+
+    const summary = {
+      title: 'Done!',
+      // The skipped count is stated rather than swallowed: silently handing
+      // over fewer files than there are items on screen reads as a failure.
+      description:
+        `Downloaded ${count} ${label} file${count === 1 ? '' : 's'}.` +
+        (skipped > 0 ? ` ${skipped} had no ${label} version and were skipped.` : ''),
+      color: skipped > 0 ? ('warning' as const) : ('success' as const),
+      duration: skipped > 0 ? 4000 : 2000,
+    }
+    if (progress) toast.update(progress.id, summary)
+    else toast.add(summary)
+  }
+
+  return { isDownloadingAll, downloadAll, downloadAllIn }
 }

@@ -15,6 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const toast = useToast()
+const { downloadAllIn } = useDownloadAll()
 const items = ref<DropdownMenuItem[][]>([])
 
 // Programmatic context menu: parents call `show(event)` (right-click or
@@ -91,6 +92,29 @@ const previewCopyLabel = computed(() =>
   /\.webp(?:[?#]|$)/i.test(props.content.preview ?? '') ? 'Copy WebP' : 'Copy AVIF',
 )
 
+/**
+ * A submenu entry, plus what it becomes when it's the only one: a lone entry is
+ * lifted to the top level rather than given a submenu of its own, and there it
+ * needs its full name back ("SD mp4" → "Download SD mp4").
+ */
+type MenuEntry = DropdownMenuItem & { flat?: Partial<DropdownMenuItem> }
+
+function submenu(label: string, icon: string, groups: MenuEntry[][]): DropdownMenuItem | null {
+  const actions = groups.flat().filter((entry) => entry.type !== 'label')
+  if (actions.length === 0) return null
+  if (actions.length === 1) {
+    const { flat, ...item } = actions[0]!
+    return { ...item, ...flat }
+  }
+  return {
+    label,
+    icon,
+    children: groups
+      .filter((group) => group.some((entry) => entry.type !== 'label'))
+      .map((group) => group.map(({ flat: _flat, ...item }) => item)),
+  }
+}
+
 onMounted(() => {
   const filetype = props.content.filetype
   const c = props.content
@@ -140,30 +164,37 @@ onMounted(() => {
   const hdLink = shortLink(c, 'hd')
   const sdLink = shortLink(c, 'sd')
 
-  const copy: DropdownMenuItem[] = []
+  // Copy and Download each collapse into one submenu row. With the whole-set
+  // download alongside the per-item ones the flat menu ran past fifteen rows;
+  // separators alone stopped being enough. Inside a submenu the parent already
+  // says the verb, so the entries name only the rendition.
+  const copy: MenuEntry[] = []
 
   if (filetype !== 'video') {
     copy.push({
-      label: previewCopyLabel.value,
+      label: previewCopyLabel.value.replace(/^Copy /, ''),
       icon: 'i-simple-icons-discord',
       onSelect: () => copyPreview(),
+      flat: { label: previewCopyLabel.value },
     })
   }
 
   if (filetype === 'video' || filetype === 'gif') {
     if (hdLink) {
       copy.push({
-        label: 'Copy HD mp4',
+        label: 'HD mp4',
         slot: 'hd',
         onSelect: () => copyRendition(hdLink, 'HD'),
+        flat: { label: 'Copy HD mp4' },
       })
     }
 
     if (sdLink) {
       copy.push({
-        label: 'Copy SD mp4',
+        label: 'SD mp4',
         slot: 'sd',
         onSelect: () => copyRendition(sdLink, 'SD'),
+        flat: { label: 'Copy SD mp4' },
       })
     }
   }
@@ -172,9 +203,10 @@ onMounted(() => {
   // can name the destination instead of the vague "mirror".
   if (c.mirror?.trim()) {
     copy.push({
-      label: 'Copy Imgur',
+      label: 'Imgur link',
       icon: 'i-lucide-copy',
       onSelect: () => copyMirror(),
+      flat: { label: 'Copy Imgur' },
     })
   }
 
@@ -185,36 +217,89 @@ onMounted(() => {
   // downloads fine and then refuses to play. `sd` is the H.264 720p rendition
   // that exists for exactly those devices (see hooks/h264.go), and until now it
   // was only reachable by copying its link and fetching it by hand.
-  const retrieve: DropdownMenuItem[] = []
+  const isMotion = filetype === 'video' || filetype === 'gif'
+  const downloadItem: MenuEntry[] = []
 
-  if (filetype === 'video' || filetype === 'gif') {
+  if (isMotion) {
     if (hdUrl) {
-      retrieve.push({
-        label: 'Download HD mp4',
-        icon: 'i-lucide-download',
-        // Leading stays the download icon (no -leading override below); the slot
-        // is only here to hang the AV1 compatibility hint off the trailing edge.
-        slot: 'downloadHd',
+      downloadItem.push({
+        label: 'HD mp4',
+        slot: 'hd',
         onSelect: () => downloadFile(hdUrl),
+        // Flattened, the leading icon goes back to the download glyph; the slot
+        // only hangs the AV1 compatibility hint off the trailing edge.
+        flat: { label: 'Download HD mp4', icon: 'i-lucide-download', slot: 'downloadHd' },
       })
     }
     // Conditional for the same reason the SD copy entry above is: the rendition
     // is best-effort backend-side and absent entirely on older records.
     if (sdUrl) {
-      retrieve.push({
-        label: 'Download SD mp4',
-        icon: 'i-lucide-download',
+      downloadItem.push({
+        label: 'SD mp4',
+        slot: 'sd',
         onSelect: () => downloadFile(sdUrl),
+        flat: { label: 'Download SD mp4', icon: 'i-lucide-download', slot: undefined },
       })
     }
   } else if (hdUrl) {
     // Stills and stickers have one rendition, so naming it would be noise.
-    retrieve.push({
-      label: 'Download',
-      icon: 'i-lucide-download',
+    downloadItem.push({
+      label: 'This item',
+      icon: 'i-lucide-image',
       onSelect: () => downloadFile(hdUrl),
+      flat: { label: 'Download', icon: 'i-lucide-download' },
     })
   }
+
+  // The whole set, from a card on a listing, without opening the set page.
+  // Fetched on select rather than counted up front, so the menu stays free to
+  // open. SD is offered when this item has one — sets are encoded together, so
+  // it's a fair guess for the rest, and the summary toast names any that lack it.
+  const downloadSet: MenuEntry[] = []
+  const setId = c.set?.trim()
+
+  if (setId) {
+    if (isMotion) {
+      downloadSet.push({
+        label: 'HD mp4',
+        slot: 'hd',
+        onSelect: () => void downloadAllIn({ setId }, 'hd'),
+        flat: { label: 'Download Set HD mp4', icon: 'i-lucide-download', slot: 'downloadHd' },
+      })
+      if (sdUrl) {
+        downloadSet.push({
+          label: 'SD mp4',
+          slot: 'sd',
+          onSelect: () => void downloadAllIn({ setId }, 'sd'),
+          flat: { label: 'Download Set SD mp4', icon: 'i-lucide-download', slot: undefined },
+        })
+      }
+    } else {
+      downloadSet.push({
+        label: 'Entire set',
+        icon: 'i-lucide-images',
+        onSelect: () => void downloadAllIn({ setId }, 'hd'),
+        flat: { label: 'Download Set', icon: 'i-lucide-download' },
+      })
+    }
+  }
+
+  // Headed only when the two scopes sit side by side as rendition lists — two
+  // "HD mp4" rows need telling apart. A still's entries name their scope.
+  const downloadGroups =
+    isMotion && downloadItem.length && downloadSet.length
+      ? [
+          [{ type: 'label' as const, label: 'This item' }, ...downloadItem],
+          [{ type: 'label' as const, label: 'Entire set' }, ...downloadSet],
+        ]
+      : [downloadItem, downloadSet]
+
+  const transfer = [
+    submenu('Copy', 'i-lucide-copy', [copy]),
+    submenu('Download', 'i-lucide-download', downloadGroups),
+  ].filter((item): item is DropdownMenuItem => !!item)
+
+  const retrieve: DropdownMenuItem[] = []
 
   if (c.source?.trim()) {
     retrieve.push({
@@ -241,7 +326,7 @@ onMounted(() => {
   ]
 
   // Drop empties so a record missing a whole category leaves no stray separator.
-  items.value = [organise, copy, retrieve, flag].filter((group) => group.length > 0)
+  items.value = [organise, transfer, retrieve, flag].filter((group) => group.length > 0)
 })
 </script>
 
