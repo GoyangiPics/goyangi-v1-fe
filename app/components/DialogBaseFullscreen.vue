@@ -179,18 +179,35 @@ function requestClose() {
 </script>
 
 <template>
+  <!--
+    Fullscreen, i.e. the content box IS the viewport, with the media centred
+    inside it. A centred modal is placed with a translate, and a transformed
+    box becomes the containing block for its `position: fixed` children — so
+    the edge arrows sat 16px from the MEDIA's edges and moved with every step
+    to a differently shaped item. With no transform on the box they are pinned
+    to the viewport.
+
+    The trade is that empty space is now the content, not the overlay, so the
+    click-outside dismiss no longer fires there; the body's own click.self
+    takes over that job.
+  -->
   <UModal
     :open="isVisible"
+    fullscreen
     :ui="{
       overlay: 'bg-black/90 backdrop-blur-[14px]',
-      content:
-        'w-auto max-w-[95vw] max-h-none sm:max-h-none p-0 border-0 ring-0 divide-y-0 bg-transparent shadow-2xl rounded-xl overflow-visible',
+      content: 'p-0 border-0 ring-0 divide-y-0 bg-transparent shadow-none overflow-hidden',
     }"
     @update:open="handleVisibilityChange"
   >
     <template #content>
-      <div ref="bodyRef" class="fullscreen-body" @wheel.passive="onWheel">
-        <div class="relative">
+      <div
+        ref="bodyRef"
+        class="fullscreen-body w-full h-full flex items-center justify-center"
+        @wheel.passive="onWheel"
+        @click.self="requestClose"
+      >
+        <div class="relative rounded-xl shadow-2xl">
           <!-- The active item plus, once stepped, the outgoing and next items
                (see mountedContents). Keyed by id so a step moves elements
                rather than remounting them — a remount restarts the fetch. -->
