@@ -116,8 +116,28 @@ function openFullscreen() {
   isFullscreenVisible.value = true
 }
 
+// The page's own video autoplays muted and loops, like a gif — muted because
+// browsers block unmuted autoplay, and the native controls unmute it. Not in
+// data-saving mode: autoplay pulls the whole file before anyone asked for it.
+const settingsStore = useSettingsStore()
+const autoplayInline = computed(() => settingsStore.settings.dataSavingMode !== 'Enabled')
+const inlineVideoRef = ref<HTMLVideoElement | null>(null)
+
+// The fullscreen viewer plays its own copy, so the one behind the overlay
+// stops — two decoders for one clip otherwise, and an unmuted one would talk
+// over it. Resumes on close only if it was playing when the viewer opened.
+let resumeInline = false
+
 watch(isFullscreenVisible, (v) => {
-  if (!v) autoplayInFullscreen.value = false
+  const el = inlineVideoRef.value
+  if (v) {
+    resumeInline = !!el && !el.paused
+    el?.pause()
+    return
+  }
+  autoplayInFullscreen.value = false
+  if (resumeInline) el?.play().catch(() => {})
+  resumeInline = false
 })
 
 const moreButtonRef = ref<any>(null)
@@ -189,9 +209,11 @@ function openExternal(url?: string) {
                scrub and volume change. The Fullscreen button covers it. -->
           <video
             v-if="isVideo"
+            ref="inlineVideoRef"
             class="rounded-md w-full video-hover-controls"
-            :autoplay="false"
-            :loop="false"
+            :autoplay="autoplayInline"
+            muted
+            loop
             controls
             playsinline
           >
