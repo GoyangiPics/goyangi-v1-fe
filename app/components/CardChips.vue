@@ -171,7 +171,7 @@ function applyLabelFilter(label: any) {
         />
       </UTooltip>
       <UTooltip
-        v-else-if="!simpleDate && content.date"
+        v-else-if="!simpleDate && hasOwnDate(content)"
         :text="`Created: ${formatShortDate(content.created)} Actual: ${formatShortDate(content.date)}`"
         :content="{ side: 'top' }"
       >
@@ -185,7 +185,7 @@ function applyLabelFilter(label: any) {
       </UTooltip>
       <UTooltip
         v-else-if="!simpleDate && content.created"
-        :text="`Created: ${formatShortDate(content.created)} Actual: Inherited`"
+        :text="`Created: ${formatShortDate(content.created)} Actual: same day`"
         :content="{ side: 'top' }"
       >
         <UBadge

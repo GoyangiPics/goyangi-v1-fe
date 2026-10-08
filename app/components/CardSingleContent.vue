@@ -389,7 +389,9 @@ function openExternal(url?: string) {
           </span>
         </div>
 
-        <div v-if="content.date" class="flex items-center justify-between gap-2">
+        <!-- Only when it differs from the upload day: every record has a date
+             now, and a same-day one would just repeat "Uploaded". -->
+        <div v-if="hasOwnDate(content)" class="flex items-center justify-between gap-2">
           <span class="micro-label text-night-400">Content date</span>
           <span class="text-xs text-night-300 font-mono">
             {{ formatShortDate(content.date) }}
