@@ -29,6 +29,7 @@ export const FILTER_PARAMS = [
   'origin',
   'label',
   'sort',
+  'datemode',
   'date',
   'top',
   'filter',

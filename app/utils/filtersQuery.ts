@@ -68,6 +68,9 @@ export function serializeFiltersToQuery(
 
   if (filters.sort && defaultSortValue && filters.sort.value !== defaultSortValue)
     queryParts.push(`sort=${filters.sort.value}`)
+  // Only the non-default is written, like sort. It went unserialized for as
+  // long as it did nothing, and a link must carry it now that it orders results.
+  if (filters.dateMode?.value === 'actual') queryParts.push('datemode=actual')
 
   if (filters.date.length > 0) {
     const startDate = filters.date[0]?.toISOString().split('T')[0]

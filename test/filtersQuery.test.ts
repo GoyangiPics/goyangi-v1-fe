@@ -84,4 +84,18 @@ describe('serializeFiltersToQuery', () => {
     expect(serializeFiltersToQuery(recent, ...NO_DIRECTORY)).toBe('')
     expect(serializeFiltersToQuery(liked, ...NO_DIRECTORY)).toBe('sort=liked')
   })
+
+  it('carries the Actual date basis, and leaves the default out', () => {
+    const uploaded = {
+      ...emptyFilters(),
+      dateMode: { value: 'created', option: 'Uploaded' },
+    } as any
+    const actual = {
+      ...emptyFilters(),
+      sort: { value: 'oldest', option: 'Oldest' },
+      dateMode: { value: 'actual', option: 'Actual' },
+    } as any
+    expect(serializeFiltersToQuery(uploaded, ...NO_DIRECTORY)).toBe('')
+    expect(serializeFiltersToQuery(actual, ...NO_DIRECTORY)).toBe('sort=oldest&datemode=actual')
+  })
 })

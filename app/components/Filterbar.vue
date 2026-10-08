@@ -163,6 +163,19 @@ const activeChips = computed<ActiveChip[]>(() => {
       },
     })
   }
+  // It changes what Newest/Oldest and the date range mean even with neither
+  // touched, so it gets a chip of its own rather than riding on theirs.
+  if (!filtersStore.mostLikedMode && f.dateMode?.value === 'actual') {
+    chips.push({
+      key: 'datemode-actual',
+      label: 'By actual date',
+      icon: 'i-lucide-calendar-clock',
+      severity: 'contrast',
+      remove: () => {
+        filtersStore.filters.dateMode = filtersStore.dateMode[0] ?? null
+      },
+    })
+  }
 
   return chips
 })

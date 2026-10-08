@@ -187,6 +187,60 @@ describe('buildPbFilter', () => {
       expect(buildPbFilter(emptyFilters()).sort).toBe('-created')
     })
 
+    it('sorts oldest first on request, on every listing', () => {
+      const filters = { ...emptyFilters(), sort: { value: 'oldest', option: 'Oldest' } } as any
+      expect(buildPbFilter(filters).sort).toBe('created')
+      expect(buildPbFilter(filters, { remapForSets: true }).sort).toBe('created')
+      expect(buildPbFilter(filters, { canRankByLikes: true }).sort).toBe('created')
+    })
+
+    describe('by actual date', () => {
+      const actual = { value: 'actual', option: 'Actual' }
+      const oldest = { value: 'oldest', option: 'Oldest' }
+
+      it('sorts by the content date, either way round', () => {
+        const filters = { ...emptyFilters(), dateMode: actual } as any
+        expect(buildPbFilter(filters).sort).toBe('-date')
+        expect(buildPbFilter({ ...filters, sort: oldest }).sort).toBe('date')
+        // Sets carry a date of their own.
+        expect(buildPbFilter(filters, { remapForSets: true }).sort).toBe('-date')
+        // The likes list reaches the content through its relation.
+        expect(buildPbFilter(filters, { useContentPrefix: true }).sort).toBe('-content.date')
+      })
+
+      it('filters the range on the content date too', () => {
+        const filters = {
+          ...emptyFilters(),
+          dateMode: actual,
+          date: [new Date(2026, 0, 1), new Date(2026, 0, 31)],
+        } as any
+        const { filter } = buildPbFilter(filters)
+        expect(filter).toMatch(/^date>=".+"&&date<=".+"$/)
+      })
+
+      // A collection has no date, and its contents' dates are many.
+      it('leaves collections on created', () => {
+        const filters = { ...emptyFilters(), dateMode: actual, sort: oldest } as any
+        expect(buildPbFilter(filters, { remapForCollections: true }).sort).toBe('created')
+      })
+
+      // Top Posts is a window of recent uploads whatever the toggle says.
+      it('keeps the Top Posts window on created', () => {
+        const filters = { ...emptyFilters(), dateMode: actual } as any
+        const { filter } = buildPbFilter(filters, { mostLikedMode: MostLikedModes.AllTime })
+        expect(filter).toMatch(/^created>=/)
+      })
+
+      it('still ranks by likes when asked', () => {
+        const filters = {
+          ...emptyFilters(),
+          dateMode: actual,
+          sort: { value: 'liked', option: 'Most Liked' },
+        } as any
+        expect(buildPbFilter(filters, { canRankByLikes: true }).sort).toBe('-likes:length')
+      })
+    })
+
     it('sorts by like count when the collection can take it', () => {
       const filters = { ...emptyFilters(), sort: { value: 'liked', option: 'Most Liked' } } as any
       expect(buildPbFilter(filters, { canRankByLikes: true }).sort).toBe('-likes:length')

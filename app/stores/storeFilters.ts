@@ -9,12 +9,19 @@ import { serializeFiltersToQuery } from '~/utils/filtersQuery'
 import { resolveIdolToken } from '~/utils/idolSelection'
 
 const sortType = [
-  { value: 'recent', option: 'Recent' },
+  // `recent` stays the value so existing links and saved filters keep working.
+  { value: 'recent', option: 'Newest' },
+  { value: 'oldest', option: 'Oldest' },
   { value: 'liked', option: 'Most Liked' },
 ]
 
+/**
+ * Which date Newest/Oldest and the date range go by: the upload time, or the
+ * content's own date. Every record has the latter — the backend falls back to
+ * the upload time when none was given (hooks/content_date.go).
+ */
 const dateMode = [
-  { value: 'created', option: 'Created' },
+  { value: 'created', option: 'Uploaded' },
   { value: 'actual', option: 'Actual' },
 ]
 
@@ -97,7 +104,8 @@ export const useFiltersStore = defineStore(
       mostLikedMode.value = mode
       const { startDate, endDate } = calculateDateRange(mode)
       filters.value.date = [startDate, endDate]
-      filters.value.sort = sortType[1] ?? null
+      // By value, not position: the list's order is the dialog's tab order.
+      filters.value.sort = sortType.find((s) => s.value === 'liked') ?? null
     }
 
     async function applySharedFilter(id: string): Promise<boolean> {
@@ -199,6 +207,10 @@ export const useFiltersStore = defineStore(
       }
       if (query.sort) {
         filters.value.sort = sortType.find((s) => s.value === query.sort) ?? sortType[0] ?? null
+      }
+      if (query.datemode) {
+        filters.value.dateMode =
+          dateMode.find((d) => d.value === query.datemode) ?? dateMode[0] ?? null
       }
       if (query.date) {
         const parts = Array.isArray(query.date)

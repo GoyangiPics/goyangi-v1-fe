@@ -135,6 +135,13 @@ export function buildPbFilter(
   const prefix = useContentPrefix ? 'content.' : ''
   const queries: string[] = []
 
+  // The field "Actual" means. A collection has no date of its own and its
+  // contents' dates are many, so collections listings stay on `created`.
+  // Top Posts is a window of recent uploads, so it never follows the toggle.
+  const actualField = remapForCollections ? null : `${prefix}date`
+  const byActual = filters.dateMode?.value === 'actual' && !!actualField && !mostLikedMode
+  const rangeField = byActual ? actualField : `${prefix}created`
+
   // Date window — `mostLikedMode` overrides any saved `filters.date` since
   // the preset is meant to track "the last N days from now" on every fetch.
   if (mostLikedMode) {
@@ -147,7 +154,7 @@ export function buildPbFilter(
     const endDate = new Date(filters.date[1])
     endDate.setHours(23, 59, 59, 999)
     queries.push(
-      `${prefix}created>=${pbQuote(formatPbDate(startDate))}&&${prefix}created<=${pbQuote(formatPbDate(endDate))}`,
+      `${rangeField}>=${pbQuote(formatPbDate(startDate))}&&${rangeField}<=${pbQuote(formatPbDate(endDate))}`,
     )
   }
 
@@ -206,7 +213,12 @@ export function buildPbFilter(
    * switch to their per-content list — see useContentListing.honourLikeRanking.
    */
   const wantsLikeRanking = filters.sort?.value === 'liked' || !!mostLikedMode
-  const sort = wantsLikeRanking && canRankByLikes ? '-likes:length' : '-created'
+  // Newest/Oldest go by the same date the range does. By upload it is the
+  // listing's own `created` — on the likes list that is when the like was made,
+  // as it always has been.
+  const direction = filters.sort?.value === 'oldest' ? '' : '-'
+  const chronological = `${direction}${byActual ? actualField : 'created'}`
+  const sort = wantsLikeRanking && canRankByLikes ? '-likes:length' : chronological
 
   return {
     filter: queries.join('&&'),

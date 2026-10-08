@@ -518,19 +518,28 @@ async function deleteSavedFilter() {
           </template>
         </USelectMenu>
 
-        <!-- Sort + Content Type -->
-        <div class="flex gap-3">
-          <div class="flex flex-col gap-1.5 flex-1">
+        <!-- Sort, and which date it goes by. The Uploaded/Actual toggle sits
+             here rather than on the date range because "oldest by actual date"
+             is a sorting question first — but it governs the range below as
+             well, so the two can never disagree about which date they mean.
+             Full width: three tabs, "Most Liked" among them, don't fit in half. -->
+        <div class="flex flex-col gap-1.5">
+          <div class="flex items-center justify-between gap-3">
             <span class="micro-label text-night-400">Sort by</span>
-            <UTabs
-              v-model="sortModel"
-              :content="false"
-              :items="sortTabItems"
-              size="xs"
-              class="w-full"
-            />
+            <UTabs v-model="dateModeModel" :content="false" :items="dateModeTabItems" size="xs" />
           </div>
-          <div class="flex flex-col gap-1.5 flex-1">
+          <UTabs
+            v-model="sortModel"
+            :content="false"
+            :items="sortTabItems"
+            size="xs"
+            class="w-full"
+          />
+        </div>
+
+        <!-- Content type and Origin share a row: three short options each. -->
+        <div class="flex gap-3">
+          <div class="flex flex-col gap-1.5 flex-1 min-w-0">
             <span class="micro-label text-night-400">Content type</span>
             <div class="flex w-full items-center gap-1 rounded-lg bg-elevated p-1">
               <UButton
@@ -545,34 +554,30 @@ async function deleteSavedFilter() {
               />
             </div>
           </div>
-        </div>
-
-        <!-- Its own row rather than a third column beside Sort/Content type:
-             the panel is w-110, which is already tight for two. -->
-        <div class="flex flex-col gap-1.5">
-          <span class="micro-label text-night-400">Origin</span>
-          <div class="flex w-full items-center gap-1 rounded-lg bg-elevated p-1">
-            <UButton
-              v-for="option in filtersStore.originTypes"
-              :key="option.value"
-              :label="option.option"
-              size="xs"
-              :color="isOriginSelected(option) ? 'primary' : 'neutral'"
-              :variant="isOriginSelected(option) ? 'solid' : 'ghost'"
-              class="flex-1 justify-center"
-              @click="toggleOrigin(option)"
-            />
+          <div class="flex flex-col gap-1.5 flex-1 min-w-0">
+            <span class="micro-label text-night-400">Origin</span>
+            <div class="flex w-full items-center gap-1 rounded-lg bg-elevated p-1">
+              <UButton
+                v-for="option in filtersStore.originTypes"
+                :key="option.value"
+                :label="option.option"
+                size="xs"
+                :color="isOriginSelected(option) ? 'primary' : 'neutral'"
+                :variant="isOriginSelected(option) ? 'solid' : 'ghost'"
+                class="flex-1 justify-center"
+                @click="toggleOrigin(option)"
+              />
+            </div>
           </div>
         </div>
 
-        <!-- Date range + which date field it filters on. The range input
-             needs the full panel width (segmented range + calendar button),
-             so the Created/Actual toggle lives in the label row. -->
+        <!-- Filters on whichever date the Sort row's toggle names. -->
         <div class="flex flex-col gap-1.5">
-          <div class="flex items-center justify-between gap-3">
-            <span class="micro-label text-night-400">Date range</span>
-            <UTabs v-model="dateModeModel" :content="false" :items="dateModeTabItems" size="xs" />
-          </div>
+          <span class="micro-label text-night-400">
+            {{
+              filters.dateMode?.value === 'actual' ? 'Date range · actual' : 'Date range · uploaded'
+            }}
+          </span>
           <DateField v-model="dateRangeModel" range class="w-full" />
         </div>
 
