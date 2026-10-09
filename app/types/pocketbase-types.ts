@@ -282,6 +282,7 @@ export type UploadersRecord = {
 	created: IsoAutoDateString
 	id: string
 	name?: string
+	skipDiscordImport?: boolean
 	updated: IsoAutoDateString
 	user?: RecordIdString
 }

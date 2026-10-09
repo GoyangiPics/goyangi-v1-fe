@@ -130,6 +130,14 @@ export const useAuthStore = defineStore('authStore', () => {
     })
   }
 
+  /** The uploader's own opt-out from automatic Discord import (bot/ingest.go). */
+  async function setDiscordImport(enabled: boolean) {
+    if (!uploader.value) return
+    uploader.value = await pb.collection('uploaders').update<Uploader>(uploader.value.id, {
+      skipDiscordImport: !enabled,
+    })
+  }
+
   async function updateUserAvatar(file: File) {
     if (!user.value) return
     const formData = new FormData()
@@ -174,6 +182,7 @@ export const useAuthStore = defineStore('authStore', () => {
     logout,
     createUploader,
     updateUploaderName,
+    setDiscordImport,
     updateUserAvatar,
     deleteAccount,
   }

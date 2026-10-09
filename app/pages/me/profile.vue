@@ -54,6 +54,25 @@ async function saveUploaderName() {
   }
 }
 
+// People who upload here AND post the same thing to Discord got every post
+// twice. On = the bot imports their Discord posts as before; off = it skips them
+// (an explicit "Ingest this message" still works). Stored inverted, as
+// `skipDiscordImport`, so every existing uploader keeps importing.
+const isSavingDiscordImport = ref(false)
+const discordImport = computed({
+  get: () => !authStore.uploader?.skipDiscordImport,
+  set: async (enabled: boolean) => {
+    isSavingDiscordImport.value = true
+    try {
+      await authStore.setDiscordImport(enabled)
+    } catch {
+      toast.add({ title: "Couldn't save setting", color: 'error', duration: 3000 })
+    } finally {
+      isSavingDiscordImport.value = false
+    }
+  },
+})
+
 // ─── Data export ──────────────────────────────────────────────────────────────
 // GDPR Art. 20 portability, self-service: everything tied to the account, as
 // JSON, fetched client-side with the user's own session — every collection
@@ -225,6 +244,17 @@ async function confirmDeleteAccount() {
             @click="saveUploaderName"
           />
         </div>
+      </div>
+
+      <!-- Needs the uploader record to exist, so it waits for a name. -->
+      <div v-if="authStore.uploader" class="flex items-center justify-between gap-4">
+        <div>
+          <p class="text-sm font-medium text-night-200">Import my Discord posts</p>
+          <p class="text-xs text-night-500 mt-0.5">
+            Turn off if you upload everything here, so your posts don't show up twice.
+          </p>
+        </div>
+        <USwitch v-model="discordImport" :loading="isSavingDiscordImport" />
       </div>
     </div>
 
