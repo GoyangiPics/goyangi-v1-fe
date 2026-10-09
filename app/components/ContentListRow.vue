@@ -77,7 +77,7 @@ const groups = computed<any[]>(() => (props.content.expand as any)?.group ?? [])
         color="neutral"
         variant="ghost"
         title="Copy preview link"
-        @click="copyLink(content.preview, 'Preview')"
+        @click="copyLink(shortLink(content, 'preview'), 'Preview')"
       />
       <UButton
         v-if="content.sd"
@@ -86,15 +86,18 @@ const groups = computed<any[]>(() => (props.content.expand as any)?.group ?? [])
         color="neutral"
         variant="ghost"
         title="Copy SD link"
-        @click="copyLink(content.sd, 'SD')"
+        @click="copyLink(shortLink(content, 'sd'), 'SD')"
       />
+      <!-- Short links, like every other copy on the site; HD only once it exists
+           (a post still processing has none). -->
       <UButton
+        v-if="content.original"
         icon="i-lucide-file-video"
         size="xs"
         color="neutral"
         variant="ghost"
         title="Copy HD link"
-        @click="copyLink(content.original, 'HD')"
+        @click="copyLink(shortLink(content, 'hd'), 'HD')"
       />
       <slot name="actions" />
     </div>
