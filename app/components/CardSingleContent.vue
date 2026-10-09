@@ -38,6 +38,7 @@ const { isLiked, isLikeAnimating, likeCount, handleLike, download } = useContent
 const { requireAuth } = useAuthGate()
 const { likeAllIn } = useLikeAll()
 const { videoSources, primaryUrl: contentUrl } = useContentSources(() => props.content)
+const { canShare, sharePage } = useShare()
 
 const isAddToCollectionVisible = ref(false)
 const isLabelsVisible = ref(false)
@@ -276,12 +277,22 @@ function openExternal(url?: string) {
           <ViewCountBadge v-if="typeof views === 'number'" :views="views" />
 
           <UButton
+            v-if="canShare"
+            icon="i-lucide-share"
+            aria-label="Share"
+            color="neutral"
+            variant="outline"
+            size="sm"
+            class="ml-auto"
+            @click="sharePage(content.title)"
+          />
+          <UButton
             icon="i-lucide-expand"
             label="Fullscreen"
             color="neutral"
             variant="outline"
             size="sm"
-            class="ml-auto"
+            :class="canShare ? '' : 'ml-auto'"
             @click="openFullscreen"
           />
         </div>

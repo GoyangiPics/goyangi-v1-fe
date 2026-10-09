@@ -18,6 +18,7 @@ definePageMeta({ keepalive: { max: 10 } })
 const pb = usePocketBase()
 
 const { isMobile } = useWindowSize()
+const { canShare, sharePage } = useShare()
 
 const setId = route.params.id as string
 
@@ -198,6 +199,15 @@ async function likeAll() {
             @click="openAddToCollection"
           />
           <DownloadAllButton :items="items" />
+          <UButton
+            v-if="canShare"
+            icon="i-lucide-share"
+            :label="isMobile ? undefined : 'Share'"
+            color="neutral"
+            variant="outline"
+            size="sm"
+            @click="sharePage(ogData?.title || pageTitle)"
+          />
           <UButton
             v-if="canEditSet"
             icon="i-lucide-pencil"
