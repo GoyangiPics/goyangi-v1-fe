@@ -365,6 +365,9 @@ useSwipe(mediaAreaRef, {
 // opening it over a hovered card does not necessarily fire mouseleave — so
 // without this, one keypress would step the dialog AND the card behind it, and
 // closing the dialog would land somewhere two items along.
+// F opens the post on screen fullscreen while the cursor is over the card.
+useHoverFullscreenKey(mediaAreaRef, () => openFullscreenWithAutoplay())
+
 useHoverArrowKeys(mediaAreaRef, {
   onPrev: prevContent,
   onNext: nextContent,

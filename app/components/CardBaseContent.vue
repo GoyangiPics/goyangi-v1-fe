@@ -71,6 +71,9 @@ const mediaAreaRef = ref<HTMLElement | null>(null)
 const { menuRef: contentActionsMenuRef, onContextMenu: handleContextMenu } =
   useContextMenuTrigger(mediaAreaRef)
 
+// F opens this post fullscreen while the cursor is over it.
+useHoverFullscreenKey(mediaAreaRef, () => openFullscreenWithAutoplay())
+
 // Unlike CardUnified, this card holds a single item, so the set has to be
 // fetched rather than reused from an expand.
 const { likeAllIn } = useLikeAll()

@@ -43,6 +43,11 @@ const loginRoute = computed(() => ({
 }))
 
 const shortcutsVisible = ref(false)
+defineShortcuts({
+  '?': () => {
+    shortcutsVisible.value = true
+  },
+})
 // computed, not ref: the "New Upload" entry is gated on canUpload, which only
 // resolves once client-side auth state has synced.
 // Navigation entries carry `to` rather than an onSelect that pushes: the menu
@@ -284,32 +289,58 @@ function showComingSoon() {
     :ui="{ content: 'sm:max-w-sm' }"
   >
     <template #body>
-      <p class="text-sm text-night-400 mb-4">Hold a key and click a post.</p>
-      <div class="flex flex-col gap-3">
-        <div
-          v-for="shortcut in [
-            { key: 'C', icon: 'i-lucide-copy', label: 'Copy image link' },
-            { key: 'A', icon: 'i-lucide-folder-plus', label: 'Add to collection' },
-            { key: 'L', icon: 'i-lucide-heart', label: 'Like or unlike' },
-            { key: 'D', icon: 'i-lucide-download', label: 'Download' },
-          ]"
-          :key="shortcut.key"
-          class="flex items-center gap-3"
-        >
-          <kbd
-            class="inline-flex items-center justify-center w-7 h-7 rounded bg-night-700 text-white text-xs font-bold font-mono border border-night-600 shrink-0"
-          >
-            {{ shortcut.key }}
-          </kbd>
-          <UIcon :name="shortcut.icon" class="text-night-400 text-sm shrink-0" />
-          <span class="text-sm text-night-200">{{ shortcut.label }}</span>
+      <div
+        v-for="section in [
+          {
+            title: 'Anywhere',
+            keys: [
+              { key: '/', icon: 'i-lucide-search', label: 'Search' },
+              { key: 'F', icon: 'i-lucide-expand', label: 'Open the post under the mouse' },
+              { key: '?', icon: 'i-lucide-keyboard', label: 'Show this list' },
+            ],
+          },
+          {
+            title: 'Hold a key and click a post',
+            keys: [
+              { key: 'C', icon: 'i-lucide-copy', label: 'Copy image link' },
+              { key: 'A', icon: 'i-lucide-folder-plus', label: 'Add to collection' },
+              { key: 'L', icon: 'i-lucide-heart', label: 'Like or unlike' },
+              { key: 'D', icon: 'i-lucide-download', label: 'Download' },
+            ],
+          },
+          {
+            title: 'In fullscreen',
+            keys: [
+              { key: '← →', icon: 'i-lucide-arrow-left-right', label: 'Previous or next' },
+              { key: 'C', icon: 'i-lucide-copy', label: 'Copy image link' },
+              { key: 'A', icon: 'i-lucide-folder-plus', label: 'Add to collection' },
+              { key: 'L', icon: 'i-lucide-heart', label: 'Like or unlike' },
+              { key: 'D', icon: 'i-lucide-download', label: 'Download' },
+              { key: 'Esc', icon: 'i-lucide-x', label: 'Close' },
+            ],
+          },
+        ]"
+        :key="section.title"
+        class="mb-6"
+      >
+        <p class="text-sm text-night-400 mb-3">{{ section.title }}</p>
+        <div class="flex flex-col gap-3">
+          <div v-for="shortcut in section.keys" :key="shortcut.key" class="flex items-center gap-3">
+            <kbd
+              class="inline-flex items-center justify-center min-w-7 px-1.5 h-7 rounded bg-night-700 text-white text-xs font-bold font-mono border border-night-600 shrink-0"
+            >
+              {{ shortcut.key }}
+            </kbd>
+            <UIcon :name="shortcut.icon" class="text-night-400 text-sm shrink-0" />
+            <span class="text-sm text-night-200">{{ shortcut.label }}</span>
+          </div>
         </div>
       </div>
 
       <!-- This modal is where the app documents its hidden interactions, so the
            hold gesture belongs here — the context-menu entry is the discoverable
            path, this is the shortcut. -->
-      <p class="text-sm text-night-400 mt-6 mb-4">Gestures</p>
+      <p class="text-sm text-night-400 mb-3">Gestures</p>
       <div class="flex items-center gap-3">
         <kbd
           class="inline-flex items-center justify-center px-2 h-7 rounded bg-night-700 text-white text-xs font-bold font-mono border border-night-600 shrink-0"

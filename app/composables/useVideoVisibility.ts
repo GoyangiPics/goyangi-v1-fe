@@ -106,6 +106,11 @@ function rerank() {
 const fullscreenDepth = ref(0)
 
 /** Called by DialogBaseFullscreen on mount and unmount. */
+/** Whether any fullscreen viewer is open — page-level keys stand down meanwhile. */
+export function isFullscreenOpen() {
+  return fullscreenDepth.value > 0
+}
+
 export function markFullscreen(open: boolean) {
   fullscreenDepth.value = Math.max(0, fullscreenDepth.value + (open ? 1 : -1))
 }

@@ -5,6 +5,15 @@ const emit = defineEmits(['filtersApply'])
 
 const filtersDialog = ref()
 
+// `/` jumps to search, the convention most sites share. Kept-alive pages keep
+// their (detached) filter bars listening too, so only a connected input takes it.
+const searchInput = ref<HTMLInputElement | null>(null)
+defineShortcuts({
+  '/': () => {
+    if (searchInput.value?.isConnected) searchInput.value.focus()
+  },
+})
+
 const filtersStore = useFiltersStore()
 const referenceStore = useReferenceStore()
 const avatar = useAvatarUrl()
@@ -235,6 +244,7 @@ function filtersApply() {
         </span>
       </UBadge>
       <input
+        ref="searchInput"
         v-model="searchValue"
         type="text"
         placeholder="Search titles…"

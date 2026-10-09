@@ -130,24 +130,39 @@ onBeforeUnmount(() => {
   historyToken = null
 })
 
+// The card keys (C copy, D download, A add to collection) work here too, on
+// whatever is on screen — fullscreen is where people decide what to keep. While
+// the collection dialog is open on top, the viewer's keys stand down.
+const { copyAvif, download } = useContentCard(() => props.content)
+const { requireAuth } = useAuthGate()
+const isCollectVisible = ref(false)
+const viewerKeys = (fn: () => void) => () => {
+  if (!isCollectVisible.value) fn()
+}
+
 defineShortcuts({
-  arrowleft: () => {
+  arrowleft: viewerKeys(() => {
     if (props.hasNavigation) emit('prev')
-  },
-  arrowright: () => {
+  }),
+  arrowright: viewerKeys(() => {
     if (props.hasNavigation) emit('next')
-  },
+  }),
   // Vertical too, in the shorts convention: down (and swipe-up, wheel-down)
   // is next, the way a feed scrolls.
-  arrowdown: () => {
+  arrowdown: viewerKeys(() => {
     if (props.hasNavigation) emit('next')
-  },
-  arrowup: () => {
+  }),
+  arrowup: viewerKeys(() => {
     if (props.hasNavigation) emit('prev')
-  },
-  l: () => {
+  }),
+  l: viewerKeys(() => {
     if (props.likeCount !== undefined) emit('like')
-  },
+  }),
+  c: viewerKeys(() => copyAvif()),
+  d: viewerKeys(() => download()),
+  a: viewerKeys(() => {
+    if (requireAuth('add posts to a collection')) isCollectVisible.value = true
+  }),
 })
 
 /** Bottom strip of a video reserved for the native controls. */
@@ -312,6 +327,13 @@ function requestClose() {
       </div>
     </template>
   </UModal>
+
+  <QuickCollectionModal
+    v-if="isCollectVisible"
+    :is-visible="isCollectVisible"
+    :content="content"
+    @update:is-visible="isCollectVisible = $event"
+  />
 </template>
 
 <style scoped>
