@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ContentsItem } from '~/types/appTypes'
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { MostLikedModes } from '~/types/typesFilters'
 
 useHead({ title: 'Home' })
@@ -76,6 +76,34 @@ const {
   likeCount: fsLikeCount,
   handleLike: fsHandleLike,
 } = useContentCard(() => fsContent.value)
+
+// ─── New since the last visit ────────────────────────────────────────────────
+// The grid is masonry — items are dealt across columns — so there is no single
+// place for a "you've seen everything below" divider. Each new card gets a
+// badge instead, and the header says how many arrived in total.
+const pb = usePocketBase()
+const { since: lastVisit, isNew } = useLastVisit()
+const newSinceCount = ref(0)
+
+// All contents, not the filtered listing: "what did I miss" is a question about
+// the site, and the badges already show which of those are on this page.
+watch(lastVisit, async (since) => {
+  if (since === null) return
+  try {
+    const page = await pb.collection('contents').getList(1, 1, {
+      // PocketBase's own layout: `created` compares as text, and an ISO `T`
+      // sorts after the stored space, which would misplace the same day.
+      filter: pb.filter('created > {:since}', {
+        since: new Date(since).toISOString().replace('T', ' '),
+      }),
+      fields: 'id',
+      requestKey: 'home-new-since',
+    })
+    newSinceCount.value = page.totalItems
+  } catch {
+    // A count is a nicety; the badges still work without it.
+  }
+})
 
 async function likedRowToggle() {
   if (isMostLikedRowVisible.value) {
@@ -156,6 +184,10 @@ async function likedRowToggle() {
         </template>
       </PageHeader>
 
+      <p v-if="newSinceCount > 0" class="-mt-2 mb-4 text-xs text-pink-300">
+        ✨ {{ newSinceCount.toLocaleString() }} new since your last visit
+      </p>
+
       <PageHandoffTitle />
 
       <div v-if="isLoading === true">
@@ -165,20 +197,28 @@ async function likedRowToggle() {
       </div>
       <ContentGrid v-else-if="items.length !== 0" :columns="columns">
         <template #default="{ item }">
-          <CardUnified
-            v-if="isGrouped"
-            :content="item as any"
-            @filters-apply="onFiltersSettingsApply"
-            @changed="refresh"
-          />
-          <CardBaseContent
-            v-else-if="(item as any).original"
-            :content="item"
-            fullscreen-host
-            @filters-apply="onFiltersSettingsApply"
-            @changed="refresh"
-            @open-fullscreen="openFullscreen"
-          />
+          <div class="relative">
+            <span
+              v-if="isNew(item as any)"
+              class="absolute -top-1.5 -left-1.5 z-30 px-2 py-0.5 rounded-full bg-pink-500 text-white text-[10px] font-semibold uppercase tracking-wide shadow-md select-none pointer-events-none"
+            >
+              New
+            </span>
+            <CardUnified
+              v-if="isGrouped"
+              :content="item as any"
+              @filters-apply="onFiltersSettingsApply"
+              @changed="refresh"
+            />
+            <CardBaseContent
+              v-else-if="(item as any).original"
+              :content="item"
+              fullscreen-host
+              @filters-apply="onFiltersSettingsApply"
+              @changed="refresh"
+              @open-fullscreen="openFullscreen"
+            />
+          </div>
         </template>
       </ContentGrid>
       <div v-else>
