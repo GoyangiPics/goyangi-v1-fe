@@ -90,7 +90,7 @@ export default defineNuxtConfig({
     public: {
       hostUrl: 'https://cdn.goyangi.pics/',
       baseUrl: 'https://api.goyangi.pics/',
-      appVersion: 'v1.35 — 2026-09-07',
+      appVersion: 'v1.4 — 2026-10-09',
       // The public origin, for anything that has to emit absolute URLs on the
       // server: the sitemap. NUXT_PUBLIC_SITE_URL overrides it for a staging deploy.
       siteUrl: 'https://goyangi.pics',

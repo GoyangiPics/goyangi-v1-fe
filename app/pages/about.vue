@@ -159,10 +159,10 @@ const { discordInvite, supportEmail } = useRuntimeConfig().public
             <ul class="flex flex-col gap-1.5">
               <li
                 v-for="item in [
-                  'Rebuilt upload page, with per-file details and collection uploads',
-                  'Separate HD and SD downloads for older Apple devices',
-                  'Live encode queue, so you can see the backlog before uploading',
-                  'A wider, retuned grid on desktop',
+                  'Manage your posts from anywhere: edit, move between sets, delete',
+                  'Select mode for doing the same thing to many posts or sets at once',
+                  'Failed uploads show up with a Retry button',
+                  'Sort by oldest, and by upload date or the content\'s own date',
                 ]"
                 :key="item"
                 class="flex items-start gap-2.5 text-night-300"
@@ -216,6 +216,45 @@ const { discordInvite, supportEmail } = useRuntimeConfig().public
 
           <div
             v-for="release in [
+              {
+                version: 'v1.4',
+                date: 'October 9th 2026',
+                groups: [
+                  {
+                    label: 'New',
+                    items: [
+                      'Edit, move to another set, remove from a set or delete your own posts from any right-click or long-press menu, and from buttons on the post page',
+                      'Select mode: pick many posts or sets and edit, move, delete, collect, label or download them at once, across pages',
+                      'Merge your own sets. Deleting a set you share with other uploaders removes only your posts',
+                      'Uploads that fail processing show up in My uploads with a Retry button, and uploads interrupted by a restart pick up again on their own',
+                      'Edit, delete or retry a file right from the upload results',
+                      'Sort by Oldest, and sort or filter by the upload date or the content\'s own date',
+                      'Download a whole set from any of its cards. Copy and Download are now submenus',
+                      'Pinch, double-tap or ctrl+scroll to zoom pictures in fullscreen',
+                      'The back button closes fullscreen instead of leaving the page',
+                      'New posts since your last visit are marked on the home page',
+                      'Share button on post and set pages, using your phone\'s share sheet',
+                      'Videos on a post\'s page autoplay muted and loop',
+                      'Edit or delete a collection from its own page',
+                      'Turn off automatic import of your Discord posts in your profile, if you upload everything here',
+                      'Keyboard shortcuts: / to search, F for fullscreen, C, D and A in fullscreen, ? for the full list',
+                      'Admin page for reports, failed posts, empty sets and Discord import blocks',
+                    ],
+                  },
+                  {
+                    label: 'Fixed',
+                    items: [
+                      'Shorter, plainer wording across the whole site',
+                      'Fullscreen arrows no longer jump around when the next item is a different size, and media keeps its space while loading',
+                      'Posts and sets can only be changed by their own uploaders or admins',
+                      'A content date is only shown when it differs from the upload date',
+                      'The post editor offers every file type, including gifs and stickers',
+                      'Copy buttons in list view hand over short links',
+                      'The selection bar no longer covers the page navigation',
+                    ],
+                  },
+                ],
+              },
               {
                 version: 'v1.3',
                 date: 'August 9th 2026',
