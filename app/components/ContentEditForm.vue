@@ -5,7 +5,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 /**
  * Edit one content record's metadata.
  *
- * Extracted from UploadsActionsMenu once the admin context menu needed the same
+ * Extracted from the uploads wrench menu once the admin context menu needed the same
  * fields and the same write — the alternative was a second copy of the form and
  * its save, which would then drift the moment a field is added.
  *
@@ -50,9 +50,13 @@ const dateModel = computed({
   },
 })
 
+// Every filetype a post can have — a gif or sticker used to open with an
+// empty picker, and saving could quietly change its type.
 const fileTypeOptions = [
-  { label: 'Video', value: 'video' },
   { label: 'Image', value: 'image' },
+  { label: 'Gif', value: 'gif' },
+  { label: 'Video', value: 'video' },
+  { label: 'Sticker', value: 'sticker' },
 ]
 
 const inferredGroups = computed(() => inferGroups(form.idol, referenceStore.groups))
