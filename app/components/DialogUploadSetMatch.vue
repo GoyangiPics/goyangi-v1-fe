@@ -51,15 +51,14 @@ function createNew() {
     :open="isVisible"
     :close="false"
     :dismissible="false"
-    title="Existing sets found"
+    title="Add to an existing set?"
     :ui="{ content: 'sm:max-w-lg' }"
     @update:open="emit('update:isVisible', $event)"
   >
     <template #body>
       <div class="flex flex-col gap-3">
         <p class="text-sm text-night-400 mb-1">
-          Sets matching your selected date, idols, and groups already exist. Pick one to add your
-          files into, or create a new set.
+          These sets have the same date and idols. Pick one to add to, or create a new set.
         </p>
 
         <div class="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
@@ -133,7 +132,8 @@ function createNew() {
                 </div>
               </div>
               <p class="text-xs text-night-500 mt-1.5 font-mono">
-                {{ set.expand?.contents_via_set?.length ?? 0 }} items ·
+                {{ set.expand?.contents_via_set?.length ?? 0 }}
+                {{ (set.expand?.contents_via_set?.length ?? 0) === 1 ? 'post' : 'posts' }} ·
                 {{ new Date(set.created).toLocaleDateString() }}
               </p>
             </div>
@@ -173,7 +173,7 @@ function createNew() {
         />
         <UButton
           v-if="selectedSetId !== null"
-          label="Add to selected set"
+          label="Add to set"
           icon="i-lucide-folder-open"
           color="info"
           @click="confirmMerge"

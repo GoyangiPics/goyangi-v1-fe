@@ -12,7 +12,7 @@ const sortType = [
   // `recent` stays the value so existing links and saved filters keep working.
   { value: 'recent', option: 'Newest' },
   { value: 'oldest', option: 'Oldest' },
-  { value: 'liked', option: 'Most Liked' },
+  { value: 'liked', option: 'Most liked' },
 ]
 
 /**

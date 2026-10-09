@@ -48,7 +48,7 @@ export function useLikeAll() {
    * the list under the viewer.
    */
   async function likeAllItems(items: ContentsItem[]): Promise<LikeAllResult | null> {
-    if (!requireAuth('like content')) return null
+    if (!requireAuth('like posts')) return null
     const userId = authStore.user?.id
     if (!userId || isLikingAll.value) return null
 
@@ -62,7 +62,7 @@ export function useLikeAll() {
     if (pending.length === 0) {
       toast.add({
         title: 'Already liked',
-        description: `All ${items.length} item${items.length === 1 ? '' : 's'} were already liked.`,
+        description: `You've already liked ${items.length === 1 ? 'this post' : `all ${items.length} posts`}.`,
         color: 'info',
         duration: 2000,
       })
@@ -77,7 +77,7 @@ export function useLikeAll() {
     // update() — Nuxt UI's update sets duration from the toast's own value
     // unconditionally, so omitting it resurrects the timer mid-run.
     const progress = toast.add({
-      title: 'Liking set…',
+      title: 'Liking posts…',
       description: `0/${pending.length}`,
       color: 'info',
       duration: 0,
@@ -112,13 +112,16 @@ export function useLikeAll() {
       Array.from({ length: Math.min(LIKE_ALL_CONCURRENCY, pending.length) }, worker),
     )
 
-    const parts = [`Liked ${result.liked}`]
+    const parts: string[] = []
     if (result.skipped) parts.push(`${result.skipped} already liked`)
     if (result.failed) parts.push(`${result.failed} failed`)
 
     toast.update(progress.id, {
-      title: result.failed ? 'Finished with errors' : 'Liked all',
-      description: parts.join(' · '),
+      title:
+        result.liked === 0 && result.failed > 0
+          ? "Couldn't like posts"
+          : `Liked ${result.liked} post${result.liked === 1 ? '' : 's'}`,
+      description: parts.length ? parts.join(' · ') : undefined,
       color: result.failed ? 'warning' : 'success',
       duration: 3000,
     })
@@ -142,7 +145,7 @@ export function useLikeAll() {
     target: { setId: string } | { collectionId: string },
     opts: { live?: ContentsItem[] } = {},
   ): Promise<LikeAllResult | null> {
-    if (!requireAuth('like content')) return null
+    if (!requireAuth('like posts')) return null
 
     const filter =
       'setId' in target
@@ -169,8 +172,7 @@ export function useLikeAll() {
 
       if (items.length === 0) {
         toast.add({
-          title: 'Nothing to like',
-          description: 'This set has no items.',
+          title: 'No posts to like',
           color: 'warning',
           duration: 2000,
         })
@@ -180,8 +182,8 @@ export function useLikeAll() {
     } catch (error) {
       console.error('Error loading items to like:', error)
       toast.add({
-        title: 'Error',
-        description: 'Could not load the items to like.',
+        title: "Couldn't load posts",
+        description: 'Try again.',
         color: 'error',
         duration: 3000,
       })

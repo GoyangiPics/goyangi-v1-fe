@@ -20,8 +20,7 @@ async function registerWithData() {
   // Validation
   if (!email.value || !password.value || !passwordConfirm.value) {
     toast.add({
-      title: 'Validation Error',
-      description: 'Please fill in all fields.',
+      title: 'Fill in all fields',
       color: 'warning',
       duration: 5000,
     })
@@ -30,8 +29,8 @@ async function registerWithData() {
 
   if (password.value.length < 6) {
     toast.add({
-      title: 'Validation Error',
-      description: 'Password must be at least 6 characters long.',
+      title: 'Password too short',
+      description: 'Use at least 6 characters.',
       color: 'warning',
       duration: 5000,
     })
@@ -40,8 +39,7 @@ async function registerWithData() {
 
   if (password.value !== passwordConfirm.value) {
     toast.add({
-      title: 'Validation Error',
-      description: 'Passwords do not match.',
+      title: "Passwords don't match",
       color: 'warning',
       duration: 5000,
     })
@@ -51,20 +49,16 @@ async function registerWithData() {
   try {
     await authStore.register(email.value, password.value, passwordConfirm.value)
     toast.add({
-      title: 'Registration Successful',
-      description: 'Your account has been created successfully!',
+      title: 'Account created',
       color: 'success',
       duration: 3000,
     })
     router.push(redirectTarget())
   } catch (error: any) {
     console.error('Registration failed:', error)
-    const errorMessage =
-      error?.response?.data?.message ||
-      error?.message ||
-      'Failed to create account. Please try again.'
+    const errorMessage = error?.response?.data?.message || error?.message || 'Try again.'
     toast.add({
-      title: 'Registration Failed',
+      title: "Couldn't create account",
       description: errorMessage,
       color: 'error',
       duration: 5000,
@@ -85,14 +79,14 @@ async function registerWithData() {
           <p class="text-sm text-night-400 mt-2">Create a new account</p>
           <form class="mt-6" @submit.prevent="registerWithData">
             <div>
-              <label for="register-email" class="block text-sm text-night-300">Email Address</label>
+              <label for="register-email" class="block text-sm text-night-300">Email</label>
               <UInput
                 id="register-email"
                 v-model="email"
                 type="email"
                 name="email"
                 autocomplete="email"
-                placeholder="Enter Email Address"
+                placeholder="Your email"
                 class="w-full mt-2"
                 :ui="{ base: 'px-4 rounded-lg' }"
                 autofocus
@@ -108,7 +102,7 @@ async function registerWithData() {
                 type="password"
                 name="password"
                 autocomplete="new-password"
-                placeholder="Enter Password"
+                placeholder="At least 6 characters"
                 minlength="6"
                 class="w-full mt-2"
                 :ui="{ base: 'px-4 rounded-lg' }"
@@ -118,7 +112,7 @@ async function registerWithData() {
 
             <div class="mt-4">
               <label for="register-password-confirm" class="block text-sm text-night-300"
-                >Confirm Password</label
+                >Confirm password</label
               >
               <UInput
                 id="register-password-confirm"
@@ -126,7 +120,7 @@ async function registerWithData() {
                 type="password"
                 name="passwordConfirm"
                 autocomplete="new-password"
-                placeholder="Confirm Password"
+                placeholder="Repeat password"
                 minlength="6"
                 class="w-full mt-2"
                 :ui="{ base: 'px-4 rounded-lg' }"
@@ -144,7 +138,7 @@ async function registerWithData() {
             />
 
             <p class="text-xs text-night-500 mt-3">
-              By creating an account you confirm you are 18 or older and agree to the
+              By creating an account, you confirm you're 18 or older and agree to the
               <NuxtLink to="/terms" class="text-pink-400 hover:text-pink-300 transition-colors"
                 >Terms</NuxtLink
               >
@@ -160,7 +154,7 @@ async function registerWithData() {
           >
             <p>Already have an account?</p>
             <UButton
-              label="Login"
+              label="Log in"
               color="neutral"
               variant="solid"
               class="px-6 font-semibold rounded-lg transition-all duration-200 hover:brightness-95"
@@ -173,7 +167,7 @@ async function registerWithData() {
           <img
             src="~/assets/images/goyangi_register.avif"
             class="w-full h-full object-cover object-center"
-            alt="Register page decorative image"
+            alt=""
           />
         </div>
       </div>

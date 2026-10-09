@@ -59,7 +59,7 @@ function handleSave() {
       <div class="flex flex-col gap-3 p-3" style="width: 220px">
         <UInput
           v-model="editTitle"
-          placeholder="Collection name..."
+          placeholder="Collection name"
           size="sm"
           class="w-full"
           autofocus

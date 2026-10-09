@@ -40,7 +40,7 @@ export function useLikeItem(content: MaybeRefOrGetter<ContentsItem | null>) {
 
   async function likeContent() {
     const c = toValue(content)
-    if (!requireAuth('like content')) return
+    if (!requireAuth('like posts')) return
 
     const userId = authStore.user?.id
     if (!c || !userId || isPending.value) return
@@ -69,8 +69,7 @@ export function useLikeItem(content: MaybeRefOrGetter<ContentsItem | null>) {
         likes.push(likeRecord as any)
         console.error('Error unliking content:', error)
         toast.add({
-          title: 'Error',
-          description: 'Failed to unlike content.',
+          title: "Couldn't unlike",
           color: 'error',
           duration: 1000,
         })
@@ -90,8 +89,7 @@ export function useLikeItem(content: MaybeRefOrGetter<ContentsItem | null>) {
         if (idx !== -1) likes.splice(idx, 1)
         console.error('Error liking content:', error)
         toast.add({
-          title: 'Error',
-          description: 'Failed to like content.',
+          title: "Couldn't like",
           color: 'error',
           duration: 1000,
         })

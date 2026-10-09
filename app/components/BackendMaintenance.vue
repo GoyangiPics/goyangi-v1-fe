@@ -47,8 +47,8 @@ onBeforeUnmount(() => {
     <p class="text-sm text-night-400 max-w-md mb-8">
       {{
         isOffline
-          ? 'Check your internet connection. This page will reload once you are back online.'
-          : `goyangi can't reach its server right now. Please come back later — this page will reload by itself once it's back.`
+          ? `Check your connection. This page will reload when you're back online.`
+          : `We'll be back soon. This page will reload by itself.`
       }}
     </p>
 

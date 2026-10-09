@@ -57,7 +57,7 @@ const items = computed<DropdownMenuItem[][]>(() => [
         [
           { type: 'label' as const, label: 'Upload' },
           {
-            label: 'New Upload',
+            label: 'New upload',
             icon: 'i-lucide-cloud-upload',
             to: '/uploads',
           },
@@ -67,27 +67,27 @@ const items = computed<DropdownMenuItem[][]>(() => [
   [
     { type: 'label', label: 'Library' },
     {
-      label: 'My Feed',
+      label: 'My feed',
       icon: 'i-lucide-star',
       to: to('/me/feed'),
     },
     {
-      label: 'My Likes',
+      label: 'My likes',
       icon: 'i-lucide-heart',
       to: to('/me/likes'),
     },
     {
-      label: 'My Collections',
+      label: 'My collections',
       icon: 'i-lucide-images',
       to: to('/me/collections'),
     },
     {
-      label: 'My Uploads',
+      label: 'My uploads',
       icon: 'i-lucide-square-pen',
       to: to('/me/uploads'),
     },
     {
-      label: 'My Sets',
+      label: 'My sets',
       icon: 'i-lucide-film',
       to: to('/me/sets'),
     },
@@ -98,32 +98,32 @@ const items = computed<DropdownMenuItem[][]>(() => [
     // orphan routes — in no nav at all — and /sets is now the admin merge
     // surface, so they need a way in that isn't a sixth main nav tab.
     {
-      label: 'Browse Contents',
+      label: 'Browse posts',
       icon: 'i-lucide-image',
       to: to('/singles'),
     },
     {
-      label: 'Browse Sets',
+      label: 'Browse sets',
       icon: 'i-lucide-film',
       to: to('/sets'),
     },
     {
-      label: 'Browse Collections',
+      label: 'Browse collections',
       icon: 'i-lucide-folder',
       to: to('/collections'),
     },
     {
-      label: 'Browse Labels',
+      label: 'Browse labels',
       icon: 'i-lucide-tag',
       to: '/labels',
     },
     {
-      label: 'Browse Stickers',
+      label: 'Browse stickers',
       icon: 'i-lucide-smile',
       to: '/stickers',
     },
     {
-      label: 'Browse Uploaders',
+      label: 'Browse uploaders',
       icon: 'i-lucide-users',
       to: '/uploaders',
     },
@@ -131,24 +131,24 @@ const items = computed<DropdownMenuItem[][]>(() => [
   [
     { type: 'label', label: 'Tools' },
     {
-      label: 'Site Settings',
+      label: 'Settings',
       icon: 'i-lucide-settings',
       onSelect: () => {
         settingsStore.isSettingsOpen = true
       },
     },
     {
-      label: 'Imgur Tools',
+      label: 'Imgur tools',
       icon: 'i-lucide-wrench',
       to: '/tools',
     },
     {
-      label: 'Gif Tools',
+      label: 'GIF tools',
       icon: 'i-lucide-zap',
       to: '/tools/gif',
     },
     {
-      label: 'Keyboard Shortcuts',
+      label: 'Keyboard shortcuts',
       icon: 'i-lucide-keyboard',
       onSelect: () => {
         shortcutsVisible.value = true
@@ -158,12 +158,12 @@ const items = computed<DropdownMenuItem[][]>(() => [
   [
     { type: 'label', label: 'Account' },
     {
-      label: 'My Profile',
+      label: 'My profile',
       icon: 'i-lucide-user',
       to: '/me/profile',
     },
     {
-      label: 'Logout',
+      label: 'Log out',
       icon: 'i-lucide-log-out',
       onSelect: async () => {
         // Await it: logout tears the session down before the first await, but
@@ -178,8 +178,8 @@ const items = computed<DropdownMenuItem[][]>(() => [
 
 function showComingSoon() {
   toast.add({
-    title: 'Coming soon!',
-    description: 'Ability to support Goyangi team will be available soon.',
+    title: 'Coming soon',
+    description: "You'll be able to support Goyangi soon.",
     color: 'info',
     duration: 3000,
   })
@@ -210,7 +210,7 @@ function showComingSoon() {
         <!-- Additional Info -->
         <div>
           <p class="block text-center text-sm text-night-600 mt-4">
-            goyangi - Kpop image and gif archive - browse, like and collect.
+            goyangi · K-pop pics, gifs and videos to browse, like and collect.
           </p>
         </div>
       </div>
@@ -243,7 +243,7 @@ function showComingSoon() {
         <UButton
           v-else
           icon="i-lucide-log-in"
-          label="Login"
+          label="Log in"
           color="neutral"
           variant="outline"
           class="nav-pill-outline"
@@ -254,20 +254,18 @@ function showComingSoon() {
   </div>
   <UModal
     v-model:open="shortcutsVisible"
-    title="Keyboard Shortcuts"
+    title="Keyboard shortcuts"
     :ui="{ content: 'sm:max-w-sm' }"
   >
     <template #body>
-      <p class="text-sm text-night-400 mb-4">
-        Hold a key and click any content card to trigger the action.
-      </p>
+      <p class="text-sm text-night-400 mb-4">Hold a key and click a post.</p>
       <div class="flex flex-col gap-3">
         <div
           v-for="shortcut in [
-            { key: 'C', icon: 'i-lucide-copy', label: 'Copy AVIF link to clipboard' },
+            { key: 'C', icon: 'i-lucide-copy', label: 'Copy image link' },
             { key: 'A', icon: 'i-lucide-folder-plus', label: 'Add to collection' },
-            { key: 'L', icon: 'i-lucide-heart', label: 'Like / Unlike' },
-            { key: 'D', icon: 'i-lucide-download', label: 'Download original' },
+            { key: 'L', icon: 'i-lucide-heart', label: 'Like or unlike' },
+            { key: 'D', icon: 'i-lucide-download', label: 'Download' },
           ]"
           :key="shortcut.key"
           class="flex items-center gap-3"
@@ -294,7 +292,7 @@ function showComingSoon() {
         </kbd>
         <UIcon name="i-lucide-heart" class="text-night-400 text-sm shrink-0" />
         <span class="text-sm text-night-200">
-          Hold the like button for 1.5s to like every item in the set
+          Hold the like button for 1.5s to like the whole set
         </span>
       </div>
     </template>

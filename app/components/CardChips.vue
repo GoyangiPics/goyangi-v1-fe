@@ -159,7 +159,7 @@ function applyLabelFilter(label: any) {
       </UPopover>
       <UTooltip
         v-if="simpleDate && content.created"
-        :text="`Created: ${formatShortDate(content.created)}`"
+        :text="`Uploaded ${formatShortDate(content.created)}`"
         :content="{ side: 'top' }"
       >
         <UBadge
@@ -172,7 +172,7 @@ function applyLabelFilter(label: any) {
       </UTooltip>
       <UTooltip
         v-else-if="!simpleDate && hasOwnDate(content)"
-        :text="`Created: ${formatShortDate(content.created)} Actual: ${formatShortDate(content.date)}`"
+        :text="`Uploaded ${formatShortDate(content.created)}`"
         :content="{ side: 'top' }"
       >
         <UBadge
@@ -185,7 +185,7 @@ function applyLabelFilter(label: any) {
       </UTooltip>
       <UTooltip
         v-else-if="!simpleDate && content.created"
-        :text="`Created: ${formatShortDate(content.created)} Actual: same day`"
+        :text="`Uploaded ${formatShortDate(content.created)}`"
         :content="{ side: 'top' }"
       >
         <UBadge
@@ -199,11 +199,7 @@ function applyLabelFilter(label: any) {
       <!-- Last in the row on purpose — provenance is the least important thing
            here, and keeping it at the end means it's the first to be hidden
            when the row collapses. -->
-      <UTooltip
-        v-if="isDirectUpload"
-        text="Uploaded directly on the site (not scraped from Discord)"
-        :content="{ side: 'top' }"
-      >
+      <UTooltip v-if="isDirectUpload" text="Uploaded on Goyangi" :content="{ side: 'top' }">
         <UBadge
           icon="i-lucide-upload"
           color="success"
@@ -212,11 +208,7 @@ function applyLabelFilter(label: any) {
           class="select-none cursor-help mr-2 mt-2"
         />
       </UTooltip>
-      <UTooltip
-        v-if="isImgurImport"
-        text="Imported from an imgur link on the site"
-        :content="{ side: 'top' }"
-      >
+      <UTooltip v-if="isImgurImport" text="Added from an Imgur link" :content="{ side: 'top' }">
         <UBadge
           icon="i-simple-icons-imgur"
           color="success"
@@ -232,7 +224,7 @@ function applyLabelFilter(label: any) {
       class="shrink-0 self-start mt-2 h-6 px-2 rounded-md text-xs text-night-400 hover:text-white hover:bg-night-700 transition-colors cursor-pointer select-none inline-flex items-center"
       @click.stop="chipsExpanded = !chipsExpanded"
     >
-      {{ chipsExpanded ? '↑' : 'more...' }}
+      {{ chipsExpanded ? '↑' : 'More' }}
     </button>
   </div>
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue'
 
-useHead({ title: 'GIF Tool' })
+useHead({ title: 'GIF tool' })
 
 const config = useRuntimeConfig()
 const toast = useToast()
@@ -15,8 +15,8 @@ const MAX_FILE_SIZE_MB = 100
 // upload default. Selects which /api/convert/{format} endpoint is hit and the
 // downloaded file's extension.
 const formatOptions = [
-  { label: 'WebP — widest device support', value: 'webp' },
-  { label: 'AVIF — smallest, newer devices', value: 'avif' },
+  { label: 'WebP (works everywhere)', value: 'webp' },
+  { label: 'AVIF (smaller, newer devices)', value: 'avif' },
 ]
 const selectedFormat = ref<'webp' | 'avif'>('webp')
 
@@ -57,7 +57,7 @@ function onFileSelect(file: File | null) {
   if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
     toast.add({
       title: 'File too large',
-      description: `"${file.name}" is ${formatSize(file.size)}. Max is ${MAX_FILE_SIZE_MB} MB.`,
+      description: `This file is ${formatSize(file.size)}. The limit is ${MAX_FILE_SIZE_MB} MB.`,
       color: 'error',
       duration: 4000,
     })
@@ -155,15 +155,15 @@ async function convert() {
 
     toast.add({
       title: 'Converted',
-      description: `Saved ${outName} · ${formatSize(outBlob.size)}`,
+      description: `${outName} · ${formatSize(outBlob.size)}`,
       color: 'success',
       duration: 3000,
     })
   } catch (err: any) {
     console.error('Preview conversion failed:', err)
     toast.add({
-      title: 'Conversion failed',
-      description: err?.message || 'Unknown error',
+      title: "Couldn't convert",
+      description: err?.message || 'Try again.',
       color: 'error',
       duration: 5000,
     })
@@ -180,19 +180,19 @@ async function convert() {
     </div>
 
     <div class="mt-4">
-      <PageHeader emoji="🎞️" title="Gif Tools" />
+      <PageHeader emoji="🎞️" title="GIF tools" />
       <p class="text-sm text-night-400 mb-4 max-w-2xl">
-        Upload a video (MP4, MOV, WebM, GIF, etc.) and get back a small animated preview — WebP or
-        AVIF. Encoded on the server; usually finishes in a second or two. Nothing is stored; the
-        file is processed in-memory and returned for download.
+        Turn a video or GIF into a small animated WebP or AVIF. Files aren't stored.
       </p>
     </div>
 
     <div class="glass-card p-6 max-w-2xl mx-auto">
       <div class="flex items-center gap-2 mb-3">
         <UIcon name="i-lucide-file" class="text-pink-300" />
-        <h2 class="micro-label text-pink-300">Source file</h2>
-        <span class="ml-auto text-sm text-night-500 font-mono"> max {{ MAX_FILE_SIZE_MB }}MB </span>
+        <h2 class="micro-label text-pink-300">File</h2>
+        <span class="ml-auto text-sm text-night-500 font-mono">
+          Max {{ MAX_FILE_SIZE_MB }} MB
+        </span>
       </div>
 
       <UFileUpload
@@ -222,9 +222,9 @@ async function convert() {
         <template #leading>
           <div class="flex items-center justify-center flex-col py-8 w-full">
             <UIcon name="i-lucide-cloud-upload" class="text-5xl text-night-600 mb-3" />
-            <p class="text-night-400 text-sm">Drag and drop a video here</p>
+            <p class="text-night-400 text-sm">Drop a video or GIF here</p>
             <p class="text-sm text-night-500 mt-3 font-mono">
-              .mp4 .webm .mkv .mov .gif &middot; max {{ MAX_FILE_SIZE_MB }}MB
+              .mp4 .webm .mkv .mov .gif &middot; max {{ MAX_FILE_SIZE_MB }} MB
             </p>
           </div>
         </template>
@@ -257,7 +257,7 @@ async function convert() {
               {{ selectedFile.name }}
             </p>
             <p class="text-xs text-night-500 font-mono mt-0.5">
-              {{ formatSize(selectedFile.size) }} &middot; {{ selectedFile.type || 'unknown type' }}
+              {{ formatSize(selectedFile.size) }} &middot; {{ selectedFile.type || 'Unknown type' }}
             </p>
           </div>
           <UButton
@@ -267,13 +267,13 @@ async function convert() {
             square
             class="rounded-full justify-center w-8! h-8! shrink-0"
             :disabled="isConverting"
-            aria-label="Clear"
+            aria-label="Remove file"
             @click="clearSelection"
           />
         </div>
 
         <div class="flex flex-col gap-1">
-          <label for="toolFormat" class="text-xs text-night-400 font-medium">Output format</label>
+          <label for="toolFormat" class="text-xs text-night-400 font-medium">Format</label>
           <USelect
             id="toolFormat"
             v-model="selectedFormat"
@@ -283,7 +283,11 @@ async function convert() {
         </div>
 
         <UButton
-          :label="isConverting ? 'Converting…' : `Convert to ${selectedFormat.toUpperCase()}`"
+          :label="
+            isConverting
+              ? 'Converting…'
+              : `Convert to ${selectedFormat === 'webp' ? 'WebP' : 'AVIF'}`
+          "
           icon="i-lucide-zap"
           :loading="isConverting"
           class="search-gradient"
@@ -294,18 +298,16 @@ async function convert() {
         <div v-if="lastResult" class="p-3 rounded-xl border border-emerald-500/25 bg-emerald-500/5">
           <div class="flex items-center gap-2 mb-2">
             <UIcon name="i-lucide-circle-check" class="text-emerald-400" />
-            <p class="text-xs font-semibold text-emerald-300">
-              Conversion complete &mdash; download started
-            </p>
+            <p class="text-xs font-semibold text-emerald-300">Done. Your download has started.</p>
           </div>
           <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm font-mono text-night-400">
-            <span class="text-night-500">Input:</span>
+            <span class="text-night-500">Before:</span>
             <span>{{ formatSize(lastResult.inputSize) }}</span>
-            <span class="text-night-500">Output:</span>
+            <span class="text-night-500">After:</span>
             <span class="text-emerald-300">{{ formatSize(lastResult.outputSize) }}</span>
-            <span class="text-night-500">Reduction:</span>
+            <span class="text-night-500">Saved:</span>
             <span>{{ sizeReduction ? `${sizeReduction.percent.toFixed(1)}%` : '—' }}</span>
-            <span class="text-night-500">Total time:</span>
+            <span class="text-night-500">Took:</span>
             <span>{{ formatDuration(lastResult.durationMs) }}</span>
           </div>
         </div>

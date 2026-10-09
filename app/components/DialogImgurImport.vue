@@ -49,17 +49,17 @@ watch(
 const detectedLinks = computed(() => extractImgurLinks(rawInput.value))
 
 const SKIP_LABELS: Record<ImgurSkipReason, string> = {
-  dead: 'gone from imgur',
-  type: 'wrong kind of file',
+  dead: 'gone from Imgur',
+  type: 'wrong file type',
   size: 'over the size limit',
-  network: 'could not be fetched',
+  network: "couldn't be loaded",
 }
 
 async function handleImport() {
   if (!detectedLinks.value.length) {
     toast.add({
       title: 'No links',
-      description: 'Paste at least one imgur link.',
+      description: 'Paste at least one Imgur link.',
       color: 'warning',
       duration: 2000,
     })
@@ -80,7 +80,7 @@ async function handleImport() {
   // twenty links should read as one problem, not twenty.
   const parts: string[] = []
   if (result.items.length) parts.push(`Added ${result.items.length}`)
-  if (result.duplicates > 0) parts.push(`${result.duplicates} already staged`)
+  if (result.duplicates > 0) parts.push(`${result.duplicates} already added`)
   if (result.overflow > 0) parts.push(`${result.overflow} over the file limit`)
   const byReason = new Map<ImgurSkipReason, number>()
   for (const skip of result.skipped) byReason.set(skip.reason, (byReason.get(skip.reason) ?? 0) + 1)
@@ -88,7 +88,7 @@ async function handleImport() {
 
   const failed = result.skipped.length + result.overflow + result.duplicates
   toast.add({
-    title: result.items.length ? 'Imgur links staged' : 'Nothing could be staged',
+    title: result.items.length ? 'Imgur files added' : 'Nothing added',
     description: parts.join(' · '),
     color: result.items.length ? (failed ? 'warning' : 'success') : 'error',
     duration: 4000,
@@ -114,25 +114,26 @@ function handleHide() {
   >
     <template #body>
       <p class="text-xs text-night-400 mb-3">
-        Paste imgur links and they are fetched into the staging area as files — for recovering
-        things whose source file is gone. Everything after that is a normal upload: idols, tags,
-        destination and all.
+        Paste Imgur links to add them as files. Handy when the original file is gone.
       </p>
 
       <UTextarea
         v-model="rawInput"
         :rows="7"
-        placeholder="Paste imgur links here — markdown, prose and one-per-line all work..."
+        placeholder="Paste Imgur links in any format…"
         class="w-full"
         :ui="{ base: 'tools-textarea font-mono text-xs! resize-y' }"
       />
 
       <div class="flex items-center gap-2 mt-2 mb-4 text-sm font-mono text-night-500">
-        <span>{{ detectedLinks.length }} detected</span>
+        <span
+          >{{ detectedLinks.length }}
+          {{ detectedLinks.length === 1 ? 'link' : 'links' }} found</span
+        >
         <span aria-hidden="true">·</span>
         <span>room for {{ remaining }}</span>
         <span v-if="isImporting" class="ml-auto text-pink-300">
-          fetching {{ importedSoFar }}/{{ importTotal }}
+          Fetching {{ importedSoFar }}/{{ importTotal }}…
         </span>
       </div>
 
@@ -140,14 +141,14 @@ function handleHide() {
            browser is not allowed to read. Said up front rather than reported as
            a failure after a wasted fetch. -->
       <p class="text-sm text-night-600 mb-4">
-        Album and gallery links won't work here — paste the direct image links instead.
+        Album and gallery links won't work. Paste direct image links instead.
         {{ typeLabel }} files only, up to {{ maxFileSizeMb }}MB each.
       </p>
 
       <div class="flex gap-3">
         <UButton label="Cancel" color="neutral" block @click="handleHide" />
         <UButton
-          label="Fetch & Stage"
+          label="Add files"
           color="success"
           block
           :loading="isImporting"

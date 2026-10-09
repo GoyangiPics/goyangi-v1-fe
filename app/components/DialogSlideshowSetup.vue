@@ -47,7 +47,7 @@ function start() {
       <div class="p-5 min-w-80">
         <div class="flex items-center gap-2 mb-1">
           <UIcon name="i-lucide-circle-play" class="text-violet-400" />
-          <h2 class="text-lg font-semibold">Play as Slideshow</h2>
+          <h2 class="text-lg font-semibold">Play slideshow</h2>
         </div>
         <p class="text-sm text-night-400 mb-5 truncate">
           {{ title }}
@@ -66,7 +66,7 @@ function start() {
           </div>
 
           <div>
-            <label class="micro-label text-night-400 mb-2 block"> Loops per item </label>
+            <label class="micro-label text-night-400 mb-2 block"> Loops per post </label>
             <UTabs
               v-model="loopsPerContent"
               :content="false"
@@ -75,11 +75,11 @@ function start() {
               class="w-full"
             />
             <p class="text-xs text-night-500 mt-1">
-              Videos replay N times · Images show for {{ loopsPerContent * 4 }}s each
+              Gifs and videos play {{ loopsPerContent }}×. Pics show for {{ loopsPerContent * 4 }}s.
             </p>
           </div>
 
-          <USwitch v-model="randomize" label="Randomize order" />
+          <USwitch v-model="randomize" label="Shuffle" />
 
           <div class="flex gap-2 pt-1">
             <UButton

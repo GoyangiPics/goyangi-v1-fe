@@ -164,7 +164,7 @@ async function commit() {
       const result = await propagate(props.set.id, selectedPropagateFields.value)
       toast.add({
         title: 'Set updated',
-        description: `${result.updated} clip${result.updated === 1 ? '' : 's'} updated.`,
+        description: `${result.updated} post${result.updated === 1 ? '' : 's'} updated.`,
         color: 'success',
         duration: 3000,
       })
@@ -176,8 +176,8 @@ async function commit() {
     close()
   } catch (error: any) {
     toast.add({
-      title: 'Error',
-      description: error?.response?.message ?? 'Could not save the set.',
+      title: "Couldn't save set",
+      description: error?.response?.message ?? 'Try again.',
       color: 'error',
       duration: 4000,
     })
@@ -207,7 +207,7 @@ function onPrimary() {
 <template>
   <UModal
     :open="isVisible"
-    :title="isConfirming ? 'Confirm changes' : 'Edit set'"
+    :title="isConfirming ? 'Update all posts?' : 'Edit set'"
     :ui="{ content: 'sm:max-w-lg overflow-visible', body: 'overflow-visible' }"
     @update:open="emit('update:isVisible', $event)"
   >
@@ -216,7 +216,7 @@ function onPrimary() {
       <div v-if="!isConfirming" class="flex flex-col gap-3">
         <div class="flex flex-col gap-1">
           <label class="text-xs text-night-400">Title</label>
-          <UInput v-model="form.title" size="sm" placeholder="Title..." />
+          <UInput v-model="form.title" size="sm" placeholder="Add a title" />
         </div>
 
         <div class="flex flex-col gap-1">
@@ -235,7 +235,7 @@ function onPrimary() {
               variant="soft"
             />
             <span v-if="!inferredGroups.length" class="text-xs text-night-500">
-              Derived from the selected idols
+              Added from the idols you pick
             </span>
           </div>
         </div>
@@ -257,7 +257,7 @@ function onPrimary() {
           class="flex flex-col gap-2 p-3 rounded-lg border border-white/10 bg-white/2"
         >
           <p class="text-xs text-night-300">
-            Also apply to all {{ childCount }} clip{{ childCount === 1 ? '' : 's' }} in this set:
+            Also update all {{ childCount }} post{{ childCount === 1 ? '' : 's' }} in this set:
           </p>
           <UCheckbox
             v-for="entry in propagatableDirty"
@@ -278,7 +278,7 @@ function onPrimary() {
       <!-- Confirm -->
       <div v-else class="flex flex-col gap-3">
         <p class="text-sm text-night-300">
-          Applying to <strong>{{ childCount }}</strong> clip{{ childCount === 1 ? '' : 's' }}:
+          Changes for <strong>{{ childCount }}</strong> post{{ childCount === 1 ? '' : 's' }}:
         </p>
         <div class="flex flex-col gap-1.5">
           <div
@@ -290,10 +290,7 @@ function onPrimary() {
             <span class="text-night-100">{{ entry.preview }}</span>
           </div>
         </div>
-        <p class="text-xs text-error-400">
-          This rewrites {{ childCount }} content record{{ childCount === 1 ? '' : 's' }} and cannot
-          be undone.
-        </p>
+        <p class="text-xs text-error-400">This can't be undone.</p>
       </div>
     </template>
 

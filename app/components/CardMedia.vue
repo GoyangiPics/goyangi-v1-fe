@@ -232,7 +232,7 @@ const boxClass = computed(() => (box.value.isLetterboxed ? 'relative block' : 'b
     >
       <button
         type="button"
-        aria-label="Open fullscreen"
+        aria-label="Play"
         class="pointer-events-auto bg-transparent border-0 cursor-pointer p-2 flex items-center justify-center"
         @click.stop.prevent="emit('openFullscreen')"
       >

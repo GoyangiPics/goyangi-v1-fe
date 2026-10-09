@@ -87,8 +87,8 @@ async function save() {
     emit('saved')
   } catch (error: any) {
     toast.add({
-      title: 'Error',
-      description: pbErrorDetail(error, 'Failed to save changes.'),
+      title: "Couldn't save",
+      description: pbErrorDetail(error, 'Try again.'),
       color: 'error',
       duration: 3000,
     })
@@ -102,7 +102,7 @@ async function save() {
   <div class="flex flex-col gap-3">
     <div class="flex flex-col gap-1">
       <label class="text-xs text-night-400">Title</label>
-      <UInput v-model="form.title" size="sm" placeholder="Title..." />
+      <UInput v-model="form.title" size="sm" placeholder="Add a title" />
     </div>
     <div class="flex flex-col gap-1">
       <label class="text-xs text-night-400">Idols</label>
@@ -119,7 +119,7 @@ async function save() {
           variant="soft"
         />
         <span v-if="!inferredGroups.length" class="text-xs text-night-500">
-          Derived from the selected idols
+          Added from the idols you pick
         </span>
       </div>
     </div>
@@ -131,14 +131,19 @@ async function save() {
         by="id"
         :items="referenceStore.tags"
         label-key="name"
-        placeholder="Select tags..."
+        placeholder="Pick tags"
         size="sm"
       />
     </div>
     <div class="flex gap-3">
       <div class="flex flex-col gap-1 flex-1">
         <label class="text-xs text-night-400">File type</label>
-        <USelect v-model="form.filetype" :items="fileTypeOptions" size="sm" placeholder="Type..." />
+        <USelect
+          v-model="form.filetype"
+          :items="fileTypeOptions"
+          size="sm"
+          placeholder="Pick a type"
+        />
       </div>
       <div class="flex flex-col gap-1 flex-1">
         <label class="text-xs text-night-400">Date</label>
@@ -150,7 +155,7 @@ async function save() {
     </div>
     <div class="flex flex-col gap-1">
       <label class="text-xs text-night-400">Source</label>
-      <UInput v-model="form.source" size="sm" placeholder="Youtube, Instagram..." />
+      <UInput v-model="form.source" size="sm" placeholder="YouTube, Instagram…" />
     </div>
     <div class="flex gap-2 pt-1">
       <UButton label="Cancel" color="neutral" size="sm" block @click="emit('cancel')" />

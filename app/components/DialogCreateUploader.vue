@@ -31,8 +31,7 @@ async function handleCreate() {
   try {
     await authStore.createUploader(name.value)
     toast.add({
-      title: 'Welcome!',
-      description: `Uploader profile "${name.value.trim()}" created.`,
+      title: `Welcome, ${name.value.trim()}!`,
       color: 'success',
       duration: 3000,
     })
@@ -40,8 +39,8 @@ async function handleCreate() {
     emit('update:isVisible', false)
   } catch {
     toast.add({
-      title: 'Error',
-      description: 'Failed to create uploader profile.',
+      title: "Couldn't create uploader",
+      description: 'Try again.',
       color: 'error',
       duration: 3000,
     })
@@ -56,20 +55,18 @@ async function handleCreate() {
     :open="isVisible"
     :close="false"
     :dismissible="false"
-    title="Set up your uploader profile"
+    title="Choose your uploader name"
     :ui="{ content: 'sm:max-w-sm' }"
     @update:open="emit('update:isVisible', $event)"
   >
     <template #body>
       <div class="flex flex-col gap-4">
-        <p class="text-night-400 text-sm">
-          Choose a public display name for your uploads. This is shown on all content you upload.
-        </p>
+        <p class="text-night-400 text-sm">This name is shown on everything you upload.</p>
         <div class="flex flex-col gap-1">
           <label class="text-xs text-night-400">Display name</label>
           <UInput
             v-model="name"
-            placeholder="e.g. nabi, fansite_name..."
+            placeholder="e.g. nabi, fansite_name…"
             autofocus
             @keydown.enter="handleCreate"
           />
@@ -79,7 +76,7 @@ async function handleCreate() {
 
     <template #footer>
       <UButton
-        label="Create profile"
+        label="Save"
         color="success"
         block
         :disabled="!name.trim()"

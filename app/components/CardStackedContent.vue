@@ -119,14 +119,14 @@ function stashTitle() {
           loading="lazy"
           class="w-full h-auto rounded-md group-hover:brightness-110 transition duration-300"
           :src="(content as any).cover"
-          alt="Content preview"
+          alt="Preview"
         />
         <div
           v-else
           class="grid grid-cols-2 gap-1.5 group-hover:brightness-110 transition duration-300"
         >
           <div v-for="(url, index) in previewUrls" :key="index" class="rounded-md overflow-hidden">
-            <img loading="lazy" class="w-full h-auto rounded-md" :src="url" alt="Content preview" />
+            <img loading="lazy" class="w-full h-auto rounded-md" :src="url" alt="Preview" />
           </div>
         </div>
       </NuxtLink>

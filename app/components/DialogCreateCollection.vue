@@ -48,8 +48,7 @@ async function handleCreate() {
 
   if (!name.value.trim()) {
     toast.add({
-      title: 'Name required',
-      description: 'Enter a name for the collection.',
+      title: 'Add a name first',
       color: 'warning',
       duration: 2000,
     })
@@ -60,16 +59,16 @@ async function handleCreate() {
     const record = await createCollection(name.value, isPublic.value)
     emit('created', record)
     toast.add({
-      title: 'Created!',
-      description: `"${record.title}" is ready — add content to it from any card.`,
+      title: 'Collection created',
+      description: `Add posts to "${record.title}" from any post.`,
       color: 'success',
       duration: 3000,
     })
     close()
   } catch {
     toast.add({
-      title: 'Error',
-      description: 'Failed to create the collection.',
+      title: "Couldn't create collection",
+      description: 'Try again.',
       color: 'error',
       duration: 3000,
     })
@@ -88,7 +87,7 @@ async function handleCreate() {
       <div class="flex flex-col gap-4">
         <UInput
           v-model="name"
-          placeholder="Collection name..."
+          placeholder="Collection name"
           autofocus
           class="w-full"
           @keydown.enter="handleCreate"
@@ -96,7 +95,7 @@ async function handleCreate() {
         <div class="flex items-center justify-between">
           <USwitch v-model="isPublic" :label="isPublic ? 'Public' : 'Private'" />
           <p class="text-sm text-night-500">
-            {{ isPublic ? 'Visible to everyone once it has content' : 'Only visible to you' }}
+            {{ isPublic ? 'Everyone can see it once it has posts' : 'Only you can see it' }}
           </p>
         </div>
       </div>

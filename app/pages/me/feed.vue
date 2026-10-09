@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
-useHead({ title: 'My Feed' })
+useHead({ title: 'My feed' })
 
 definePageMeta({
   middleware: ['auth'],
@@ -79,9 +79,9 @@ watch(isManageVisible, (open) => {
     <div class="mt-4">
       <PageHeader
         emoji="⭐"
-        title="My Feed"
+        title="My feed"
         :total="itemsTotal"
-        :total-label="isGrouped ? 'sets' : 'contents'"
+        :total-label="isGrouped ? 'sets' : 'posts'"
       >
         <template #actions>
           <!-- No `size`: default, matching /home's header buttons. These sit in
@@ -89,7 +89,7 @@ watch(isManageVisible, (open) => {
                as a different class of control. -->
           <UButton
             icon="i-lucide-star"
-            :label="isMobile ? undefined : 'Manage Stars'"
+            :label="isMobile ? undefined : 'Manage stars'"
             color="neutral"
             variant="outline"
             @click="openManage"
@@ -119,7 +119,7 @@ watch(isManageVisible, (open) => {
         <UIcon name="i-lucide-star" class="text-4xl text-night-600" />
         <h1 class="text-2xl">Your feed is empty.</h1>
         <p class="text-sm text-night-400 max-w-sm">
-          Star the idols and groups you care about and they'll show up here.
+          Star idols and groups to see their posts here.
         </p>
         <UButton icon="i-lucide-star" label="Pick some" size="sm" @click="openManage" />
       </div>
@@ -142,7 +142,7 @@ watch(isManageVisible, (open) => {
       </ContentGrid>
 
       <div v-else class="flex justify-center items-center mt-16">
-        <h1 class="text-2xl">No results.</h1>
+        <h1 class="text-2xl">Nothing found.</h1>
       </div>
     </div>
 

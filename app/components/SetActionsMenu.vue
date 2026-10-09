@@ -86,9 +86,10 @@ async function deleteSet() {
   const count = ((props.content.expand as any)?.contents_via_set ?? []).length
   if (
     !(await confirm({
+      title: 'Delete this set?',
       message: count
-        ? `Delete this set and its ${count} item${count === 1 ? '' : 's'}?`
-        : 'Delete this empty set?',
+        ? `Its ${count} post${count === 1 ? '' : 's'} will be deleted too.`
+        : "This can't be undone.",
       icon: 'i-lucide-trash-2',
       confirmLabel: 'Delete',
       cancelLabel: 'Cancel',
@@ -101,12 +102,12 @@ async function deleteSet() {
     // contents.set is cascadeDelete, so this takes the clips and their R2
     // objects with it — which is what the confirm message spells out.
     await pb.collection('contents_sets').delete(props.content.id)
-    toast.add({ title: 'Deleted', color: 'success', duration: 2000 })
+    toast.add({ title: 'Set deleted', color: 'success', duration: 2000 })
     emit('deleted')
   } catch (error: any) {
     toast.add({
-      title: 'Error',
-      description: error?.response?.message ?? 'Could not delete the set.',
+      title: "Couldn't delete set",
+      description: error?.response?.message ?? 'Try again.',
       color: 'error',
       duration: 4000,
     })
@@ -117,7 +118,7 @@ async function deleteSet() {
 // (CardStackedContent passes :is-set through).
 const items = computed<DropdownMenuItem[]>(() => [
   {
-    label: 'Play as Slideshow',
+    label: 'Play slideshow',
     icon: 'i-lucide-circle-play',
     onSelect: () => {
       isSetupVisible.value = true
@@ -126,7 +127,7 @@ const items = computed<DropdownMenuItem[]>(() => [
   {
     // No "…In Set"/"…In Collection" split: the menu is already anchored to the
     // thing it acts on, so the distinction only made the label longer.
-    label: 'Like All',
+    label: 'Like all',
     icon: 'i-lucide-heart',
     onSelect: () =>
       props.isSet
@@ -134,7 +135,7 @@ const items = computed<DropdownMenuItem[]>(() => [
         : likeAllIn({ collectionId: props.content.id }),
   },
   {
-    label: 'Add To Collection',
+    label: 'Add to collection',
     icon: 'i-lucide-folder-plus',
     onSelect: () => {
       isAddToCollectionVisible.value = true

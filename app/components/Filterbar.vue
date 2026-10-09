@@ -152,9 +152,12 @@ const activeChips = computed<ActiveChip[]>(() => {
     })
   }
   if (!filtersStore.mostLikedMode && f.sort && f.sort.value && f.sort.value !== 'recent') {
+    // Label from the store's list rather than the persisted copy, so a label
+    // renamed since it was saved still shows its current wording.
+    const sortValue = f.sort.value
     chips.push({
-      key: `sort-${f.sort.value}`,
-      label: f.sort.option,
+      key: `sort-${sortValue}`,
+      label: filtersStore.sortType.find((o) => o.value === sortValue)?.option ?? f.sort.option,
       icon: 'i-lucide-arrow-down-wide-narrow',
       severity: 'contrast',
       remove: () => {
@@ -234,7 +237,7 @@ function filtersApply() {
       <input
         v-model="searchValue"
         type="text"
-        placeholder="Search by title..."
+        placeholder="Search titles…"
         class="filter-input flex-1 min-w-30 bg-transparent outline-none border-0 text-sm py-1"
         @keyup.enter="filtersApply"
       />

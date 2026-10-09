@@ -21,7 +21,7 @@ const {
 
 useSeoMeta({
   title: () => `${slug.value} — Labels — Goyangi`,
-  description: () => `Content labelled "${slug.value}" on Goyangi.`,
+  description: () => `Posts labelled "${slug.value}" on Goyangi.`,
 })
 
 // The home feed filtered by this label. A link, because the URL is the filter
@@ -35,11 +35,16 @@ const homeFilteredByLabel = computed(() => ({ path: '/', query: { label: slug.va
 
     <NavigationBase class="my-4" />
 
-    <PageHeader emoji="🏷️" :title="slug" :total="itemsTotal" total-label="items">
+    <PageHeader
+      emoji="🏷️"
+      :title="slug"
+      :total="itemsTotal"
+      :total-label="itemsTotal === 1 ? 'post' : 'posts'"
+    >
       <template #actions>
         <UButton
           icon="i-lucide-filter"
-          label="Filter home by this"
+          label="Filter home"
           color="neutral"
           variant="outline"
           size="sm"
@@ -72,7 +77,7 @@ const homeFilteredByLabel = computed(() => ({ path: '/', query: { label: slug.va
     </ContentGrid>
 
     <div v-else class="flex flex-col items-center justify-center mt-16 gap-2">
-      <h1 class="text-2xl text-night-400">Nothing labelled "{{ slug }}".</h1>
+      <h1 class="text-2xl text-night-400">No posts labelled "{{ slug }}".</h1>
       <UButton to="/labels" label="Browse all labels" size="sm" color="neutral" variant="outline" />
     </div>
 

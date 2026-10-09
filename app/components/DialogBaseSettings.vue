@@ -17,6 +17,21 @@ onMounted(() => {
   settings.value = JSON.parse(JSON.stringify(settingsStore.settings))
 })
 
+// The stored values double as the store's option labels (see storeSettings), so
+// renaming them there would orphan persisted choices. Friendlier names are
+// mapped here, for display only.
+const OPTION_LABELS: Record<string, string> = {
+  'HD MP4 (AV1)': 'HD',
+  'SD MP4 (H264)': 'SD',
+  'LD WebP': 'Preview',
+  Disabled: 'Off',
+  Enabled: 'On',
+}
+
+function toTabItems(options: readonly string[]) {
+  return options.map((o) => ({ label: OPTION_LABELS[o] ?? o, value: o }))
+}
+
 function optionsReset() {
   settingsStore.reset()
 }
@@ -46,7 +61,7 @@ function handleHide() {
     <template #body>
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
-          <span class="micro-label text-night-400">Max Column Count</span>
+          <span class="micro-label text-night-400">Max columns</span>
           <UTabs
             v-model="settings.columnCount"
             :content="false"
@@ -56,7 +71,7 @@ function handleHide() {
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <span class="micro-label text-night-400">Max Content Count</span>
+          <span class="micro-label text-night-400">Posts per page</span>
           <UTabs
             v-model="settings.contentCount"
             :content="false"
@@ -66,44 +81,45 @@ function handleHide() {
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <span class="micro-label text-night-400">Playback Quality</span>
+          <span class="micro-label text-night-400">Video quality</span>
           <UTabs
             v-model="settings.contentFormat"
             :content="false"
-            :items="settingsStore.contentFormatOptions.map((o) => ({ label: o, value: o }))"
+            :items="toTabItems(settingsStore.contentFormatOptions)"
             size="xs"
           />
           <span class="text-xs text-night-500">
-            Applies to fullscreen and single view. Grid cards play SD or the lightweight preview.
+            For fullscreen and single posts. HD looks best. SD loads faster and plays on older
+            devices. Preview uses the least data.
           </span>
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <span class="micro-label text-night-400">Data Saving Mode</span>
+          <span class="micro-label text-night-400">Data saver</span>
           <UTabs
             v-model="settings.dataSavingMode"
             :content="false"
-            :items="settingsStore.dataSavingModeOptions.map((o) => ({ label: o, value: o }))"
+            :items="toTabItems(settingsStore.dataSavingModeOptions)"
             size="xs"
           />
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <span class="micro-label text-night-400">Uniform Card Shape</span>
+          <span class="micro-label text-night-400">Same-shape cards</span>
           <UTabs
             v-model="settings.uniformCardRatio"
             :content="false"
-            :items="settingsStore.uniformCardRatioOptions.map((o) => ({ label: o, value: o }))"
+            :items="toTabItems(settingsStore.uniformCardRatioOptions)"
             size="xs"
           />
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <span class="micro-label text-night-400">No Distractions Mode</span>
+          <span class="micro-label text-night-400">No distractions</span>
           <UTabs
             v-model="settings.noDistractionMode"
             :content="false"
-            :items="settingsStore.noDistractionModeOptions.map((o) => ({ label: o, value: o }))"
+            :items="toTabItems(settingsStore.noDistractionModeOptions)"
             size="xs"
           />
         </div>
@@ -112,7 +128,7 @@ function handleHide() {
 
         <div class="flex gap-2">
           <UButton color="error" label="Reset" block variant="outline" @click="optionsReset" />
-          <UButton color="success" label="Save & Apply" block @click="optionsApply" />
+          <UButton color="success" label="Save" block @click="optionsApply" />
         </div>
       </div>
     </template>

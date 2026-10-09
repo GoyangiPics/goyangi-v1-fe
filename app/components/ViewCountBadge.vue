@@ -18,7 +18,11 @@ const label = computed(() => (props.views ?? 0).toLocaleString())
 <template>
   <!-- v-if on the tooltip, not the badge: gating only the badge would leave an
        empty tooltip wrapper in the DOM while the count is still null. -->
-  <UTooltip v-if="typeof views === 'number'" :text="`${label} views`" :content="{ side: 'top' }">
+  <UTooltip
+    v-if="typeof views === 'number'"
+    :text="`${label} ${views === 1 ? 'view' : 'views'}`"
+    :content="{ side: 'top' }"
+  >
     <UBadge
       icon="i-lucide-eye"
       color="neutral"

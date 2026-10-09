@@ -32,8 +32,7 @@ async function fetchCollections() {
     await loadCollections()
   } catch {
     toast.add({
-      title: 'Error',
-      description: 'Failed to fetch collections.',
+      title: "Couldn't load collections",
       color: 'error',
       duration: 3000,
     })
@@ -51,8 +50,7 @@ function toggleCollection(id: string) {
 async function handleCreate() {
   if (!newCollection.value.name.trim()) {
     toast.add({
-      title: 'Name required',
-      description: 'Enter a name for the collection.',
+      title: 'Add a name first',
       color: 'warning',
       duration: 2000,
     })
@@ -66,15 +64,14 @@ async function handleCreate() {
     newCollection.value = { name: '', isPublic: true }
     isCreateOpen.value = false
     toast.add({
-      title: 'Created!',
-      description: `"${record.title}" created and selected.`,
+      title: 'Collection created',
       color: 'success',
       duration: 2000,
     })
   } catch {
     toast.add({
-      title: 'Error',
-      description: 'Failed to create collection.',
+      title: "Couldn't create collection",
+      description: 'Try again.',
       color: 'error',
       duration: 3000,
     })
@@ -149,7 +146,7 @@ async function handleCreate() {
         <div v-if="isCreateOpen" class="px-3 pb-3 flex flex-col gap-2 border-t border-white/10">
           <UInput
             v-model="newCollection.name"
-            placeholder="Collection name..."
+            placeholder="Collection name"
             class="mt-3 w-full"
             autofocus
             @keydown.enter="handleCreate"

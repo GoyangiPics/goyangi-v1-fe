@@ -13,9 +13,9 @@ const authStore = useAuthStore()
 const toast = useToast()
 
 const reportTypes = [
-  { label: 'Terms of Service violation', value: 'tos' },
-  { label: 'Suggest metadata change', value: 'tags' },
-  { label: 'Low quality content', value: 'quality' },
+  { label: 'Breaks the Terms of Service', value: 'tos' },
+  { label: 'Wrong idols, tags or info', value: 'tags' },
+  { label: 'Low quality', value: 'quality' },
   { label: 'Other', value: 'other' },
 ]
 
@@ -45,8 +45,7 @@ async function submit() {
   const userId = authStore.user?.id
   if (!userId) {
     toast.add({
-      title: 'Not logged in',
-      description: 'You must be logged in to report.',
+      title: 'Log in to report',
       color: 'warning',
       duration: 2000,
     })
@@ -63,16 +62,16 @@ async function submit() {
     })
     alreadyReported.value = true
     toast.add({
-      title: 'Reported',
-      description: "Thank you. We'll review this content.",
+      title: 'Report sent',
+      description: "Thanks, we'll take a look.",
       color: 'success',
       duration: 3000,
     })
     emit('update:isVisible', false)
   } catch {
     toast.add({
-      title: 'Error',
-      description: 'Failed to submit report. Please try again.',
+      title: "Couldn't send report",
+      description: 'Try again.',
       color: 'error',
       duration: 3000,
     })
@@ -85,14 +84,14 @@ async function submit() {
 <template>
   <UModal
     :open="isVisible"
-    title="Report"
+    title="Report post"
     :ui="{ content: 'sm:max-w-sm' }"
     @update:open="emit('update:isVisible', $event)"
   >
     <template #body>
       <div v-if="alreadyReported" class="flex flex-col items-center gap-3 py-2 text-center">
         <UIcon name="i-lucide-circle-check" class="text-4xl text-green-500" />
-        <p class="text-night-300">You've already reported this content.</p>
+        <p class="text-night-300">You've already reported this post.</p>
       </div>
       <div v-else class="flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
@@ -108,7 +107,7 @@ async function submit() {
             v-model="message"
             :maxlength="255"
             :rows="3"
-            placeholder="Describe the issue..."
+            placeholder="What's wrong?"
             class="w-full"
             :ui="{ base: 'resize-none' }"
           />
@@ -116,7 +115,7 @@ async function submit() {
         </div>
 
         <UButton
-          label="Submit Report"
+          label="Send report"
           icon="i-lucide-flag"
           color="error"
           :disabled="!selectedType || isSubmitting"

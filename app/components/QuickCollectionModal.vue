@@ -129,8 +129,7 @@ async function handleSave() {
         item.collections = [...(item.collections ?? []), ...toAdd]
       }
       toast.add({
-        title: 'Saved!',
-        description: 'Collections updated.',
+        title: 'Collections updated',
         color: 'success',
         duration: 2000,
       })
@@ -139,8 +138,8 @@ async function handleSave() {
     emit('update:isVisible', false)
   } catch {
     toast.add({
-      title: 'Error',
-      description: 'Failed to update collections.',
+      title: "Couldn't update collections",
+      description: 'Try again.',
       color: 'error',
       duration: 3000,
     })
@@ -157,7 +156,7 @@ function handleHide() {
 <template>
   <UModal
     :open="isVisible"
-    title="Add to Collection"
+    title="Add to collection"
     :ui="{ content: 'sm:max-w-md' }"
     @update:open="emit('update:isVisible', $event)"
   >
@@ -171,17 +170,12 @@ function handleHide() {
         <UCheckbox
           :model-value="addAll"
           :disabled="isScopeOnly"
-          :label="`Add all contents from ${scopeNoun}`"
+          :label="`Add all posts in this ${scopeNoun}`"
           @update:model-value="onAddAllChange($event as boolean)"
         />
         <p class="mt-1 pl-6 text-xs text-night-500">
-          <template v-if="isScopeOnly">
-            Every item in this {{ scopeNoun }} — not just the ones on this page.
-          </template>
-          <template v-else>
-            Save adds every item in this {{ scopeNoun }} to each ticked collection. Unticking one
-            only ever removes this single item.
-          </template>
+          <template v-if="isScopeOnly"> Every post, not just the ones on this page. </template>
+          <template v-else> Unticking a collection only removes this post. </template>
         </p>
       </div>
 

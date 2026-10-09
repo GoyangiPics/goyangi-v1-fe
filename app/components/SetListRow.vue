@@ -70,7 +70,7 @@ function urls(field: 'preview' | 'sd' | 'hd') {
       </NuxtLink>
       <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
         <span class="text-xs text-night-500 font-mono">
-          {{ clips.length }} {{ clips.length === 1 ? 'item' : 'items' }}
+          {{ clips.length }} {{ clips.length === 1 ? 'post' : 'posts' }}
         </span>
         <UBadge
           v-for="idol in idols.slice(0, 3)"
@@ -100,7 +100,7 @@ function urls(field: 'preview' | 'sd' | 'hd') {
         size="xs"
         color="neutral"
         variant="ghost"
-        title="Copy this set's preview links"
+        title="Copy preview links"
         @click="copyLinks(urls('preview'), 'Preview')"
       />
       <UButton
@@ -108,7 +108,7 @@ function urls(field: 'preview' | 'sd' | 'hd') {
         size="xs"
         color="neutral"
         variant="ghost"
-        title="Copy this set's SD links"
+        title="Copy SD links"
         @click="copyLinks(urls('sd'), 'SD')"
       />
       <UButton
@@ -116,7 +116,7 @@ function urls(field: 'preview' | 'sd' | 'hd') {
         size="xs"
         color="neutral"
         variant="ghost"
-        title="Copy this set's HD links"
+        title="Copy HD links"
         @click="copyLinks(urls('hd'), 'HD')"
       />
       <slot name="actions" />

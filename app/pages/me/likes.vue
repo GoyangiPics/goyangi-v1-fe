@@ -1,5 +1,5 @@
 <script setup lang="ts">
-useHead({ title: 'My Likes' })
+useHead({ title: 'My likes' })
 
 definePageMeta({
   middleware: ['auth'],
@@ -25,7 +25,7 @@ const {
     <NavigationSaved />
 
     <div class="mt-4">
-      <PageHeader emoji="🔖" title="Saved" :total="itemsTotal" total-label="liked" />
+      <PageHeader emoji="🔖" title="Saved" :total="itemsTotal" total-label="posts" />
       <PageHandoffTitle />
 
       <div v-if="isLoading === true">
@@ -45,7 +45,7 @@ const {
       </ContentGrid>
       <div v-else>
         <div class="flex justify-center items-center mt-16">
-          <h1 class="text-2xl">No results.</h1>
+          <h1 class="text-2xl">No posts found.</h1>
         </div>
       </div>
     </div>

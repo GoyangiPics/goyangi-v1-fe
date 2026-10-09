@@ -17,7 +17,7 @@ const { isDown: isBackendDown } = useBackendStatus()
   <UApp :toaster="{ position: 'top-right' }" :tooltip="{ delayDuration: 0 }">
     <img
       src="~/assets/background.svg"
-      alt="Background"
+      alt=""
       class="w-full h-62.5 absolute top-0 left-0 z-[-1] transform rotate-180 opacity-50"
     />
     <NuxtLoadingIndicator />

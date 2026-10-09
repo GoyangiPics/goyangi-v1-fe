@@ -82,7 +82,8 @@ async function remove(label: LabelStat) {
   // the backend guard is the real gate, so handle its rejection.
   if (
     !(await confirm({
-      message: `Delete the label "${label.name}"?`,
+      title: `Delete label "${label.name}"?`,
+      message: "This can't be undone.",
       icon: 'i-lucide-trash-2',
       confirmLabel: 'Delete',
       cancelLabel: 'Cancel',
@@ -93,12 +94,12 @@ async function remove(label: LabelStat) {
   }
   try {
     await pb.collection('labels').delete(label.id)
-    toast.add({ title: 'Deleted', color: 'success', duration: 2000 })
+    toast.add({ title: 'Label deleted', color: 'success', duration: 2000 })
     await load()
   } catch (error: any) {
     toast.add({
-      title: 'Still in use',
-      description: error?.response?.message ?? 'Remove it from all content first.',
+      title: "Couldn't delete label",
+      description: error?.response?.message ?? 'Remove it from all posts first.',
       color: 'warning',
       duration: 4000,
     })
@@ -122,7 +123,7 @@ async function remove(label: LabelStat) {
       <input
         v-model="search"
         type="text"
-        placeholder="Search labels..."
+        placeholder="Search labels…"
         class="filter-input flex-1 bg-transparent outline-none border-0 text-sm py-1"
         @input="onSearch"
       />
@@ -133,7 +134,7 @@ async function remove(label: LabelStat) {
     </div>
 
     <div v-else-if="!entries.length" class="flex justify-center items-center mt-16">
-      <h1 class="text-2xl text-night-400">No labels yet.</h1>
+      <h1 class="text-2xl text-night-400">No labels found.</h1>
     </div>
 
     <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -153,7 +154,7 @@ async function remove(label: LabelStat) {
             </p>
           </div>
           <div class="flex items-center gap-1.5 text-xs text-primary-300 font-mono">
-            <span>{{ entry.uses ?? 0 }} item{{ (entry.uses ?? 0) === 1 ? '' : 's' }}</span>
+            <span>{{ entry.uses ?? 0 }} post{{ (entry.uses ?? 0) === 1 ? '' : 's' }}</span>
           </div>
         </NuxtLink>
 
@@ -163,7 +164,7 @@ async function remove(label: LabelStat) {
             size="xs"
             color="neutral"
             variant="ghost"
-            title="Filter the feed by this label"
+            title="Filter home by this label"
             :to="browseTarget(entry)"
           />
           <!-- Admin-only, and disabled with the reason rather than allowed to
@@ -173,7 +174,7 @@ async function remove(label: LabelStat) {
             v-if="authStore.isAdmin"
             :text="
               (entry.uses ?? 0) > 0
-                ? `Still applied to ${entry.uses} item(s) — remove them first`
+                ? `Used on ${entry.uses} post${entry.uses === 1 ? '' : 's'}. Remove it first.`
                 : 'Delete label'
             "
             :content="{ side: 'top' }"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-useHead({ title: 'My Collections' })
+useHead({ title: 'My collections' })
 
 definePageMeta({
   middleware: ['auth'],
@@ -36,21 +36,17 @@ async function saveEdit(content: any, { title, isPublic }: { title: string; isPu
     await pb.collection('contents_collections').update(content.id, { title, isPublic })
     content.title = title
     content.isPublic = isPublic
-    toast.add({ title: 'Saved!', color: 'success', duration: 2000 })
+    toast.add({ title: 'Collection saved', color: 'success', duration: 2000 })
   } catch {
-    toast.add({
-      title: 'Error',
-      description: 'Failed to update collection.',
-      color: 'error',
-      duration: 3000,
-    })
+    toast.add({ title: "Couldn't save collection", color: 'error', duration: 3000 })
   }
 }
 
 async function confirmDelete(_event: Event, content: any) {
   if (
     await confirm({
-      message: `Delete "${content.title}"?`,
+      title: `Delete "${content.title}"?`,
+      message: "This can't be undone.",
       icon: 'i-lucide-trash-2',
       confirmLabel: 'Delete',
       cancelLabel: 'Cancel',
@@ -60,14 +56,9 @@ async function confirmDelete(_event: Event, content: any) {
     try {
       await pb.collection('contents_collections').delete(content.id)
       await fetchItems(itemsCurrentPage.value)
-      toast.add({ title: 'Deleted!', color: 'success', duration: 2000 })
+      toast.add({ title: 'Collection deleted', color: 'success', duration: 2000 })
     } catch {
-      toast.add({
-        title: 'Error',
-        description: 'Failed to delete collection.',
-        color: 'error',
-        duration: 3000,
-      })
+      toast.add({ title: "Couldn't delete collection", color: 'error', duration: 3000 })
     }
   }
 }
@@ -80,11 +71,11 @@ async function confirmDelete(_event: Event, content: any) {
     <NavigationSaved />
 
     <div class="mt-4">
-      <PageHeader emoji="🗂️" title="My Collections" :total="itemsTotal" total-label="collections">
+      <PageHeader emoji="🗂️" title="My collections" :total="itemsTotal" total-label="collections">
         <template #actions>
           <UButton
             icon="i-lucide-folder-plus"
-            label="New Collection"
+            label="New collection"
             color="neutral"
             variant="outline"
             size="sm"
@@ -121,7 +112,7 @@ async function confirmDelete(_event: Event, content: any) {
 
       <div v-else>
         <div class="flex justify-center items-center mt-16">
-          <h1 class="text-2xl">No results.</h1>
+          <h1 class="text-2xl">No collections found.</h1>
         </div>
       </div>
     </div>

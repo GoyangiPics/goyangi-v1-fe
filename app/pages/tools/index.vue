@@ -39,10 +39,10 @@ async function deleteSavedLink(id: string, e: Event) {
   try {
     await pb.collection('users_links').delete(id)
     savedLinks.value = savedLinks.value.filter((l) => l.id !== id)
-    toast.add({ title: 'Deleted', color: 'success', duration: 1500 })
+    toast.add({ title: 'Link deleted', color: 'success', duration: 1500 })
   } catch (error) {
     console.error('Failed to delete:', error)
-    toast.add({ title: 'Delete failed', color: 'error', duration: 2000 })
+    toast.add({ title: "Couldn't delete", color: 'error', duration: 2000 })
   }
 }
 
@@ -58,19 +58,19 @@ onMounted(fetchSavedLinks)
     <div class="mt-4">
       <PageHeader
         emoji="🛠️"
-        title="Imgur Tools"
+        title="Imgur tools"
         :total="items.length"
         :total-label="items.length === 1 ? 'link' : 'links'"
       />
       <p class="text-sm text-night-400 mb-4 max-w-2xl">
-        Paste Imgur links to grid them out, recover content from dead links, mass-download files, or
-        generate a shareable link.
+        Paste Imgur links to preview them, recover dead ones, download them all, or share them as
+        one link.
       </p>
     </div>
 
     <ToolsLinksPanel :tools="tools">
       <UButton
-        label="Share Link"
+        label="Share link"
         icon="i-lucide-share-2"
         class="search-gradient ml-auto"
         size="sm"
@@ -106,7 +106,7 @@ onMounted(fetchSavedLinks)
             </div>
             <button
               class="saved-link-delete"
-              aria-label="Delete"
+              aria-label="Delete link"
               @click="deleteSavedLink(link.id, $event)"
             >
               <UIcon name="i-lucide-trash-2" class="text-xs" />
@@ -162,8 +162,7 @@ onMounted(fetchSavedLinks)
     <div v-else class="flex flex-col items-center justify-center py-12 text-center">
       <UIcon name="i-lucide-images" class="text-5xl text-night-700 mb-3" />
       <p class="text-sm text-night-500">
-        Paste links above and hit <span class="text-night-300">Generate Grid</span> to preview them
-        here.
+        Paste links above, then hit <span class="text-night-300">Show grid</span>.
       </p>
     </div>
   </div>

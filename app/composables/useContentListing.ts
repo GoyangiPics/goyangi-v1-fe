@@ -105,8 +105,8 @@ export function useContentListing(
   watch(error, (err) => {
     if (!err) return
     toast.add({
-      title: 'Could not load results',
-      description: 'The current filters were rejected by the server.',
+      title: "Couldn't load posts",
+      description: 'Try changing your filters.',
       color: 'error',
       duration: 4000,
     })
@@ -208,8 +208,7 @@ export function useContentListing(
     window.scrollTo(0, 0)
     await fetchItems(1)
     toast.add({
-      title: 'Success!',
-      description: 'Filters have been applied.',
+      title: 'Filters applied',
       color: 'success',
       duration: 1000,
     })

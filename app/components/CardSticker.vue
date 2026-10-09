@@ -14,8 +14,7 @@ async function copyAndNotify() {
   const url = props.content.preview
   if (!url) {
     toast.add({
-      title: 'Not ready',
-      description: 'Sticker has no URL yet.',
+      title: 'Sticker not ready yet',
       color: 'warning',
       duration: 2000,
     })
@@ -23,8 +22,7 @@ async function copyAndNotify() {
   }
   await navigator.clipboard.writeText(url)
   toast.add({
-    title: 'Copied!',
-    description: 'Sticker link copied.',
+    title: 'Link copied',
     color: 'info',
     duration: 1000,
   })

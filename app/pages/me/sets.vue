@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-useHead({ title: 'My Sets' })
+useHead({ title: 'My sets' })
 
 definePageMeta({
   middleware: ['auth'],
@@ -58,7 +58,7 @@ async function onPageChange(e: any) {
     <NavigationUploads class="mt-6" />
 
     <div class="mt-4">
-      <PageHeader emoji="🎞️" title="My Sets" :total="itemsTotal" total-label="sets">
+      <PageHeader emoji="🎞️" title="My sets" :total="itemsTotal" total-label="sets">
         <template #actions>
           <ListingLayoutToggle v-model="layout" storage-key="me-sets" />
         </template>

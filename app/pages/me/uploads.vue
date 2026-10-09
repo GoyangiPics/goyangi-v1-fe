@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-useHead({ title: 'My Uploads' })
+useHead({ title: 'My uploads' })
 
 definePageMeta({
   middleware: ['auth'],
@@ -53,7 +53,8 @@ async function onPageChange(e: any) {
 async function deleteContent(_event: Event, content: any) {
   if (
     await confirm({
-      message: `Delete "${content.title}"?`,
+      title: `Delete "${content.title}"?`,
+      message: "This can't be undone.",
       icon: 'i-lucide-trash-2',
       confirmLabel: 'Delete',
       cancelLabel: 'Cancel',
@@ -62,20 +63,10 @@ async function deleteContent(_event: Event, content: any) {
   ) {
     try {
       await pb.collection('contents').delete(content.id)
-      toast.add({
-        title: 'Deleted',
-        description: 'Content removed.',
-        color: 'success',
-        duration: 2000,
-      })
+      toast.add({ title: 'Post deleted', color: 'success', duration: 2000 })
       await fetchItems(itemsCurrentPage.value)
     } catch {
-      toast.add({
-        title: 'Error',
-        description: 'Failed to delete.',
-        color: 'error',
-        duration: 3000,
-      })
+      toast.add({ title: "Couldn't delete post", color: 'error', duration: 3000 })
     }
   }
 }
@@ -88,7 +79,7 @@ async function deleteContent(_event: Event, content: any) {
     <NavigationUploads />
 
     <div class="mt-4">
-      <PageHeader emoji="📤" title="My Uploads" :total="itemsTotal" total-label="uploads">
+      <PageHeader emoji="📤" title="My uploads" :total="itemsTotal" total-label="posts">
         <template #actions>
           <ListingLayoutToggle v-model="layout" storage-key="me-uploads" />
         </template>
@@ -154,7 +145,7 @@ async function deleteContent(_event: Event, content: any) {
       </template>
 
       <div v-else class="flex justify-center items-center mt-16">
-        <h1 class="text-2xl">No results.</h1>
+        <h1 class="text-2xl">No posts found.</h1>
       </div>
     </div>
 

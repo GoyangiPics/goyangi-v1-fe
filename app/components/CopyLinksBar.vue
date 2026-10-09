@@ -44,34 +44,34 @@ const emit = defineEmits<{
 
     <UButton
       v-if="previewCount"
-      :label="`Copy Preview Links (${previewCount})`"
+      :label="`Copy preview links (${previewCount})`"
       icon="i-simple-icons-discord"
       size="sm"
       color="neutral"
       variant="outline"
-      title="Discord-ready preview links"
+      title="Best for Discord"
       :disabled="disabled"
       @click="emit('copy', 'preview')"
     />
     <UButton
       v-if="sdCount"
-      :label="`Copy SD Links (${sdCount})`"
+      :label="`Copy SD links (${sdCount})`"
       icon="i-lucide-copy"
       size="sm"
       color="neutral"
       variant="outline"
-      title="H.264 720p — plays everywhere"
+      title="Plays everywhere"
       :disabled="disabled"
       @click="emit('copy', 'sd')"
     />
     <UButton
       v-if="hdCount"
-      :label="`Copy HD Links (${hdCount})`"
+      :label="`Copy HD links (${hdCount})`"
       icon="i-lucide-copy"
       size="sm"
       color="neutral"
       variant="outline"
-      title="AV1 1080p — best quality"
+      title="Best quality"
       :disabled="disabled"
       @click="emit('copy', 'hd')"
     />

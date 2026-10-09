@@ -31,8 +31,7 @@ async function copyPreview() {
   const link = shortLink(props.content, 'preview')
   if (!link) {
     toast.add({
-      title: 'Nothing to copy',
-      description: 'This item has no preview link.',
+      title: 'No link to copy',
       color: 'warning',
       duration: 2000,
     })
@@ -40,8 +39,7 @@ async function copyPreview() {
   }
   await navigator.clipboard.writeText(link)
   toast.add({
-    title: 'Copied!',
-    description: 'Preview link copied to clipboard.',
+    title: 'Link copied',
     color: 'info',
     duration: 1000,
   })
@@ -52,15 +50,13 @@ async function copyRendition(url: string, label: string) {
   try {
     await navigator.clipboard.writeText(url)
     toast.add({
-      title: 'Copied!',
-      description: `${label} link copied to clipboard.`,
+      title: `${label} link copied`,
       color: 'info',
       duration: 1000,
     })
   } catch {
     toast.add({
-      title: 'Error',
-      description: 'Failed to copy the link.',
+      title: "Couldn't copy link",
       color: 'error',
       duration: 3000,
     })
@@ -70,8 +66,7 @@ async function copyRendition(url: string, label: string) {
 async function copyMirror() {
   await navigator.clipboard.writeText(props.content.mirror)
   toast.add({
-    title: 'Copied!',
-    description: 'Mirror link copied to clipboard.',
+    title: 'Imgur link copied',
     color: 'info',
     duration: 1000,
   })
@@ -128,12 +123,12 @@ onMounted(() => {
       // No separate "Add All" entry beside this one: the modal it opens carries
       // an "add all contents from set" checkbox, which is both fewer rows here
       // and the only place the choice is actually visible before it happens.
-      label: 'Add To Collection',
+      label: 'Add to collection',
       icon: 'i-lucide-folder-plus',
       onSelect: () => emit('openCollections'),
     },
     {
-      label: 'Add Label',
+      label: 'Add label',
       icon: 'i-lucide-tag',
       onSelect: () => emit('openLabels'),
     },
@@ -145,7 +140,7 @@ onMounted(() => {
   // `likes` expanded, while CardBaseContent has to fetch.
   if (c.set?.trim()) {
     organise.push({
-      label: 'Like All',
+      label: 'Like whole set',
       icon: 'i-lucide-heart',
       onSelect: () => emit('likeAllInSet'),
     })
@@ -182,19 +177,19 @@ onMounted(() => {
   if (filetype === 'video' || filetype === 'gif') {
     if (hdLink) {
       copy.push({
-        label: 'HD mp4',
+        label: 'HD MP4',
         slot: 'hd',
         onSelect: () => copyRendition(hdLink, 'HD'),
-        flat: { label: 'Copy HD mp4' },
+        flat: { label: 'Copy HD MP4' },
       })
     }
 
     if (sdLink) {
       copy.push({
-        label: 'SD mp4',
+        label: 'SD MP4',
         slot: 'sd',
         onSelect: () => copyRendition(sdLink, 'SD'),
-        flat: { label: 'Copy SD mp4' },
+        flat: { label: 'Copy SD MP4' },
       })
     }
   }
@@ -206,7 +201,7 @@ onMounted(() => {
       label: 'Imgur link',
       icon: 'i-lucide-copy',
       onSelect: () => copyMirror(),
-      flat: { label: 'Copy Imgur' },
+      flat: { label: 'Copy Imgur link' },
     })
   }
 
@@ -223,28 +218,28 @@ onMounted(() => {
   if (isMotion) {
     if (hdUrl) {
       downloadItem.push({
-        label: 'HD mp4',
+        label: 'HD MP4',
         slot: 'hd',
         onSelect: () => downloadFile(hdUrl),
         // Flattened, the leading icon goes back to the download glyph; the slot
         // only hangs the AV1 compatibility hint off the trailing edge.
-        flat: { label: 'Download HD mp4', icon: 'i-lucide-download', slot: 'downloadHd' },
+        flat: { label: 'Download HD MP4', icon: 'i-lucide-download', slot: 'downloadHd' },
       })
     }
     // Conditional for the same reason the SD copy entry above is: the rendition
     // is best-effort backend-side and absent entirely on older records.
     if (sdUrl) {
       downloadItem.push({
-        label: 'SD mp4',
+        label: 'SD MP4',
         slot: 'sd',
         onSelect: () => downloadFile(sdUrl),
-        flat: { label: 'Download SD mp4', icon: 'i-lucide-download', slot: undefined },
+        flat: { label: 'Download SD MP4', icon: 'i-lucide-download', slot: undefined },
       })
     }
   } else if (hdUrl) {
     // Stills and stickers have one rendition, so naming it would be noise.
     downloadItem.push({
-      label: 'This item',
+      label: 'This post',
       icon: 'i-lucide-image',
       onSelect: () => downloadFile(hdUrl),
       flat: { label: 'Download', icon: 'i-lucide-download' },
@@ -261,25 +256,25 @@ onMounted(() => {
   if (setId) {
     if (isMotion) {
       downloadSet.push({
-        label: 'HD mp4',
+        label: 'HD MP4',
         slot: 'hd',
         onSelect: () => void downloadAllIn({ setId }, 'hd'),
-        flat: { label: 'Download Set HD mp4', icon: 'i-lucide-download', slot: 'downloadHd' },
+        flat: { label: 'Download set as HD MP4', icon: 'i-lucide-download', slot: 'downloadHd' },
       })
       if (sdUrl) {
         downloadSet.push({
-          label: 'SD mp4',
+          label: 'SD MP4',
           slot: 'sd',
           onSelect: () => void downloadAllIn({ setId }, 'sd'),
-          flat: { label: 'Download Set SD mp4', icon: 'i-lucide-download', slot: undefined },
+          flat: { label: 'Download set as SD MP4', icon: 'i-lucide-download', slot: undefined },
         })
       }
     } else {
       downloadSet.push({
-        label: 'Entire set',
+        label: 'Whole set',
         icon: 'i-lucide-images',
         onSelect: () => void downloadAllIn({ setId }, 'hd'),
-        flat: { label: 'Download Set', icon: 'i-lucide-download' },
+        flat: { label: 'Download set', icon: 'i-lucide-download' },
       })
     }
   }
@@ -289,8 +284,8 @@ onMounted(() => {
   const downloadGroups =
     isMotion && downloadItem.length && downloadSet.length
       ? [
-          [{ type: 'label' as const, label: 'This item' }, ...downloadItem],
-          [{ type: 'label' as const, label: 'Entire set' }, ...downloadSet],
+          [{ type: 'label' as const, label: 'This post' }, ...downloadItem],
+          [{ type: 'label' as const, label: 'Whole set' }, ...downloadSet],
         ]
       : [downloadItem, downloadSet]
 
@@ -303,7 +298,7 @@ onMounted(() => {
 
   if (c.source?.trim()) {
     retrieve.push({
-      label: 'Go To Source',
+      label: 'Go to source',
       icon: 'i-lucide-link',
       onSelect: () => window.open(c.source, '_blank'),
     })
@@ -311,7 +306,7 @@ onMounted(() => {
 
   if (c.discord?.trim()) {
     retrieve.push({
-      label: 'Go To Discord Message',
+      label: 'Open in Discord',
       icon: 'i-simple-icons-discord',
       onSelect: () => openDiscord(),
     })

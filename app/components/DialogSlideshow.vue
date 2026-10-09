@@ -97,10 +97,9 @@ onMounted(fetchAll)
               {{ content.title }}
             </p>
             <p class="text-xs text-white/40 truncate">
-              {{ allItems.length }} items · {{ columnGroups.length }} column{{
-                columnGroups.length !== 1 ? 's' : ''
-              }}
-              · {{ loopsLabel }} each
+              {{ allItems.length }} post{{ allItems.length !== 1 ? 's' : '' }} ·
+              {{ columnGroups.length }} column{{ columnGroups.length !== 1 ? 's' : '' }} ·
+              {{ loopsLabel }} each
               <span v-if="randomize"> · Shuffled</span>
             </p>
           </div>
@@ -119,15 +118,15 @@ onMounted(fetchAll)
         <!-- loading -->
         <div v-if="isLoading" class="flex-1 flex flex-col items-center justify-center gap-3">
           <LoadingSpinner size="48px" :stroke-width="3" />
-          <p class="text-sm text-white/40">Loading content…</p>
+          <p class="text-sm text-white/40">Loading…</p>
         </div>
 
         <!-- error -->
         <div v-else-if="loadError" class="flex-1 flex flex-col items-center justify-center gap-3">
           <UIcon name="i-lucide-triangle-alert" class="text-4xl text-red-400" />
-          <p class="text-sm text-white/60">Failed to load content.</p>
+          <p class="text-sm text-white/60">Couldn't load posts.</p>
           <button class="text-sm text-violet-400 hover:text-violet-300 underline" @click="fetchAll">
-            Retry
+            Try again
           </button>
         </div>
 
@@ -137,7 +136,7 @@ onMounted(fetchAll)
           class="flex-1 flex flex-col items-center justify-center gap-2"
         >
           <UIcon name="i-lucide-inbox" class="text-4xl text-white/20" />
-          <p class="text-sm text-white/40">No content found.</p>
+          <p class="text-sm text-white/40">No posts to play.</p>
         </div>
 
         <!-- columns -->

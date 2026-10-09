@@ -64,7 +64,7 @@ async function commit() {
     )
     toast.add({
       title: 'Merged',
-      description: `${result.moved} clip${result.moved === 1 ? '' : 's'} moved, ${result.deleted.length} set${result.deleted.length === 1 ? '' : 's'} removed.`,
+      description: `${result.moved} post${result.moved === 1 ? '' : 's'} moved, ${result.deleted.length} set${result.deleted.length === 1 ? '' : 's'} deleted.`,
       color: 'success',
       duration: 4000,
     })
@@ -75,8 +75,8 @@ async function commit() {
     // nothing was changed. Worth saying so rather than a generic failure.
     const status = error?.status
     toast.add({
-      title: status === 409 ? 'Nothing was changed' : 'Merge failed',
-      description: error?.response?.message ?? 'Could not merge these sets.',
+      title: status === 409 ? 'Nothing changed' : "Couldn't merge sets",
+      description: error?.response?.message ?? 'Try again.',
       color: status === 409 ? 'warning' : 'error',
       duration: 5000,
     })
@@ -102,7 +102,7 @@ function onPrimary() {
 <template>
   <UModal
     :open="isVisible"
-    :title="isConfirming ? 'Confirm merge' : 'Merge sets'"
+    :title="isConfirming ? 'Merge these sets?' : 'Merge sets'"
     :ui="{ content: 'sm:max-w-lg' }"
     @update:open="emit('update:isVisible', $event)"
   >
@@ -110,7 +110,7 @@ function onPrimary() {
       <!-- Pick the survivor -->
       <div v-if="!isConfirming">
         <p class="text-xs text-night-500 mb-3">
-          Choose which set to keep. The others' clips move into it and the empty sets are deleted.
+          Pick the set to keep. Posts from the others move into it.
         </p>
 
         <div class="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
@@ -157,7 +157,7 @@ function onPrimary() {
                 />
               </div>
               <p class="text-xs text-night-500 mt-1.5 font-mono">
-                {{ clipCount(set) }} item{{ clipCount(set) === 1 ? '' : 's' }} ·
+                {{ clipCount(set) }} post{{ clipCount(set) === 1 ? '' : 's' }} ·
                 {{ new Date(set.created).toLocaleDateString() }}
                 <span v-if="targetId === set.id" class="text-pink-300"> · keeping this one</span>
               </p>
@@ -169,26 +169,19 @@ function onPrimary() {
       <!-- Confirm -->
       <div v-else class="flex flex-col gap-3 text-sm">
         <p>
-          Merging <strong>{{ sets.length }}</strong> sets ({{ totalClips }} clips) into
+          <strong>{{ sets.length }}</strong> sets ({{ totalClips }} posts) will be merged into
           <strong>«{{ target?.title || target?.id }}»</strong>.
         </p>
 
         <div class="flex flex-col gap-1 text-xs">
-          <p class="text-night-400">These sets will be deleted:</p>
+          <p class="text-night-400">These sets and their titles and dates will be deleted:</p>
           <p v-for="set in sources" :key="set.id" class="text-night-200 truncate">
             — {{ set.title || set.id }}
           </p>
         </div>
 
-        <div class="text-xs text-night-400">
-          <p>
-            Kept: the target's title, idols, groups and date. The other sets' titles and dates are
-            discarded.
-          </p>
-        </div>
-
         <div v-if="mergedUploaders.length" class="flex flex-col gap-1">
-          <p class="text-xs text-night-400">Uploaders merged onto the target:</p>
+          <p class="text-xs text-night-400">Uploaders on the merged set:</p>
           <div class="flex flex-wrap gap-1">
             <UBadge
               v-for="u in mergedUploaders"
@@ -201,7 +194,7 @@ function onPrimary() {
           </div>
         </div>
 
-        <p class="text-xs text-error-400">This cannot be undone.</p>
+        <p class="text-xs text-error-400">This can't be undone.</p>
       </div>
     </template>
 

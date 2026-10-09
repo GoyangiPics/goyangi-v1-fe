@@ -25,7 +25,7 @@ function onSaved() {
 <template>
   <UModal
     :open="isVisible"
-    title="Edit content"
+    title="Edit post"
     :ui="{ content: 'sm:max-w-lg' }"
     @update:open="emit('update:isVisible', $event)"
   >

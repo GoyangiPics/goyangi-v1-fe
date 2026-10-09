@@ -29,7 +29,7 @@ export function useShare() {
       // Dismissing the sheet rejects with AbortError; that's a choice, not a failure.
       if ((error as Error)?.name === 'AbortError') return
       toast.add({
-        title: 'Could not share',
+        title: "Couldn't share",
         description: 'Copy the link from the menu instead.',
         color: 'warning',
         duration: 3000,

@@ -34,7 +34,7 @@ describe('describeQueue', () => {
     expect(q.isBusy).toBe(true)
     expect(q.total).toBe(20)
     expect(q.others).toBe(20)
-    expect(q.stagedLabel).toBe('10 staged files')
+    expect(q.stagedLabel).toBe('10 files')
     expect(q.breakdown).toBe('20 gifs')
     expect(q.capacityLabel).toBe('one at a time')
   })
@@ -87,7 +87,7 @@ describe('describeQueue', () => {
     // The backend buckets unknown filetypes under "other"; a bucket added there
     // later must not render as `undefined`.
     const q = describeQueue(snapshot({ total: 3, by_kind: { future_kind: 3 } }), 0, 0)
-    expect(q.breakdown).toBe('3 items')
+    expect(q.breakdown).toBe('3 posts')
   })
 
   it('omits empty buckets even if the backend sends them', () => {
@@ -104,6 +104,6 @@ describe('describeQueue', () => {
   })
 
   it('uses the singular for one staged file', () => {
-    expect(describeQueue(snapshot({ total: 1 }), 1, 0).stagedLabel).toBe('1 staged file')
+    expect(describeQueue(snapshot({ total: 1 }), 1, 0).stagedLabel).toBe('1 file')
   })
 })

@@ -16,7 +16,7 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           name: 'description',
-          content: 'K-pop image and video archive - browse, like, and collect.',
+          content: 'K-pop pics, gifs and videos to browse, like and collect.',
         },
         // night-950 (oklch(0.145 0.012 340)) — keep in sync with main.css
         // and public/site.webmanifest.

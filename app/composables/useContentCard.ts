@@ -38,15 +38,15 @@ export function useContentCard(content: MaybeRefOrGetter<ContentsItem | null>) {
     const avifUrl = toValue(content)?.preview
     if (!avifUrl) {
       toast.add({
-        title: 'No AVIF',
-        description: 'This item has no AVIF preview.',
+        title: 'Nothing to copy',
+        description: 'This post has no preview link.',
         color: 'warning',
         duration: 2000,
       })
       return
     }
     await navigator.clipboard.writeText(avifUrl)
-    toast.add({ title: 'Copied!', description: 'AVIF link copied.', color: 'info', duration: 1000 })
+    toast.add({ title: 'Link copied', color: 'info', duration: 1000 })
   }
 
   function download() {

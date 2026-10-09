@@ -19,7 +19,7 @@ async function confirmReset() {
   if (!hasToken.value) {
     toast.add({
       title: 'Invalid link',
-      description: 'This reset link is missing its token. Request a new one from the login page.',
+      description: 'Request a new one from the login page.',
       color: 'error',
       duration: 5000,
     })
@@ -27,8 +27,7 @@ async function confirmReset() {
   }
   if (password.value !== passwordConfirm.value) {
     toast.add({
-      title: 'Validation Error',
-      description: 'Passwords do not match.',
+      title: "Passwords don't match",
       color: 'warning',
       duration: 5000,
     })
@@ -40,8 +39,8 @@ async function confirmReset() {
       .collection('users')
       .confirmPasswordReset(token.value, password.value, passwordConfirm.value)
     toast.add({
-      title: 'Password Reset',
-      description: 'Your password has been updated. Please log in.',
+      title: 'Password updated',
+      description: 'Log in with your new password.',
       color: 'success',
       duration: 5000,
     })
@@ -49,8 +48,8 @@ async function confirmReset() {
   } catch (error) {
     console.error('Password reset failed:', error)
     toast.add({
-      title: 'Reset Failed',
-      description: 'The reset link is invalid or has expired.',
+      title: "Couldn't reset password",
+      description: 'This link is invalid or has expired.',
       color: 'error',
       duration: 5000,
     })
@@ -66,27 +65,27 @@ async function confirmReset() {
       <div
         class="bg-gradient-to-br from-night-800 to-night-900 rounded-2xl shadow-lg w-full max-w-sm mx-4 p-8"
       >
-        <h2 class="text-2xl text-white font-semibold">Reset Password</h2>
-        <p class="text-sm text-night-400 mt-2">Enter your new password below.</p>
+        <h2 class="text-2xl text-white font-semibold">Reset password</h2>
+        <p class="text-sm text-night-400 mt-2">Choose a new password.</p>
 
         <UAlert
           v-if="!hasToken"
           color="error"
           variant="subtle"
           class="mt-4"
-          description="This reset link is missing its token. Request a new one from the login page."
+          description="This link doesn't work. Request a new one from the login page."
         />
 
         <form class="mt-6" @submit.prevent="confirmReset">
           <div>
-            <label for="new-password" class="block text-sm text-night-300">New Password</label>
+            <label for="new-password" class="block text-sm text-night-300">New password</label>
             <UInput
               id="new-password"
               v-model="password"
               type="password"
               name="password"
               autocomplete="new-password"
-              placeholder="Enter new password"
+              placeholder="At least 6 characters"
               minlength="6"
               class="w-full mt-2"
               autofocus
@@ -96,7 +95,7 @@ async function confirmReset() {
 
           <div class="mt-4">
             <label for="confirm-new-password" class="block text-sm text-night-300"
-              >Confirm Password</label
+              >Confirm password</label
             >
             <UInput
               id="confirm-new-password"
@@ -104,7 +103,7 @@ async function confirmReset() {
               type="password"
               name="passwordConfirm"
               autocomplete="new-password"
-              placeholder="Confirm new password"
+              placeholder="Repeat password"
               minlength="6"
               class="w-full mt-2"
               required
@@ -113,7 +112,7 @@ async function confirmReset() {
 
           <UButton
             type="submit"
-            label="Set New Password"
+            label="Set new password"
             icon="i-lucide-lock"
             color="neutral"
             variant="solid"

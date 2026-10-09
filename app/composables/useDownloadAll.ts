@@ -94,7 +94,7 @@ export function useDownloadAll() {
     if (isDownloadingAll.value) {
       toast.add({
         title: 'Already downloading',
-        description: 'Wait for the current download to finish.',
+        description: 'Wait for it to finish.',
         color: 'info',
         duration: 2000,
       })
@@ -113,8 +113,8 @@ export function useDownloadAll() {
       } catch (error) {
         console.error('Error loading items to download:', error)
         toast.add({
-          title: 'Error',
-          description: 'Could not load the set to download.',
+          title: "Couldn't load this set",
+          description: 'Try again.',
           color: 'error',
           duration: 3000,
         })
@@ -162,7 +162,7 @@ export function useDownloadAll() {
     if (count === 0) {
       toast.add({
         title: 'Nothing to download',
-        description: `None of these items has ${label === 'SD' ? 'an SD' : 'an HD'} file.`,
+        description: `None of these posts have ${label === 'SD' ? 'an SD' : 'an HD'} version.`,
         color: 'warning',
         duration: 3000,
       })
@@ -170,12 +170,10 @@ export function useDownloadAll() {
     }
 
     const summary = {
-      title: 'Done!',
+      title: `Downloaded ${count} ${label} file${count === 1 ? '' : 's'}`,
       // The skipped count is stated rather than swallowed: silently handing
       // over fewer files than there are items on screen reads as a failure.
-      description:
-        `Downloaded ${count} ${label} file${count === 1 ? '' : 's'}.` +
-        (skipped > 0 ? ` ${skipped} had no ${label} version and were skipped.` : ''),
+      description: skipped > 0 ? `Skipped ${skipped} with no ${label} version.` : undefined,
       color: skipped > 0 ? ('warning' as const) : ('success' as const),
       duration: skipped > 0 ? 4000 : 2000,
     }

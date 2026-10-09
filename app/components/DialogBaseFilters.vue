@@ -279,11 +279,11 @@ async function savedFiltersSave() {
     isCreateSavedFilterVisible.value = false
     filterName.value = ''
     await referenceStore.fetchSavedFilters()
-    toast.add({ title: 'Saved!', color: 'success', duration: 1000 })
+    toast.add({ title: 'Filter saved', color: 'success', duration: 1000 })
   } catch (error) {
     toast.add({
-      title: 'Error',
-      description: 'Filter ID may already be taken. Try a different name.',
+      title: "Couldn't save filter",
+      description: 'That name may be taken. Try another.',
       color: 'error',
       duration: 3000,
     })
@@ -297,16 +297,14 @@ async function copyFilterLink() {
   try {
     await navigator.clipboard.writeText(url)
     toast.add({
-      title: 'Copied!',
-      description: 'Filter link copied to clipboard.',
+      title: 'Link copied',
       color: 'info',
       duration: 1500,
     })
   } catch (error) {
     console.error('Error copying filter link:', error)
     toast.add({
-      title: 'Error',
-      description: 'Could not copy the link.',
+      title: "Couldn't copy link",
       color: 'error',
       duration: 3000,
     })
@@ -315,7 +313,7 @@ async function copyFilterLink() {
 
 async function deleteSavedFilter() {
   if (!selectedSavedFilter.value) {
-    toast.add({ title: 'Select a filter first', color: 'warning', duration: 2000 })
+    toast.add({ title: 'Pick a filter first', color: 'warning', duration: 2000 })
     return
   }
   try {
@@ -323,12 +321,11 @@ async function deleteSavedFilter() {
     selectedSavedFilter.value = null
     await referenceStore.fetchSavedFilters()
     filtersReset()
-    toast.add({ title: 'Deleted!', color: 'success', duration: 1500 })
+    toast.add({ title: 'Filter deleted', color: 'success', duration: 1500 })
   } catch (error) {
     console.error('Error deleting filter:', error)
     toast.add({
-      title: 'Error',
-      description: 'Could not delete the filter.',
+      title: "Couldn't delete filter",
       color: 'error',
       duration: 3000,
     })
@@ -353,42 +350,38 @@ async function deleteSavedFilter() {
             :items="referenceStore.savedFilters"
             label-key="name"
             by="id"
-            placeholder="Saved filters..."
+            placeholder="Saved filters…"
             class="flex-1 text-sm"
             @change="filtersChange"
           />
-          <UTooltip
-            v-if="selectedSavedFilter"
-            text="Copy shareable link"
-            :content="{ side: 'top' }"
-          >
+          <UTooltip v-if="selectedSavedFilter" text="Copy link" :content="{ side: 'top' }">
             <UButton
               icon="i-lucide-link"
               color="info"
               variant="ghost"
               class="rounded-full"
-              aria-label="Copy shareable link"
+              aria-label="Copy link"
               @click="copyFilterLink"
             />
           </UTooltip>
-          <UTooltip text="Delete saved filter" :content="{ side: 'top' }">
+          <UTooltip text="Delete filter" :content="{ side: 'top' }">
             <UButton
               icon="i-lucide-trash-2"
               color="error"
               variant="ghost"
               class="rounded-full"
-              aria-label="Delete saved filter"
+              aria-label="Delete filter"
               :disabled="!selectedSavedFilter"
               @click="deleteSavedFilter"
             />
           </UTooltip>
-          <UTooltip text="Save current as filter" :content="{ side: 'top' }">
+          <UTooltip text="Save filter" :content="{ side: 'top' }">
             <UButton
               icon="i-lucide-bookmark"
               color="secondary"
               variant="ghost"
               class="rounded-full"
-              aria-label="Save current as filter"
+              aria-label="Save filter"
               @click="openCreateSavedFilter"
             />
           </UTooltip>
@@ -405,7 +398,7 @@ async function deleteSavedFilter() {
         <IdolSelectMenu
           ref="idolMenuRef"
           v-model="multiSelectIdols"
-          placeholder="Idols..."
+          placeholder="Idols…"
           class="w-full"
         />
 
@@ -415,7 +408,7 @@ async function deleteSavedFilter() {
           by="id"
           :items="referenceStore.tags"
           label-key="name"
-          placeholder="Tags..."
+          placeholder="Tags…"
           class="w-full"
         >
           <template #default>
@@ -439,7 +432,7 @@ async function deleteSavedFilter() {
                 </template>
               </UBadge>
             </div>
-            <span v-else class="text-dimmed truncate">Tags...</span>
+            <span v-else class="text-dimmed truncate">Tags…</span>
           </template>
         </USelectMenu>
 
@@ -456,7 +449,7 @@ async function deleteSavedFilter() {
           :loading="isSearchingLabels"
           ignore-filter
           label-key="name"
-          placeholder="Labels..."
+          placeholder="Labels…"
           class="w-full"
         >
           <template #default>
@@ -480,7 +473,7 @@ async function deleteSavedFilter() {
                 </template>
               </UBadge>
             </div>
-            <span v-else class="text-dimmed truncate">Labels...</span>
+            <span v-else class="text-dimmed truncate">Labels…</span>
           </template>
         </USelectMenu>
 
@@ -490,7 +483,7 @@ async function deleteSavedFilter() {
           by="id"
           :items="referenceStore.uploaders"
           label-key="name"
-          placeholder="Uploaders..."
+          placeholder="Uploaders…"
           class="w-full"
         >
           <template #default>
@@ -514,7 +507,7 @@ async function deleteSavedFilter() {
                 </template>
               </UBadge>
             </div>
-            <span v-else class="text-dimmed truncate">Uploaders...</span>
+            <span v-else class="text-dimmed truncate">Uploaders…</span>
           </template>
         </USelectMenu>
 
@@ -540,7 +533,7 @@ async function deleteSavedFilter() {
         <!-- Content type and Origin share a row: three short options each. -->
         <div class="flex gap-3">
           <div class="flex flex-col gap-1.5 flex-1 min-w-0">
-            <span class="micro-label text-night-400">Content type</span>
+            <span class="micro-label text-night-400">Type</span>
             <div class="flex w-full items-center gap-1 rounded-lg bg-elevated p-1">
               <UButton
                 v-for="option in filtersStore.contentTypes"
@@ -574,9 +567,7 @@ async function deleteSavedFilter() {
         <!-- Filters on whichever date the Sort row's toggle names. -->
         <div class="flex flex-col gap-1.5">
           <span class="micro-label text-night-400">
-            {{
-              filters.dateMode?.value === 'actual' ? 'Date range · actual' : 'Date range · uploaded'
-            }}
+            {{ filters.dateMode?.value === 'actual' ? 'Actual date' : 'Upload date' }}
           </span>
           <DateField v-model="dateRangeModel" range class="w-full" />
         </div>
@@ -586,7 +577,7 @@ async function deleteSavedFilter() {
         <!-- Actions -->
         <div class="flex gap-2">
           <UButton color="error" variant="outline" label="Reset" block @click="filtersResetApply" />
-          <UButton color="success" label="Save & Apply" block @click="filtersApply" />
+          <UButton color="success" label="Apply" block @click="filtersApply" />
         </div>
       </div>
     </template>
@@ -595,19 +586,13 @@ async function deleteSavedFilter() {
   <!-- Save filter name dialog -->
   <UModal
     v-model:open="isCreateSavedFilterVisible"
-    title="Save Filter"
+    title="Save filter"
     :ui="{ content: 'sm:max-w-sm' }"
   >
     <template #body>
       <div class="flex flex-col gap-4">
         <p class="text-sm text-night-400 leading-relaxed">
-          The name becomes a shareable link ID — anyone with the link can apply your filter
-          instantly. It must be
-          <span class="text-night-200 font-medium">unique across all users</span> and may only
-          contain
-          <span class="text-night-200 font-medium"
-            >lowercase letters, numbers, hyphens, and underscores</span
-          >.
+          The name is also the share link, so it has to be unique.
         </p>
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium">Filter name</label>
@@ -617,7 +602,7 @@ async function deleteSavedFilter() {
             {{ `/?filter=${toSlug(filterName) || '—'}` }}
           </span>
           <span v-if="filterName && !toSlug(filterName)" class="text-xs text-red-400 mt-0.5">
-            Name must contain at least one valid character.
+            Use at least one letter or number.
           </span>
         </div>
       </div>

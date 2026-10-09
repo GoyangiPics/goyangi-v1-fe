@@ -82,9 +82,9 @@ async function commit() {
     toast.add({
       title: 'Merged',
       description:
-        `${result.movedContent} upload${result.movedContent === 1 ? '' : 's'} and ` +
+        `${result.movedContent} post${result.movedContent === 1 ? '' : 's'} and ` +
         `${result.movedSets} set${result.movedSets === 1 ? '' : 's'} moved to ${result.name}, ` +
-        `${result.deleted.length} profile${result.deleted.length === 1 ? '' : 's'} removed.`,
+        `${result.deleted.length} uploader${result.deleted.length === 1 ? '' : 's'} deleted.`,
       color: moved === 0 ? 'info' : 'success',
       duration: 5000,
     })
@@ -95,8 +95,8 @@ async function commit() {
     // nothing was changed. Worth saying so rather than a generic failure.
     const status = error?.status
     toast.add({
-      title: status === 409 ? 'Nothing was changed' : 'Merge failed',
-      description: error?.response?.message ?? 'Could not merge these uploaders.',
+      title: status === 409 ? 'Nothing changed' : "Couldn't merge uploaders",
+      description: error?.response?.message ?? 'Try again.',
       color: status === 409 ? 'warning' : 'error',
       duration: 5000,
     })
@@ -122,7 +122,7 @@ function onPrimary() {
 <template>
   <UModal
     :open="isVisible"
-    :title="isConfirming ? 'Confirm merge' : 'Merge uploaders'"
+    :title="isConfirming ? 'Merge these uploaders?' : 'Merge uploaders'"
     :ui="{ content: 'sm:max-w-lg' }"
     @update:open="emit('update:isVisible', $event)"
   >
@@ -130,8 +130,7 @@ function onPrimary() {
       <!-- Pick the survivor -->
       <div v-if="!isConfirming">
         <p class="text-xs text-night-500 mb-3">
-          Choose which profile to keep. The others' uploads and sets move onto it, their names
-          become its aliases, and the emptied profiles are deleted.
+          Pick the uploader to keep. The others are merged into it.
         </p>
 
         <div class="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
@@ -176,7 +175,7 @@ function onPrimary() {
                   icon="i-lucide-user-check"
                   color="success"
                   variant="soft"
-                  :label="`account: ${uploader.userName}`"
+                  :label="`Account: ${uploader.userName}`"
                   class="select-none text-xs!"
                 />
                 <UBadge
@@ -184,7 +183,7 @@ function onPrimary() {
                   icon="i-lucide-unlink"
                   color="neutral"
                   variant="soft"
-                  label="no account"
+                  label="No account"
                   class="select-none text-xs!"
                 />
                 <UBadge
@@ -197,7 +196,7 @@ function onPrimary() {
                 />
               </div>
               <p class="text-xs text-night-500 mt-1.5 font-mono">
-                {{ uploader.uploadCount }} upload{{ uploader.uploadCount === 1 ? '' : 's' }} · since
+                {{ uploader.uploadCount }} post{{ uploader.uploadCount === 1 ? '' : 's' }} · since
                 {{ new Date(uploader.created).toLocaleDateString() }}
                 <span v-if="targetId === uploader.id" class="text-pink-300">
                   · keeping this one</span
@@ -211,12 +210,12 @@ function onPrimary() {
       <!-- Confirm -->
       <div v-else class="flex flex-col gap-3 text-sm">
         <p>
-          Merging <strong>{{ uploaders.length }}</strong> profiles ({{ totalUploads }} uploads) into
-          <strong>«{{ target?.name || target?.id }}»</strong>.
+          <strong>{{ uploaders.length }}</strong> uploaders ({{ totalUploads }} posts) will be
+          merged into <strong>«{{ target?.name || target?.id }}»</strong>.
         </p>
 
         <div class="flex flex-col gap-1 text-xs">
-          <p class="text-night-400">These profiles will be deleted:</p>
+          <p class="text-night-400">These uploaders will be deleted:</p>
           <p v-for="uploader in sources" :key="uploader.id" class="text-night-200 truncate">
             — {{ uploader.name || uploader.id }}
             <span v-if="uploader.userName" class="text-night-500">
@@ -227,8 +226,7 @@ function onPrimary() {
 
         <div v-if="absorbedNames.length" class="flex flex-col gap-1">
           <p class="text-xs text-night-400">
-            Kept as aliases, so Discord ingestion resolves onto the survivor instead of recreating
-            these:
+            These names become aliases, so Discord uploads under them go to the kept uploader:
           </p>
           <div class="flex flex-wrap gap-1">
             <UBadge
@@ -242,10 +240,7 @@ function onPrimary() {
           </div>
         </div>
 
-        <p class="text-xs text-night-400">
-          Uploads, sets, likes and view counts all follow the records — nothing is re-encoded and no
-          file URL changes.
-        </p>
+        <p class="text-xs text-night-400">Posts, sets, likes and views all move over.</p>
 
         <div
           v-if="losesAccount"
@@ -253,14 +248,13 @@ function onPrimary() {
         >
           <UIcon name="i-lucide-triangle-alert" class="text-amber-400 mt-0.5 shrink-0" />
           <p class="text-xs text-amber-200">
-            You're keeping a profile with no linked account and deleting one that has it. Whoever
-            owns that account will lose the ability to edit this content, and it will drop out of
-            their My Uploads. Keeping the account-linked profile instead is almost always what you
-            want.
+            You're deleting the uploader linked to an account. Its owner will lose edit access to
+            these posts and they'll leave their My uploads. You probably want to keep the linked
+            one.
           </p>
         </div>
 
-        <p class="text-xs text-error-400">This cannot be undone.</p>
+        <p class="text-xs text-error-400">This can't be undone.</p>
       </div>
     </template>
 

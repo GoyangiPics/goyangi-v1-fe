@@ -135,7 +135,7 @@ async function likedRowToggle() {
     <div class="flex justify-start items-start">
       <NavigationBase class="flex-1" />
       <UButton
-        :label="isMobile ? 'Top' : 'Top Posts'"
+        :label="isMobile ? 'Top' : 'Top posts'"
         class="ml-2 nav-pill-outline nav-pill-outline-fuchsia"
         :class="filtersStore.mostLikedMode ? 'nav-pill-outline-active' : ''"
         @click="likedRowToggle"
@@ -159,13 +159,13 @@ async function likedRowToggle() {
         emoji="🐱"
         title="Home"
         :total="itemsTotal"
-        :total-label="isGrouped ? 'sets' : 'contents'"
+        :total-label="isGrouped ? 'sets' : 'posts'"
       >
         <template #actions>
           <!-- Left of the grouping toggle so that control keeps its position. -->
           <UButton
             icon="i-lucide-star"
-            :label="isMobile ? undefined : 'My Feed'"
+            :label="isMobile ? undefined : 'My feed'"
             color="neutral"
             variant="outline"
             to="/me/feed"
@@ -185,7 +185,8 @@ async function likedRowToggle() {
       </PageHeader>
 
       <p v-if="newSinceCount > 0" class="-mt-2 mb-4 text-xs text-pink-300">
-        ✨ {{ newSinceCount.toLocaleString() }} new since your last visit
+        ✨ {{ newSinceCount.toLocaleString() }} new post{{ newSinceCount === 1 ? '' : 's' }} since
+        your last visit
       </p>
 
       <PageHandoffTitle />
@@ -223,7 +224,7 @@ async function likedRowToggle() {
       </ContentGrid>
       <div v-else>
         <div class="flex justify-center items-center mt-16">
-          <h1 class="text-2xl">No results.</h1>
+          <h1 class="text-2xl">Nothing found.</h1>
         </div>
       </div>
     </div>

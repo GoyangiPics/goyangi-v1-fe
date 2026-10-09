@@ -71,15 +71,15 @@ async function ensureSet(): Promise<any | null> {
     })
     return fetchedSet.value
   } catch (error: any) {
-    report(error, 'Could not load the set.')
+    report(error, "Couldn't load set")
     return null
   }
 }
 
-function report(error: any, fallback: string) {
+function report(error: any, title: string) {
   toast.add({
-    title: 'Error',
-    description: pbErrorDetail(error, fallback),
+    title,
+    description: pbErrorDetail(error, 'Try again.'),
     color: 'error',
     duration: 4000,
   })
@@ -88,9 +88,9 @@ function report(error: any, fallback: string) {
 async function copyText(value: string, what: string) {
   try {
     await navigator.clipboard.writeText(value)
-    toast.add({ title: 'Copied!', description: `${what} copied.`, color: 'info', duration: 1000 })
+    toast.add({ title: `${what} copied`, color: 'info', duration: 1000 })
   } catch {
-    toast.add({ title: 'Error', description: 'Could not copy.', color: 'error', duration: 3000 })
+    toast.add({ title: "Couldn't copy", color: 'error', duration: 3000 })
   }
 }
 
@@ -114,7 +114,8 @@ async function deleteContent() {
   if (!c) return
   if (
     !(await confirm({
-      message: `Delete "${c.title || c.id}"? Its stored files go with it.`,
+      title: 'Delete this post?',
+      message: `"${c.title || c.id}" and its files will be deleted for good.`,
       icon: 'i-lucide-trash-2',
       confirmLabel: 'Delete',
       cancelLabel: 'Cancel',
@@ -125,10 +126,10 @@ async function deleteContent() {
   }
   try {
     await pb.collection('contents').delete(c.id)
-    toast.add({ title: 'Content deleted', color: 'success', duration: 2000 })
+    toast.add({ title: 'Post deleted', color: 'success', duration: 2000 })
     emit('contentDeleted')
   } catch (error: any) {
-    report(error, 'Could not delete the content.')
+    report(error, "Couldn't delete post")
   }
 }
 
@@ -138,9 +139,10 @@ async function deleteSet() {
   const count = setContents(s).length
   if (
     !(await confirm({
+      title: 'Delete this set?',
       message: count
-        ? `Delete this set and its ${count} item${count === 1 ? '' : 's'}?`
-        : 'Delete this empty set?',
+        ? `Its ${count} post${count === 1 ? '' : 's'} will be deleted too.`
+        : "This can't be undone.",
       icon: 'i-lucide-trash-2',
       confirmLabel: 'Delete',
       cancelLabel: 'Cancel',
@@ -156,7 +158,7 @@ async function deleteSet() {
     toast.add({ title: 'Set deleted', color: 'success', duration: 2000 })
     emit('setDeleted')
   } catch (error: any) {
-    report(error, 'Could not delete the set.')
+    report(error, "Couldn't delete set")
   }
 }
 
@@ -173,9 +175,10 @@ async function detachFromSet() {
   if (!c?.set) return
   if (
     !(await confirm({
-      message: 'Remove this item from its set? The item itself is kept.',
+      title: 'Remove from set?',
+      message: "The post itself won't be deleted.",
       icon: 'i-lucide-unlink',
-      confirmLabel: 'Detach',
+      confirmLabel: 'Remove',
       cancelLabel: 'Cancel',
       color: 'warning',
     }))
@@ -184,10 +187,10 @@ async function detachFromSet() {
   }
   try {
     await pb.collection('contents').update(c.id, { set: '' })
-    toast.add({ title: 'Detached from set', color: 'success', duration: 2000 })
+    toast.add({ title: 'Removed from set', color: 'success', duration: 2000 })
     emit('changed')
   } catch (error: any) {
-    report(error, 'Could not detach the content.')
+    report(error, "Couldn't remove from set")
   }
 }
 
@@ -200,7 +203,7 @@ const items = computed<DropdownMenuItem[][]>(() => {
   const edit: DropdownMenuItem[] = []
   if (contentId) {
     edit.push({
-      label: 'Edit content',
+      label: 'Edit post',
       icon: 'i-lucide-pencil',
       onSelect: () => {
         isContentEditVisible.value = true
@@ -219,12 +222,12 @@ const items = computed<DropdownMenuItem[][]>(() => {
   if (contentId) {
     inspect.push(
       {
-        label: 'Copy content ID',
+        label: 'Copy post ID',
         icon: 'i-lucide-hash',
-        onSelect: () => copyText(contentId, 'Content ID'),
+        onSelect: () => copyText(contentId, 'Post ID'),
       },
       {
-        label: 'Open content in PocketBase',
+        label: 'Open post in PocketBase',
         icon: 'i-lucide-database',
         onSelect: () => openInPocketBase('contents', contentId),
       },
@@ -250,14 +253,14 @@ const items = computed<DropdownMenuItem[][]>(() => {
   // ordinary edit away, unlike the two deletes below it.
   if (props.content?.set) {
     destructive.push({
-      label: 'Detach from set',
+      label: 'Remove from set',
       icon: 'i-lucide-unlink',
       onSelect: () => detachFromSet(),
     })
   }
   if (contentId) {
     destructive.push({
-      label: 'Delete content',
+      label: 'Delete post',
       icon: 'i-lucide-trash-2',
       color: 'error' as const,
       onSelect: () => deleteContent(),

@@ -131,7 +131,7 @@ onMounted(loadUploaders)
           ref="searchInputRef"
           v-model="searchTerm"
           type="text"
-          placeholder="Search by name..."
+          placeholder="Search uploaders…"
           class="filter-input flex-1 min-w-30 bg-transparent outline-none border-0 text-sm py-1"
         />
         <div v-if="searchTerm" class="ml-auto flex items-center gap-0.5 shrink-0">
@@ -176,7 +176,7 @@ onMounted(loadUploaders)
       >
         <template #actions>
           <UTooltip
-            :text="canMerge ? 'Merge the selected profiles' : 'Select at least two profiles'"
+            :text="canMerge ? 'Merge selected profiles' : 'Select at least two profiles'"
             :content="{ side: 'top' }"
           >
             <UButton
@@ -225,7 +225,7 @@ onMounted(loadUploaders)
             </p>
             <div class="flex items-center gap-1.5 text-xs text-pink-300 font-mono">
               <UIcon name="i-lucide-cloud-upload" class="text-xs" />
-              <span>{{ entry.uploadCount }} upload{{ entry.uploadCount === 1 ? '' : 's' }}</span>
+              <span>{{ entry.uploadCount }} post{{ entry.uploadCount === 1 ? '' : 's' }}</span>
             </div>
             <p class="text-xs text-night-500 font-mono">since {{ formatJoined(entry.created) }}</p>
             <!-- Only for admins, and only where it means something: an uploader
@@ -236,7 +236,7 @@ onMounted(loadUploaders)
               icon="i-lucide-unlink"
               color="neutral"
               variant="soft"
-              label="no account"
+              label="No account"
               class="select-none text-xs!"
             />
           </NuxtLink>

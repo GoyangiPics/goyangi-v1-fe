@@ -59,7 +59,7 @@ onMounted(async () => {
     </div>
 
     <div class="mt-4">
-      <PageHeader emoji="😻" title="Stickers" :total="itemsTotal" />
+      <PageHeader emoji="😻" title="Stickers" :total="itemsTotal" total-label="stickers" />
 
       <div v-if="isLoading" class="flex justify-center items-center mt-16">
         <LoadingSpinner />

@@ -110,7 +110,7 @@ async function onPageChange(e: any) {
           >
             <template #actions>
               <UTooltip
-                :text="canMerge ? 'Merge the selected sets' : 'Select at least two sets'"
+                :text="canMerge ? 'Merge selected sets' : 'Select at least two sets'"
                 :content="{ side: 'top' }"
               >
                 <UButton
@@ -162,7 +162,7 @@ async function onPageChange(e: any) {
 
       <div v-else>
         <div class="flex justify-center items-center mt-16">
-          <h1 class="text-2xl">No results.</h1>
+          <h1 class="text-2xl">No sets found.</h1>
         </div>
       </div>
     </div>

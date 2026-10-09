@@ -33,13 +33,13 @@ const hasChoice = computed(() => sdCount.value > 0)
 const menuItems = computed<DropdownMenuItem[][]>(() => [
   [
     {
-      label: `HD mp4 (${hdCount.value})`,
+      label: `HD MP4 (${hdCount.value})`,
       slot: 'hd',
       // AV1: best quality, and the rendition older Apple devices cannot decode.
       onSelect: () => void downloadAll(props.items, 'hd'),
     },
     {
-      label: `SD mp4 (${sdCount.value})`,
+      label: `SD MP4 (${sdCount.value})`,
       slot: 'sd',
       onSelect: () => void downloadAll(props.items, 'sd'),
     },
@@ -55,7 +55,7 @@ const menuItems = computed<DropdownMenuItem[][]>(() => [
   >
     <UButton
       icon="i-lucide-download"
-      :label="isMobile ? undefined : 'Download All'"
+      :label="isMobile ? undefined : 'Download all'"
       trailing-icon="i-lucide-chevron-down"
       color="neutral"
       variant="outline"
@@ -86,7 +86,7 @@ const menuItems = computed<DropdownMenuItem[][]>(() => [
   <UButton
     v-else
     icon="i-lucide-download"
-    :label="isMobile ? undefined : 'Download All'"
+    :label="isMobile ? undefined : 'Download all'"
     color="neutral"
     variant="outline"
     size="sm"

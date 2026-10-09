@@ -38,7 +38,7 @@ const kindNames: Record<string, [string, string]> = {
   image: ['pic', 'pics'],
   sticker: ['sticker', 'stickers'],
   convert: ['conversion', 'conversions'],
-  other: ['item', 'items'],
+  other: ['post', 'posts'],
 }
 
 export interface QueueDescription {
@@ -84,7 +84,7 @@ export function describeQueue(
     capacityLabel:
       (snapshot?.capacity ?? 1) === 1 ? 'one at a time' : `${snapshot!.capacity} at a time`,
     breakdown: formatBreakdown(snapshot?.by_kind),
-    stagedLabel: stagedCount === 1 ? '1 staged file' : `${stagedCount} staged files`,
+    stagedLabel: stagedCount === 1 ? '1 file' : `${stagedCount} files`,
   }
 }
 

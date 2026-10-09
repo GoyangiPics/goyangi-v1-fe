@@ -31,16 +31,14 @@ async function copyLink() {
   try {
     await navigator.clipboard.writeText(contentUrl.value)
     toast.add({
-      title: 'Copied!',
-      description: 'Text copied to clipboard.',
+      title: 'Link copied',
       color: 'success',
       duration: 2000,
     })
   } catch (err) {
     console.error('Failed to copy text: ', err)
     toast.add({
-      title: 'Error',
-      description: 'Failed to copy text.',
+      title: "Couldn't copy link",
       color: 'error',
       duration: 2000,
     })
@@ -99,7 +97,7 @@ async function copyLink() {
           <UButton
             color="neutral"
             variant="solid"
-            label="Copy"
+            label="Copy link"
             block
             class="mt-2"
             @click.stop.prevent="copyLink"

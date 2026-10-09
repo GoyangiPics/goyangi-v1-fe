@@ -21,14 +21,14 @@ export function useAuthGate() {
    * a "Log in" action that round-trips back here via `?redirect=`, and
    * returns false so callers can early-return.
    *
-   * `action` completes the sentence "Sign in to …".
+   * `action` completes the sentence "Log in to …".
    */
   function requireAuth(action = 'do that'): boolean {
     if (authStore.isValid) return true
 
     toast.add({
-      title: 'Login required',
-      description: `Sign in to ${action}.`,
+      title: "You're not logged in",
+      description: `Log in to ${action}.`,
       icon: 'i-lucide-lock',
       color: 'info',
       duration: 4000,

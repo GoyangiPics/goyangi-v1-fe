@@ -35,14 +35,14 @@ const q = computed(() => describeQueue(props.snapshot, props.stagedCount, props.
         :class="q.isBusy ? 'text-amber-400' : 'text-emerald-400'"
       />
       <span class="font-medium" :class="q.isBusy ? 'text-amber-200' : 'text-night-300'">
-        <template v-if="q.isBusy">{{ q.total }} in the encode queue</template>
-        <template v-else>Encoder free — your upload starts right away</template>
+        <template v-if="q.isBusy">{{ q.total }} in the queue</template>
+        <template v-else>No queue. Your upload starts right away.</template>
       </span>
       <span v-if="q.breakdown" class="text-night-500 font-mono">{{ q.breakdown }}</span>
     </div>
 
     <p v-if="q.isBusy" class="text-night-500 font-mono pl-6">
-      {{ q.active }} encoding now · {{ q.capacityLabel }}
+      {{ q.active }} processing now · {{ q.capacityLabel }}
       <span v-if="q.mine > 0" class="text-night-400">
         · {{ q.mine }} of them {{ q.mine === 1 ? 'is' : 'are' }} yours
       </span>
@@ -50,8 +50,8 @@ const q = computed(() => describeQueue(props.snapshot, props.stagedCount, props.
 
     <!-- The actual point of the row while staging: what clicking Upload buys you. -->
     <p v-if="stagedCount > 0 && q.others > 0" class="text-amber-200/80 pl-6">
-      Your {{ q.stagedLabel }} start after the {{ q.others }} ahead of
-      {{ q.others === 1 ? 'it' : 'them' }}.
+      Your {{ q.stagedLabel }} will wait behind {{ q.others }}
+      {{ q.others === 1 ? 'other' : 'others' }}.
     </p>
   </div>
 </template>

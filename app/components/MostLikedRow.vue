@@ -6,12 +6,12 @@ const filtersStore = useFiltersStore()
 const { isMobile } = useWindowSize()
 
 const buttons = [
-  { label: 'All Time', shortLabel: 'All', mode: MostLikedModes.AllTime },
-  { label: '1 Year', shortLabel: '1y', mode: MostLikedModes.OneYear },
-  { label: '6 Months', shortLabel: '6m', mode: MostLikedModes.SixMonths },
-  { label: '3 Months', shortLabel: '3m', mode: MostLikedModes.ThreeMonths },
-  { label: '1 Month', shortLabel: '1m', mode: MostLikedModes.OneMonth },
-  { label: '1 Week', shortLabel: '1w', mode: MostLikedModes.OneWeek },
+  { label: 'All time', shortLabel: 'All', mode: MostLikedModes.AllTime },
+  { label: '1 year', shortLabel: '1y', mode: MostLikedModes.OneYear },
+  { label: '6 months', shortLabel: '6m', mode: MostLikedModes.SixMonths },
+  { label: '3 months', shortLabel: '3m', mode: MostLikedModes.ThreeMonths },
+  { label: '1 month', shortLabel: '1m', mode: MostLikedModes.OneMonth },
+  { label: '1 week', shortLabel: '1w', mode: MostLikedModes.OneWeek },
 ]
 
 function filtersApply(mode: MostLikedModes) {

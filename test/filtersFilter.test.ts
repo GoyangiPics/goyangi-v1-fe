@@ -235,14 +235,14 @@ describe('buildPbFilter', () => {
         const filters = {
           ...emptyFilters(),
           dateMode: actual,
-          sort: { value: 'liked', option: 'Most Liked' },
+          sort: { value: 'liked', option: 'Most liked' },
         } as any
         expect(buildPbFilter(filters, { canRankByLikes: true }).sort).toBe('-likes:length')
       })
     })
 
     it('sorts by like count when the collection can take it', () => {
-      const filters = { ...emptyFilters(), sort: { value: 'liked', option: 'Most Liked' } } as any
+      const filters = { ...emptyFilters(), sort: { value: 'liked', option: 'Most liked' } } as any
       expect(buildPbFilter(filters, { canRankByLikes: true }).sort).toBe('-likes:length')
     })
 
@@ -262,7 +262,7 @@ describe('buildPbFilter', () => {
     // `filters` is persisted the rejected sort came back on every reload, and
     // the filter dialog's Reset could not clear it either.
     it('refuses the ranking unless the collection declares it can take it', () => {
-      const filters = { ...emptyFilters(), sort: { value: 'liked', option: 'Most Liked' } } as any
+      const filters = { ...emptyFilters(), sort: { value: 'liked', option: 'Most liked' } } as any
       // Fail-safe default: forgetting the flag costs recency order, not the page.
       expect(buildPbFilter(filters).sort).toBe('-created')
       expect(buildPbFilter(filters, { canRankByLikes: false }).sort).toBe('-created')

@@ -36,8 +36,8 @@ function onSendToUpload() {
   const links = linkLines()
   if (links.length === 0) {
     toast.add({
-      title: 'No links',
-      description: 'Paste at least one valid imgur link.',
+      title: 'No Imgur links',
+      description: 'Paste at least one first.',
       color: 'warning',
       duration: 2000,
     })
@@ -45,7 +45,7 @@ function onSendToUpload() {
   }
   // Gated here as well as on the upload page: bouncing someone to /uploads only
   // for the auth middleware to redirect them to /login loses the links.
-  if (!requireAuth('upload content')) return
+  if (!requireAuth('upload')) return
 
   localStorage.setItem(IMGUR_HANDOFF_KEY, links.join('\n'))
   router.push('/uploads')
@@ -57,8 +57,7 @@ async function onDownloadAll() {
   const count = await downloadAll()
   if (count === 0) {
     toast.add({
-      title: 'No links',
-      description: 'No valid imgur links found.',
+      title: 'No Imgur links found',
       color: 'warning',
       duration: 2000,
     })
@@ -70,21 +69,21 @@ async function onDownloadAll() {
   <div class="glass-card p-5 mb-6">
     <div class="flex items-center gap-2 mb-3">
       <UIcon name="i-lucide-link" class="text-pink-300" />
-      <h2 class="micro-label text-pink-300">Imgur Links</h2>
+      <h2 class="micro-label text-pink-300">Imgur links</h2>
       <span class="ml-auto text-sm text-night-500 font-mono"> {{ pastedCount }} pasted </span>
     </div>
 
     <UTextarea
       v-model="inputLinks"
       :rows="6"
-      placeholder="Paste imgur links here, one per line..."
+      placeholder="Paste Imgur links, one per line…"
       class="w-full"
       :ui="{ base: 'tools-textarea font-mono text-xs! resize-y' }"
     />
 
     <div class="flex flex-wrap gap-2 mt-3">
       <UButton
-        label="Format"
+        label="Clean up"
         icon="i-lucide-palette"
         color="neutral"
         variant="outline"
@@ -92,7 +91,7 @@ async function onDownloadAll() {
         @click="normalizeLinks"
       />
       <UButton
-        label="Generate Grid"
+        label="Show grid"
         icon="i-lucide-layout-grid"
         color="neutral"
         variant="outline"
@@ -100,7 +99,7 @@ async function onDownloadAll() {
         @click="generateItems"
       />
       <UButton
-        label="Download All"
+        label="Download all"
         icon="i-lucide-download"
         color="neutral"
         variant="outline"
@@ -108,7 +107,7 @@ async function onDownloadAll() {
         @click="onDownloadAll"
       />
       <UButton
-        label="Send to Upload"
+        label="Send to upload"
         icon="i-lucide-cloud-upload"
         color="neutral"
         variant="outline"

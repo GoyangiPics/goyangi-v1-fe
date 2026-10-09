@@ -61,7 +61,7 @@ export function useAddAllToCollection() {
     items: ContentsItem[],
     collectionIds: RecordIdString[],
   ): Promise<AddAllResult | null> {
-    if (!requireAuth('add content to a collection')) return null
+    if (!requireAuth('add posts to collections')) return null
     if (!collectionIds.length || isAddingAll.value) return null
 
     // Resolved up front rather than inside the worker: `skipped` is the count of
@@ -79,7 +79,7 @@ export function useAddAllToCollection() {
     if (pending.length === 0) {
       toast.add({
         title: 'Already added',
-        description: `All ${items.length} item${items.length === 1 ? '' : 's'} were already in there.`,
+        description: `${items.length === 1 ? 'This post is' : `All ${items.length} posts are`} already in there.`,
         color: 'info',
         duration: 2000,
       })
@@ -125,13 +125,16 @@ export function useAddAllToCollection() {
 
     await Promise.all(Array.from({ length: Math.min(ADD_ALL_CONCURRENCY, pending.length) }, worker))
 
-    const parts = [`Added ${result.added}`]
+    const parts: string[] = []
     if (result.skipped) parts.push(`${result.skipped} already there`)
     if (result.failed) parts.push(`${result.failed} failed`)
 
     toast.update(progress.id, {
-      title: result.failed ? 'Finished with errors' : 'Added all',
-      description: parts.join(' · '),
+      title:
+        result.added === 0 && result.failed > 0
+          ? "Couldn't add posts"
+          : `Added ${result.added} post${result.added === 1 ? '' : 's'}`,
+      description: parts.length ? parts.join(' · ') : undefined,
       color: result.failed ? 'warning' : 'success',
       duration: 3000,
     })
@@ -157,7 +160,7 @@ export function useAddAllToCollection() {
     collectionIds: RecordIdString[],
     opts: { live?: ContentsItem[] } = {},
   ): Promise<AddAllResult | null> {
-    if (!requireAuth('add content to a collection')) return null
+    if (!requireAuth('add posts to collections')) return null
     if (!collectionIds.length) return null
 
     const filter =
@@ -179,8 +182,7 @@ export function useAddAllToCollection() {
 
       if (items.length === 0) {
         toast.add({
-          title: 'Nothing to add',
-          description: 'There are no items here.',
+          title: 'No posts to add',
           color: 'warning',
           duration: 2000,
         })
@@ -190,8 +192,8 @@ export function useAddAllToCollection() {
     } catch (error) {
       console.error('Error loading items to add:', error)
       toast.add({
-        title: 'Error',
-        description: 'Could not load the items to add.',
+        title: "Couldn't load posts",
+        description: 'Try again.',
         color: 'error',
         duration: 3000,
       })

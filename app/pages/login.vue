@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-useHead({ title: 'Login' })
+useHead({ title: 'Log in' })
 
 definePageMeta({
   middleware: ['guest'],
@@ -27,8 +27,8 @@ async function authenticateWithDiscord() {
   } catch (error) {
     console.error('Authentication failed:', error)
     toast.add({
-      title: 'Authentication Failed',
-      description: 'Failed to authenticate with Discord.',
+      title: "Couldn't log in",
+      description: "Discord login didn't work. Try again.",
       color: 'error',
       duration: 5000,
     })
@@ -42,12 +42,12 @@ async function authenticateWithDiscord() {
  *   router.push(redirectTarget())
  * and drop the `aria-disabled` / muted styling on the button below.
  */
-const X_DISABLED_REASON = 'Login with X isn’t available yet — coming soon.'
+const X_DISABLED_REASON = 'Log in with X is coming soon'
 
 function authenticateWithX() {
   toast.add({
     title: 'Coming soon',
-    description: `${X_DISABLED_REASON} Use Discord or your email and password for now.`,
+    description: 'Use Discord or email for now.',
     icon: 'i-lucide-clock',
     color: 'info',
     duration: 4000,
@@ -61,8 +61,8 @@ async function authenticateWithData() {
   } catch (error) {
     console.error('Authentication failed:', error)
     toast.add({
-      title: 'Authentication Failed',
-      description: 'Failed to log in, check email and password.',
+      title: "Couldn't log in",
+      description: 'Check your email and password.',
       color: 'error',
       duration: 5000,
     })
@@ -75,8 +75,8 @@ async function requestPasswordReset() {
   try {
     await pb.collection('users').requestPasswordReset(forgotEmail.value)
     toast.add({
-      title: 'Email Sent',
-      description: 'If that email exists, a reset link has been sent.',
+      title: 'Check your email',
+      description: "If there's an account for that email, we've sent a reset link.",
       color: 'success',
       duration: 6000,
     })
@@ -85,8 +85,8 @@ async function requestPasswordReset() {
   } catch (error) {
     console.error('Password reset failed:', error)
     toast.add({
-      title: 'Request Failed',
-      description: 'Could not send reset email. Please try again.',
+      title: "Couldn't send reset link",
+      description: 'Try again.',
       color: 'error',
       duration: 5000,
     })
@@ -104,18 +104,18 @@ async function requestPasswordReset() {
         class="bg-gradient-to-br from-night-800 to-night-900 flex flex-col md:flex-row rounded-2xl shadow-lg max-w-3xl w-full mx-4 md:mx-0 overflow-hidden"
       >
         <div class="md:w-1/2 p-5 flex flex-col order-last md:order-first">
-          <h2 class="text-2xl text-white font-semibold">Login</h2>
+          <h2 class="text-2xl text-white font-semibold">Log in</h2>
           <p class="text-sm text-night-400 mt-2">Welcome back</p>
           <form class="mt-6" @submit.prevent="authenticateWithData">
             <div>
-              <label for="login-email" class="block text-sm text-night-300">Email Address</label>
+              <label for="login-email" class="block text-sm text-night-300">Email</label>
               <UInput
                 id="login-email"
                 v-model="email"
                 type="email"
                 name="email"
                 autocomplete="email"
-                placeholder="Enter Email Address"
+                placeholder="Your email"
                 class="w-full mt-2"
                 :ui="{ base: 'px-4 rounded-lg' }"
                 autofocus
@@ -140,7 +140,7 @@ async function requestPasswordReset() {
                 type="password"
                 name="password"
                 autocomplete="current-password"
-                placeholder="Enter Password"
+                placeholder="Your password"
                 minlength="6"
                 class="w-full mt-2"
                 :ui="{ base: 'px-4 rounded-lg' }"
@@ -150,7 +150,7 @@ async function requestPasswordReset() {
 
             <UButton
               type="submit"
-              label="Log In"
+              label="Log in"
               icon="i-lucide-log-in"
               color="neutral"
               variant="solid"
@@ -160,7 +160,7 @@ async function requestPasswordReset() {
 
           <div class="mt-6 grid grid-cols-3 items-center text-night-500">
             <hr class="border-night-700" />
-            <p class="text-center text-sm">OR</p>
+            <p class="text-center text-sm">or</p>
             <hr class="border-night-700" />
           </div>
 
@@ -169,7 +169,7 @@ async function requestPasswordReset() {
               icon="i-simple-icons-discord"
               color="info"
               class="flex-1"
-              aria-label="Login with Discord"
+              aria-label="Log in with Discord"
               @click="authenticateWithDiscord"
             />
             <!--
@@ -184,7 +184,7 @@ async function requestPasswordReset() {
                 color="neutral"
                 variant="soft"
                 class="flex-1 opacity-40 cursor-not-allowed hover:opacity-40"
-                aria-label="Login with X — coming soon"
+                aria-label="Log in with X (coming soon)"
                 aria-disabled="true"
                 @click="authenticateWithX"
               />
@@ -194,7 +194,7 @@ async function requestPasswordReset() {
           <!-- OAuth implicitly registers first-time users, so the consent line
                register.vue shows must appear on this path too. -->
           <p class="text-xs text-night-500 mt-3">
-            Signing in creates an account if you don't have one. You confirm you are 18 or older and
+            Logging in with Discord creates an account if you don't have one. You confirm you're 18 or older and
             agree to the
             <NuxtLink to="/terms" class="text-pink-400 hover:text-pink-300 transition-colors"
               >Terms</NuxtLink
@@ -223,7 +223,7 @@ async function requestPasswordReset() {
           <img
             src="~/assets/images/goyangi_login.avif"
             class="w-full h-full object-cover object-center"
-            alt="Login page decorative image"
+            alt=""
           />
         </div>
       </div>
@@ -231,26 +231,26 @@ async function requestPasswordReset() {
 
     <UModal
       v-model:open="forgotDialogVisible"
-      title="Reset Password"
+      title="Reset password"
       :ui="{ content: 'sm:max-w-sm' }"
     >
       <template #body>
         <p class="text-sm text-night-400 mb-4">Enter your email and we'll send you a reset link.</p>
         <form @submit.prevent="requestPasswordReset">
-          <label for="forgot-email" class="block text-sm text-night-300 mb-2">Email Address</label>
+          <label for="forgot-email" class="block text-sm text-night-300 mb-2">Email</label>
           <UInput
             id="forgot-email"
             v-model="forgotEmail"
             type="email"
             autocomplete="email"
-            placeholder="Enter your email"
+            placeholder="Your email"
             class="w-full"
             autofocus
             required
           />
           <UButton
             type="submit"
-            label="Send Reset Link"
+            label="Send reset link"
             color="neutral"
             variant="solid"
             :loading="forgotLoading"

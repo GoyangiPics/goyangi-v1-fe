@@ -14,7 +14,7 @@ const title = computed(() => (isNotFound.value ? 'Page not found' : 'Something w
 const description = computed(() =>
   isNotFound.value
     ? `We couldn't find what you're looking for.`
-    : props.error.statusMessage || props.error.message || 'An unexpected error occurred.',
+    : props.error.statusMessage || props.error.message || 'Please try again later.',
 )
 
 useSeoMeta({

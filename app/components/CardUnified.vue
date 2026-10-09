@@ -325,7 +325,7 @@ const autoplayInFullscreen = ref(false)
 // Both write to PocketBase as the current user — anonymous visitors get the
 // login prompt instead of an empty modal.
 function openAddToCollection() {
-  if (!requireAuth('add content to a collection')) return
+  if (!requireAuth('add posts to a collection')) return
   isAddToCollectionVisible.value = true
 }
 
@@ -335,7 +335,7 @@ function openLabels() {
 }
 
 function openReport() {
-  if (!requireAuth('report content')) return
+  if (!requireAuth('report posts')) return
   isReportVisible.value = true
 }
 

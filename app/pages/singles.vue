@@ -50,7 +50,7 @@ async function likedRowToggle() {
     <div class="flex justify-start items-start">
       <NavigationBase class="flex-1" />
       <UButton
-        :label="isMobile ? 'Top' : 'Top Posts'"
+        :label="isMobile ? 'Top' : 'Top posts'"
         class="ml-2 nav-pill-outline nav-pill-outline-fuchsia"
         :class="filtersStore.mostLikedMode ? 'nav-pill-outline-active' : ''"
         @click="likedRowToggle"
@@ -70,7 +70,7 @@ async function likedRowToggle() {
     </div>
 
     <div class="mt-4">
-      <PageHeader emoji="🖼️" title="Singles" :total="itemsTotal" total-label="contents" />
+      <PageHeader emoji="🖼️" title="Singles" :total="itemsTotal" total-label="posts" />
       <PageHandoffTitle />
 
       <div v-if="isLoading === true">
@@ -90,7 +90,7 @@ async function likedRowToggle() {
       </ContentGrid>
       <div v-else>
         <div class="flex justify-center items-center mt-16">
-          <h1 class="text-2xl">No results.</h1>
+          <h1 class="text-2xl">No posts found.</h1>
         </div>
       </div>
     </div>

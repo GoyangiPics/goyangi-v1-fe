@@ -77,8 +77,8 @@ async function add(name: string) {
     const { label, applied: didApply } = await applyLabel(props.content.id, name)
     if (!didApply) {
       toast.add({
-        title: 'Already there',
-        description: `"${label.name}" is already on this item.`,
+        title: 'Already added',
+        description: `"${label.name}" is already on this post.`,
         color: 'info',
         duration: 2000,
       })
@@ -89,8 +89,8 @@ async function add(name: string) {
     emit('changed', [...applied.value])
   } catch (error: any) {
     toast.add({
-      title: 'Error',
-      description: error?.response?.message ?? 'Could not add the label.',
+      title: "Couldn't add label",
+      description: error?.response?.message ?? 'Try again.',
       color: 'error',
       duration: 3000,
     })
@@ -108,8 +108,8 @@ async function remove(label: Label) {
     emit('changed', [...applied.value])
   } catch {
     toast.add({
-      title: 'Could not remove',
-      description: 'Labels can only be removed by whoever added them.',
+      title: "Couldn't remove label",
+      description: 'Only the person who added it can remove it.',
       color: 'warning',
       duration: 3000,
     })
@@ -132,13 +132,12 @@ function close() {
   >
     <template #body>
       <p class="text-xs text-night-500 mb-3">
-        Labels are shared and anyone can add them — think "hat" or "mirror selca", looser than a
-        collection.
+        Anyone can add labels, like "hat" or "mirror selca".
       </p>
 
       <UInput
         v-model="term"
-        placeholder="Search or create a label..."
+        placeholder="Search or create a label…"
         icon="i-lucide-search"
         :loading="isSearching"
         autofocus
@@ -149,7 +148,7 @@ function close() {
 
       <!-- On this content -->
       <div v-if="applied.length" class="mb-3">
-        <p class="micro-label text-night-400 mb-1.5">On this item</p>
+        <p class="micro-label text-night-400 mb-1.5">On this post</p>
         <div class="flex flex-wrap gap-1.5">
           <div
             v-for="label in applied"

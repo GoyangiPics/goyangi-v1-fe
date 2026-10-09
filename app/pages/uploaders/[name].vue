@@ -99,7 +99,7 @@ onMounted(loadUploader)
     <div class="flex justify-start items-center">
       <NavigationBase class="flex-1" />
       <UButton
-        :label="isMobile ? 'Top' : 'Top Posts'"
+        :label="isMobile ? 'Top' : 'Top posts'"
         :icon="filtersStore.mostLikedMode ? 'i-lucide-chevrons-up' : 'i-lucide-chevrons-down'"
         color="info"
         class="ml-2"
@@ -128,7 +128,7 @@ onMounted(loadUploader)
           {{ uploaderName }}
         </h1>
         <span class="text-xs text-night-500 font-mono mt-0.5">
-          {{ itemsTotal }} upload{{ itemsTotal === 1 ? '' : 's' }}
+          {{ itemsTotal }} post{{ itemsTotal === 1 ? '' : 's' }}
         </span>
         <span v-if="joinedAt" class="text-xs text-night-500 font-mono mt-0.5">
           joined {{ joinedAt }}
@@ -156,7 +156,7 @@ onMounted(loadUploader)
     </ContentGrid>
     <div v-else>
       <div class="flex justify-center items-center mt-16">
-        <h1 class="text-2xl">No uploads yet.</h1>
+        <h1 class="text-2xl">No posts found.</h1>
       </div>
     </div>
 

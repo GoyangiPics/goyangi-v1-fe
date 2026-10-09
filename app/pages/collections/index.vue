@@ -42,7 +42,7 @@ const {
       </ContentGrid>
       <div v-else>
         <div class="flex justify-center items-center mt-16">
-          <h1 class="text-2xl">No results.</h1>
+          <h1 class="text-2xl">No collections found.</h1>
         </div>
       </div>
     </div>

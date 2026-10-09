@@ -134,7 +134,7 @@ async function likedRowToggle() {
       <div class="flex justify-start items-center">
         <NavigationBase class="flex-1" />
         <UButton
-          :label="isMobile ? 'Top' : 'Top Posts'"
+          :label="isMobile ? 'Top' : 'Top posts'"
           :icon="filtersStore.mostLikedMode ? 'i-lucide-chevrons-up' : 'i-lucide-chevrons-down'"
           color="info"
           class="ml-2"
@@ -152,12 +152,12 @@ async function likedRowToggle() {
         emoji="📚"
         :title="ogData?.title || pageTitle || 'Collection'"
         :total="itemsTotal"
-        :total-label="itemsTotal === 1 ? 'content' : 'contents'"
+        :total-label="itemsTotal === 1 ? 'post' : 'posts'"
       >
         <template #actions>
           <UButton
             icon="i-lucide-heart"
-            :label="isMobile ? undefined : 'Like All'"
+            :label="isMobile ? undefined : 'Like all'"
             color="neutral"
             variant="outline"
             size="sm"
@@ -166,7 +166,7 @@ async function likedRowToggle() {
           />
           <UButton
             icon="i-lucide-folders"
-            :label="isMobile ? undefined : 'Add All'"
+            :label="isMobile ? undefined : 'Add all'"
             color="neutral"
             variant="outline"
             size="sm"
@@ -199,7 +199,7 @@ async function likedRowToggle() {
     </ContentGrid>
     <div v-else>
       <div class="flex justify-center items-center mt-16">
-        <h1 class="text-2xl">No results.</h1>
+        <h1 class="text-2xl">No posts found.</h1>
       </div>
     </div>
 

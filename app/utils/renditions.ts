@@ -10,5 +10,4 @@
  * One constant so the per-item menu, the bulk download menu and anything added
  * later all say the same thing.
  */
-export const AV1_COMPAT_HINT =
-  'AV1 1080p — might not be supported on older devices. Use SD for those.'
+export const AV1_COMPAT_HINT = 'HD may not play on older iPhones and Macs. Use SD there.'

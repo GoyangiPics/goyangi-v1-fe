@@ -23,14 +23,13 @@ async function updateLink() {
   try {
     await pb.collection('users_links').update(recordId.value, { links: linkLines() })
     toast.add({
-      title: 'Updated!',
-      description: 'Links updated successfully.',
+      title: 'Links saved',
       color: 'success',
       duration: 2000,
     })
   } catch (error) {
     console.error('Failed to update PocketBase record:', error)
-    toast.add({ title: 'Update failed', color: 'error', duration: 2500 })
+    toast.add({ title: "Couldn't save", color: 'error', duration: 2500 })
   }
 }
 
@@ -76,7 +75,7 @@ onMounted(() => {
       <div class="flex items-center gap-2 mb-2">
         <span class="text-2xl leading-none">🛠️</span>
         <NuxtLink to="/tools" class="text-night-500 hover:text-night-300 text-sm transition-colors">
-          Imgur Tools
+          Imgur tools
         </NuxtLink>
         <UIcon name="i-lucide-chevron-right" class="text-xs text-night-600" />
         <input
@@ -97,7 +96,7 @@ onMounted(() => {
       </div>
       <p class="text-sm text-night-400 mb-4 max-w-2xl">
         <span v-if="isOwner" class="text-pink-300/80"
-          >You own this — title and links auto-save.</span
+          >This is yours. The title saves on its own.</span
         >
         <span v-else class="text-night-500">
           Shared by <span class="text-night-300">{{ ownerName || 'anon' }}</span> · read-only
@@ -108,7 +107,7 @@ onMounted(() => {
     <ToolsLinksPanel :tools="tools">
       <UButton
         v-if="recordId && isOwner"
-        label="Update Link"
+        label="Save links"
         icon="i-lucide-refresh-cw"
         class="search-gradient ml-auto"
         size="sm"
@@ -116,7 +115,7 @@ onMounted(() => {
       />
       <UButton
         v-else
-        label="Share Link"
+        label="Share link"
         icon="i-lucide-share-2"
         class="search-gradient ml-auto"
         size="sm"
@@ -131,7 +130,7 @@ onMounted(() => {
     </ContentGrid>
     <div v-else class="flex flex-col items-center justify-center py-12 text-center">
       <UIcon name="i-lucide-images" class="text-5xl text-night-700 mb-3" />
-      <p class="text-sm text-night-500">No links to preview yet.</p>
+      <p class="text-sm text-night-500">No links yet.</p>
     </div>
   </div>
 </template>

@@ -294,17 +294,17 @@ export function computeUploadErrors(input: ValidationInput): ValidationErrors {
   const { files, limits } = input
 
   if (!files || files.length === 0) {
-    e.files = 'Select at least one file to upload.'
+    e.files = 'Add at least one file.'
   } else if (files.length > limits.maxFiles) {
-    e.files = `Max ${limits.maxFiles} file${limits.maxFiles === 1 ? '' : 's'} allowed for ${limits.label} uploads.`
+    e.files = `You can upload up to ${limits.maxFiles} file${limits.maxFiles === 1 ? '' : 's'} here.`
   } else {
     const oversized = files.find((f) => f.size > limits.maxFileSizeMB * 1024 * 1024)
     if (oversized) {
-      e.files = `"${oversized.name}" exceeds the ${limits.maxFileSizeMB}MB per-file limit.`
+      e.files = `"${oversized.name}" is over the ${limits.maxFileSizeMB}MB limit.`
     } else {
       const totalMB = files.reduce((sum, f) => sum + f.size, 0) / (1024 * 1024)
       if (totalMB > limits.maxTotalSizeMB) {
-        e.files = `Total size ${totalMB.toFixed(0)}MB exceeds the ${limits.maxTotalSizeMB}MB limit.`
+        e.files = `Total size ${totalMB.toFixed(0)}MB is over the ${limits.maxTotalSizeMB}MB limit.`
       }
     }
   }
@@ -321,25 +321,25 @@ export function computeUploadErrors(input: ValidationInput): ValidationErrors {
       // Nothing anywhere has an idol, so the batch picker is the thing to fix.
       e.idol = 'Select at least one idol.'
     } else if (noIdol.length > 0) {
-      e.idol = `${noIdol.length} file${noIdol.length === 1 ? '' : 's'} have no idol: ${nameList(noIdol.map((f) => f.name))}.`
+      e.idol = `No idol for ${nameList(noIdol.map((f) => f.name))}.`
     }
 
     if (noGroup.length > 0) {
-      e.group = `${noGroup.length} file${noGroup.length === 1 ? '' : 's'} have an idol with no group: ${nameList(noGroup.map((f) => f.name))}.`
+      e.group = `Idol with no group in ${nameList(noGroup.map((f) => f.name))}.`
     }
   } else if (input.batchIdols.length === 0) {
     e.idol = 'Select at least one idol.'
   }
 
   if (input.requiresCollection && !input.collectionIds?.length) {
-    e.collection = 'Pick a collection to upload into.'
+    e.collection = 'Pick a collection.'
   }
 
-  if (input.isSticker && !input.title.trim()) e.title = 'Title is required for stickers.'
+  if (input.isSticker && !input.title.trim()) e.title = 'Stickers need a title.'
 
   const src = input.source.trim()
   if (src && !isValidUrl(src)) {
-    e.source = 'Source must be a valid URL starting with http:// or https://.'
+    e.source = 'Source must start with http:// or https://.'
   }
 
   return e

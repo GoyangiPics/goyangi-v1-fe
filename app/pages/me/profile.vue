@@ -25,9 +25,9 @@ async function onUserAvatarChange(e: Event) {
   isUploadingUserAvatar.value = true
   try {
     await authStore.updateUserAvatar(file)
-    toast.add({ title: 'Avatar updated', color: 'success', duration: 2000 })
+    toast.add({ title: 'Photo updated', color: 'success', duration: 2000 })
   } catch {
-    toast.add({ title: 'Failed to update avatar', color: 'error', duration: 3000 })
+    toast.add({ title: "Couldn't update photo", color: 'error', duration: 3000 })
   } finally {
     isUploadingUserAvatar.value = false
   }
@@ -46,9 +46,9 @@ async function saveUploaderName() {
     } else {
       await authStore.createUploader(uploaderName.value)
     }
-    toast.add({ title: 'Uploader profile saved', color: 'success', duration: 2000 })
+    toast.add({ title: 'Name saved', color: 'success', duration: 2000 })
   } catch {
-    toast.add({ title: 'Failed to save uploader', color: 'error', duration: 3000 })
+    toast.add({ title: "Couldn't save name", color: 'error', duration: 3000 })
   } finally {
     isSavingUploaderName.value = false
   }
@@ -105,7 +105,7 @@ async function downloadMyData() {
     a.click()
     URL.revokeObjectURL(url)
   } catch {
-    toast.add({ title: 'Export failed', color: 'error', duration: 3000 })
+    toast.add({ title: "Couldn't download your data", color: 'error', duration: 3000 })
   } finally {
     isExporting.value = false
   }
@@ -115,11 +115,11 @@ async function downloadMyData() {
 async function confirmDeleteAccount() {
   if (
     await confirm({
-      title: 'Delete account',
+      title: 'Delete your account?',
       message:
-        'This permanently deletes your account, email, likes, stars, filters and saved links. ' +
-        'Content you uploaded stays on the site, credited to an anonymized uploader name. ' +
-        'This cannot be undone.',
+        'Your account, email, likes, stars, filters and saved links will be deleted. ' +
+        'Your posts stay up under an anonymous uploader name. ' +
+        "This can't be undone.",
       icon: 'i-lucide-triangle-alert',
       confirmLabel: 'Delete my account',
       cancelLabel: 'Cancel',
@@ -130,7 +130,7 @@ async function confirmDeleteAccount() {
       await authStore.deleteAccount()
       router.push('/login')
     } catch {
-      toast.add({ title: 'Failed to delete account', color: 'error', duration: 3000 })
+      toast.add({ title: "Couldn't delete account", color: 'error', duration: 3000 })
     }
   }
 }
@@ -138,7 +138,7 @@ async function confirmDeleteAccount() {
 
 <template>
   <div class="max-w-lg mx-auto flex flex-col gap-6 mt-6">
-    <h1 class="text-2xl font-semibold gradient-text tracking-tight">My Profile</h1>
+    <h1 class="text-2xl font-semibold gradient-text tracking-tight">My profile</h1>
 
     <!-- Account section -->
     <div class="glass-card p-6 flex flex-col gap-5">
@@ -154,7 +154,7 @@ async function confirmDeleteAccount() {
             v-if="userAvatarUrl"
             :src="userAvatarUrl"
             class="w-full h-full object-cover"
-            alt="Your avatar"
+            alt="Your profile photo"
           />
           <div v-else class="w-full h-full flex items-center justify-center">
             <UIcon name="i-lucide-user" class="text-2xl text-night-400" />
@@ -173,7 +173,7 @@ async function confirmDeleteAccount() {
         </div>
         <div>
           <p class="text-sm font-medium text-night-200">Profile photo</p>
-          <p class="text-xs text-night-500 mt-0.5">Click to upload · JPEG, PNG, WEBP, AVIF</p>
+          <p class="text-xs text-night-500 mt-0.5">JPEG, PNG, WebP or AVIF</p>
           <button
             class="text-xs text-pink-400 hover:text-pink-300 mt-1 cursor-pointer transition-colors"
             :disabled="isUploadingUserAvatar"
@@ -202,9 +202,9 @@ async function confirmDeleteAccount() {
 
     <!-- Uploader profile section -->
     <div class="glass-card p-6 flex flex-col gap-5">
-      <h2 class="micro-label text-pink-300">Uploader Profile</h2>
+      <h2 class="micro-label text-pink-300">Uploader</h2>
       <p class="text-xs text-night-500 -mt-2">
-        This name and avatar are shown publicly on all content you upload.
+        Your name and photo are shown publicly on your posts.
       </p>
 
       <!-- Uploader display name -->
@@ -213,7 +213,7 @@ async function confirmDeleteAccount() {
         <div class="flex gap-2">
           <UInput
             v-model="uploaderName"
-            placeholder="e.g. nabi, fansite_name..."
+            placeholder="e.g. nabi"
             class="flex-1"
             @keydown.enter="saveUploaderName"
           />
@@ -235,8 +235,7 @@ async function confirmDeleteAccount() {
         <div>
           <p class="text-sm font-medium text-night-200">Download my data</p>
           <p class="text-xs text-night-500 mt-0.5">
-            A JSON copy of your account, uploader profile, likes, stars, filters, links, collections
-            and uploads list.
+            A JSON file with your account, likes, stars, filters, links, collections and uploads.
           </p>
         </div>
         <UButton
@@ -258,7 +257,7 @@ async function confirmDeleteAccount() {
         <div>
           <p class="text-sm font-medium text-night-200">Delete account</p>
           <p class="text-xs text-night-500 mt-0.5">
-            Removes your account and personal data. Uploaded content stays, credited anonymously.
+            Removes your account and personal data. Your posts stay up, credited anonymously.
           </p>
         </div>
         <UButton

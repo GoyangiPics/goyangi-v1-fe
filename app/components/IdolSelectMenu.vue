@@ -34,7 +34,7 @@ const props = withDefaults(
     collapseChips?: boolean
   }>(),
   {
-    placeholder: 'Select idols...',
+    placeholder: 'Select idols…',
     collapseChips: true,
   },
 )

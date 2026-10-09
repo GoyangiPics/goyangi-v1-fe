@@ -76,7 +76,7 @@ const ORIGIN_BADGE: Record<
   { icon: string; color: 'primary' | 'neutral' | 'success'; label: string }
 > = {
   direct: { icon: 'i-lucide-badge-check', color: 'primary', label: 'Direct upload' },
-  imgur: { icon: 'i-simple-icons-imgur', color: 'success', label: 'Imported from imgur' },
+  imgur: { icon: 'i-simple-icons-imgur', color: 'success', label: 'From Imgur' },
   discord: { icon: 'i-simple-icons-discord', color: 'neutral', label: 'From Discord' },
 }
 
@@ -97,7 +97,7 @@ const externalLinks = computed(() =>
 // All three write to PocketBase as the current user — anonymous visitors get the
 // login prompt rather than an empty modal.
 function openAddToCollection() {
-  if (!requireAuth('add content to a collection')) return
+  if (!requireAuth('add posts to a collection')) return
   isAddToCollectionVisible.value = true
 }
 
@@ -107,7 +107,7 @@ function openLabels() {
 }
 
 function openReport() {
-  if (!requireAuth('report content')) return
+  if (!requireAuth('report posts')) return
   isReportVisible.value = true
 }
 
@@ -309,7 +309,7 @@ function openExternal(url?: string) {
           />
           <UButton
             icon="i-lucide-tag"
-            label="Add Label"
+            label="Add label"
             color="neutral"
             variant="outline"
             size="sm"
@@ -403,7 +403,7 @@ function openExternal(url?: string) {
         <!-- Only when it differs from the upload day: every record has a date
              now, and a same-day one would just repeat "Uploaded". -->
         <div v-if="hasOwnDate(content)" class="flex items-center justify-between gap-2">
-          <span class="micro-label text-night-400">Content date</span>
+          <span class="micro-label text-night-400">Date</span>
           <span class="text-xs text-night-300 font-mono">
             {{ formatShortDate(content.date) }}
           </span>
@@ -443,7 +443,7 @@ function openExternal(url?: string) {
       </div>
 
       <div v-if="externalLinks.length" class="surface-card p-3 flex flex-col gap-2">
-        <span class="micro-label text-night-400">External</span>
+        <span class="micro-label text-night-400">Links</span>
         <div class="flex flex-wrap gap-2">
           <UButton
             v-for="link in externalLinks"

@@ -56,12 +56,12 @@ function close() {
   >
     <template #body>
       <p class="text-xs text-night-500 mb-3">
-        Star a group to follow everything from it, or individual idols. Your feed shows both.
+        Star groups or idols to see their posts in your feed.
       </p>
 
       <UInput
         v-model="searchTerm"
-        placeholder="Search idols and groups..."
+        placeholder="Search idols and groups…"
         icon="i-lucide-search"
         class="w-full mb-3"
       />
@@ -93,8 +93,8 @@ function close() {
               variant="ghost"
               :title="
                 starsStore.isGroupStarred(group.gid)
-                  ? `Unfollow ${group.label}`
-                  : `Follow everything from ${group.label}`
+                  ? `Unstar ${group.label}`
+                  : `Star ${group.label}`
               "
               @click="starsStore.toggleGroup(group.gid)"
             />
@@ -124,7 +124,7 @@ function close() {
         </div>
 
         <p v-if="!filteredGroups.length" class="text-center text-xs text-night-500 py-4">
-          Nothing matches "{{ searchTerm }}".
+          No matches for "{{ searchTerm }}".
         </p>
       </div>
     </template>

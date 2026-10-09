@@ -67,7 +67,7 @@ export function useImgurTools() {
     if (linksArray.length === 0) {
       toast.add({
         title: 'No links',
-        description: 'Paste at least one valid imgur link.',
+        description: 'Paste at least one Imgur link.',
         color: 'warning',
         duration: 2000,
       })
@@ -83,7 +83,7 @@ export function useImgurTools() {
       router.push(`/tools/${record.id}`)
     } catch (error) {
       console.error('Failed to create PocketBase record:', error)
-      toast.add({ title: 'Failed to share', color: 'error', duration: 2500 })
+      toast.add({ title: "Couldn't share", color: 'error', duration: 2500 })
     }
   }
 
