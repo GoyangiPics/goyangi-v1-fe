@@ -52,6 +52,32 @@ watch(
   },
 )
 
+/**
+ * The media's on-screen box, worked out from the stored dimensions before a
+ * byte has arrived.
+ *
+ * With only a max-width/height, an element that hasn't loaded has no shape — a
+ * video sits at the browser's 300×150 default and an image at nothing — and then
+ * snaps to its real size, dragging the counter, like pill and dots with it on
+ * every step to an item not yet buffered. This is the same fit the max-* pair
+ * gave once loaded: as large as 93vw × 93vh allows, never past the file's own
+ * width, at the file's own ratio.
+ *
+ * Records from before dimensions were stored keep the old sizing.
+ */
+const mediaStyle = computed(() => {
+  const { width: w, height: h } = props.content
+  if (!w || !h) return { maxHeight: '93vh', maxWidth: '93vw', width: 'auto' }
+  return {
+    width: `min(93vw, calc(93vh * ${w / h}), ${w}px)`,
+    aspectRatio: `${w} / ${h}`,
+    height: 'auto',
+    objectFit: 'contain' as const,
+  }
+})
+
+const alt = computed(() => contentAltText(props.content))
+
 /** Bottom strip of a video reserved for the native controls. */
 const CONTROLS_ZONE = 60
 
@@ -70,7 +96,7 @@ function onVideoClick(e: MouseEvent) {
     <video
       ref="videoRef"
       class="block rounded-xl"
-      style="max-height: 93vh; max-width: 93vw; width: auto"
+      :style="mediaStyle"
       :autoplay="autoplayAttr"
       :muted="muteVideo"
       :loop="false"
@@ -87,7 +113,7 @@ function onVideoClick(e: MouseEvent) {
       <video
         ref="videoRef"
         class="block rounded-xl"
-        style="max-height: 93vh; max-width: 93vw; width: auto"
+        :style="mediaStyle"
         :autoplay="autoplayAttr"
         muted
         loop
@@ -102,9 +128,9 @@ function onVideoClick(e: MouseEvent) {
     <a :href="contentUrl" @click.prevent>
       <img
         class="block rounded-xl"
-        style="max-height: 93vh; max-width: 93vw; width: auto"
+        :style="mediaStyle"
         :src="contentUrl"
-        alt="pic"
+        :alt="alt"
       />
     </a>
   </div>
