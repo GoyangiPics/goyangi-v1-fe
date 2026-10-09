@@ -171,9 +171,15 @@ function activeVideo(): HTMLVideoElement | null {
 // instead of advancing. Ignore closes that land right after one.
 let lastSwipeAt = 0
 
+/**
+ * A picture zoomed in (FullscreenMedia/useMediaZoom). Its drags are pans and
+ * its wheel scrolls are pans, so neither may step through the set meanwhile.
+ */
+const isZoomed = ref(false)
+
 const { coordsStart } = useSwipe(bodyRef, {
   onSwipeEnd: (_, direction) => {
-    if (!props.hasNavigation || startedOnVideoControls()) return
+    if (!props.hasNavigation || isZoomed.value || startedOnVideoControls()) return
     if (direction === 'none') return
     lastSwipeAt = Date.now()
     // Left or up advances; right or down goes back. Up = next follows the
@@ -200,7 +206,7 @@ function startedOnVideoControls() {
  */
 let lastWheelAt = 0
 function onWheel(e: WheelEvent) {
-  if (!props.hasNavigation || Math.abs(e.deltaY) < 30) return
+  if (!props.hasNavigation || isZoomed.value || Math.abs(e.deltaY) < 30) return
   const now = Date.now()
   if (now - lastWheelAt < 500) return
   lastWheelAt = now
@@ -255,6 +261,7 @@ function requestClose() {
             :autoplay="autoplay"
             :mute-video="isIOS"
             @close="requestClose"
+            @zoom="isZoomed = $event"
           />
 
           <div

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ContentsItem } from '~/types/appTypes'
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 /**
  * One item's media inside the fullscreen viewer.
@@ -30,7 +30,11 @@ const props = defineProps<{
   muteVideo?: boolean
 }>()
 
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{
+  close: []
+  /** Zoomed in or back out — the viewer pauses its own gestures meanwhile. */
+  zoom: [zoomed: boolean]
+}>()
 
 const { videoSources, primaryUrl: contentUrl } = useContentSources(() => props.content)
 
@@ -45,12 +49,36 @@ const autoplayAttr = props.active && shouldPlay.value
 watch(
   () => props.active,
   (active) => {
+    // A picture left zoomed would come back zoomed on the next visit.
+    if (!active) zoom.reset()
     const el = videoRef.value
     if (!el) return
     if (active && shouldPlay.value) el.play().catch(() => {})
     else if (!active) el.pause()
   },
 )
+
+// ─── Zoom (pictures only) ────────────────────────────────────────────────────
+// Videos and gifs keep their native controls and tap-to-close; detail is what
+// people zoom a still for.
+const zoomBoxRef = ref<HTMLElement | null>(null)
+const zoom = useMediaZoom(zoomBoxRef, { onTap: () => emit('close') })
+
+watch(zoom.isZoomed, (zoomed) => emit('zoom', zoomed))
+onBeforeUnmount(() => zoom.dispose())
+
+/**
+ * The viewer's swipe listens for touches on the whole body. A pinch, or a pan
+ * of a zoomed picture, is not a swipe — so those touches stop here. Tracked per
+ * gesture: after a pinch, the finger left down would otherwise finish as a
+ * swipe measured from where the pinch began.
+ */
+let multiTouch = false
+function guardTouch(e: TouchEvent) {
+  if (e.touches.length > 1) multiTouch = true
+  if (multiTouch || zoom.isZoomed.value) e.stopPropagation()
+  if (e.type === 'touchend' && e.touches.length === 0) multiTouch = false
+}
 
 /**
  * The media's on-screen box, worked out from the stored dimensions before a
@@ -124,13 +152,22 @@ function onVideoClick(e: MouseEvent) {
       </video>
     </a>
   </div>
-  <div v-else @click.stop="emit('close')">
+  <!-- No click-to-close on the wrapper here: a tap on a picture might be the
+       first half of a double-tap, so useMediaZoom decides when it closes. -->
+  <div v-else ref="zoomBoxRef">
     <a :href="contentUrl" @click.prevent>
       <img
-        class="block rounded-xl"
-        :style="mediaStyle"
+        class="block rounded-xl select-none"
+        :style="[mediaStyle, zoom.style.value]"
         :src="contentUrl"
         :alt="alt"
+        draggable="false"
+        v-on="zoom.handlers"
+        @click.stop.prevent
+        @touchstart="guardTouch"
+        @touchmove="guardTouch"
+        @touchend="guardTouch"
+        @gesturestart.prevent
       />
     </a>
   </div>
