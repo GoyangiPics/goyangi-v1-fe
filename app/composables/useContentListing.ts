@@ -370,5 +370,7 @@ export function useContentListing(
     refresh,
     changePage,
     onFiltersSettingsApply,
+    /** Everything the current filters match, on every page — see useFetchItems. */
+    fetchAllMatching: () => active.value.fetchAllMatching(),
   }
 }

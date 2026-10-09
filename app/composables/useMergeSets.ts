@@ -26,7 +26,9 @@ export function useMergeSets() {
   async function mergeSets(targetId: string, sourceIds: string[]): Promise<MergeResult> {
     isMerging.value = true
     try {
-      return await pb.send('/api/admin/sets/merge', {
+      // Admins merge any sets; owners only sets where every post is theirs —
+      // the backend checks.
+      return await pb.send('/api/sets/merge', {
         method: 'POST',
         body: { target: targetId, sources: sourceIds },
       })

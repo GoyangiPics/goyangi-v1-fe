@@ -25,7 +25,16 @@ const {
   changePage,
   refresh,
   onFiltersSettingsApply,
+  fetchAllMatching,
 } = useContentListing('allContents')
+
+// Select mode for admins: bulk moderation straight from the listing.
+const authStore = useAuthStore()
+const { selecting, isSelectingAll, selection, toggleSelecting, selectAll, onProcessed } =
+  useBulkSelect(() => items.value as any[], {
+    fetchAll: fetchAllMatching as () => Promise<any[]>,
+    refresh: () => refresh(),
+  })
 
 // Derived from the store, not a local boolean.
 //
@@ -70,7 +79,18 @@ async function likedRowToggle() {
     </div>
 
     <div class="mt-4">
-      <PageHeader emoji="🖼️" title="Singles" :total="itemsTotal" total-label="posts" />
+      <PageHeader emoji="🖼️" title="Singles" :total="itemsTotal" total-label="posts">
+        <template #actions>
+          <UButton
+            v-if="authStore.isAdmin"
+            :icon="selecting ? 'i-lucide-check' : 'i-lucide-square-check'"
+            :label="isMobile ? undefined : selecting ? 'Done' : 'Select'"
+            color="neutral"
+            :variant="selecting ? 'solid' : 'outline'"
+            @click="toggleSelecting"
+          />
+        </template>
+      </PageHeader>
       <PageHandoffTitle />
 
       <div v-if="isLoading === true">
@@ -80,12 +100,18 @@ async function likedRowToggle() {
       </div>
       <ContentGrid v-else-if="items.length !== 0" :columns="columns">
         <template #default="{ item }">
-          <CardBaseContent
-            v-if="(item as any).original"
-            :content="item"
-            @filters-apply="onFiltersSettingsApply"
-            @changed="refresh"
-          />
+          <SelectOverlay
+            :active="selecting"
+            :selected="selection.isSelected(item as any)"
+            @toggle="selection.toggle(item as any)"
+          >
+            <CardBaseContent
+              v-if="(item as any).original"
+              :content="item"
+              @filters-apply="onFiltersSettingsApply"
+              @changed="refresh"
+            />
+          </SelectOverlay>
         </template>
       </ContentGrid>
       <div v-else>
@@ -94,6 +120,19 @@ async function likedRowToggle() {
         </div>
       </div>
     </div>
+
+    <SelectionActionBar
+      floating
+      :selected-count="selection.selectedCount.value"
+      :matching-count="itemsTotal"
+      :is-selecting-all="isSelectingAll"
+      @select-all="selectAll"
+      @clear="selection.clear"
+    >
+      <template #actions>
+        <BulkPostActions :posts="selection.selectedRows.value as any" @processed="onProcessed" />
+      </template>
+    </SelectionActionBar>
 
     <ListingPaginator
       :first="firstItemIndex"

@@ -18,6 +18,7 @@ const {
   changePage,
   refresh,
   onFiltersSettingsApply,
+  fetchAllMatching,
 } = useContentListing('myContents')
 
 const layout = ref<'grid' | 'list'>('grid')
@@ -60,10 +61,15 @@ onMounted(loadFailed)
 
 const { copyLinks } = useCopyLinks()
 
-const selection = useRowSelection(() => items.value as any[], {
-  keyOf: (content: any) => content.id,
-  linksOf: (content: any) => [shortLinks(content)],
-})
+// One selection for both layouts: list rows always show their checkboxes, the
+// grid shows them in select mode. It spans pages, so "Select all" covers every
+// post the filters match.
+const { selecting, isSelectingAll, selection, toggleSelecting, selectAll, onProcessed } =
+  useBulkSelect(() => items.value as any[], {
+    links: (content: any) => [shortLinks(content)],
+    fetchAll: fetchAllMatching as () => Promise<any[]>,
+    refresh: () => Promise.all([refresh(), loadFailed()]),
+  })
 
 const copyMap = computed(() => ({
   preview: { urls: selection.previewUrls.value, label: 'Preview' },
@@ -76,9 +82,7 @@ function onCopy(kind: 'preview' | 'sd' | 'hd') {
   copyLinks(urls, label)
 }
 
-// Selection is per page; clear it rather than let a copy act on invisible rows.
 async function onPageChange(e: any) {
-  selection.clear()
   await changePage(e)
 }
 </script>
@@ -92,6 +96,14 @@ async function onPageChange(e: any) {
     <div class="mt-4">
       <PageHeader emoji="📤" title="My uploads" :total="itemsTotal" total-label="posts">
         <template #actions>
+          <UButton
+            v-if="layout === 'grid'"
+            :icon="selecting ? 'i-lucide-check' : 'i-lucide-square-check'"
+            :label="selecting ? 'Done' : 'Select'"
+            color="neutral"
+            :variant="selecting ? 'solid' : 'outline'"
+            @click="toggleSelecting"
+          />
           <ListingLayoutToggle v-model="layout" storage-key="me-uploads" />
         </template>
       </PageHeader>
@@ -123,30 +135,36 @@ async function onPageChange(e: any) {
       <template v-else-if="items.length !== 0">
         <ContentGrid v-if="layout === 'grid'" :columns="columns">
           <template #default="{ item }">
-            <!-- Processing or failed: a stand-in card with Retry and Delete, rather
-                 than skipping the post while still counting it. -->
-            <CardPendingContent
-              v-if="!(item as any).preview"
-              :content="item as any"
-              @changed="refresh"
-            />
-            <CardBaseContent
-              v-else-if="(item as any).original"
-              :content="item as any"
-              hide-uploader
-              @filters-apply="onFiltersSettingsApply"
-              @changed="refresh"
+            <SelectOverlay
+              :active="selecting"
+              :selected="selection.isSelected(item as any)"
+              @toggle="selection.toggle(item as any)"
             >
-              <template #actions>
-                <ContentActionsMenu
-                  :content="item as any"
-                  with-trigger
-                  @changed="refresh"
-                  @content-deleted="refresh"
-                  @set-deleted="refresh"
-                />
-              </template>
-            </CardBaseContent>
+              <!-- Processing or failed: a stand-in card with Retry and Delete, rather
+                   than skipping the post while still counting it. -->
+              <CardPendingContent
+                v-if="!(item as any).preview"
+                :content="item as any"
+                @changed="refresh"
+              />
+              <CardBaseContent
+                v-else-if="(item as any).original"
+                :content="item as any"
+                hide-uploader
+                @filters-apply="onFiltersSettingsApply"
+                @changed="refresh"
+              >
+                <template #actions>
+                  <ContentActionsMenu
+                    :content="item as any"
+                    with-trigger
+                    @changed="refresh"
+                    @content-deleted="refresh"
+                    @set-deleted="refresh"
+                  />
+                </template>
+              </CardBaseContent>
+            </SelectOverlay>
           </template>
         </ContentGrid>
 
@@ -189,6 +207,19 @@ async function onPageChange(e: any) {
         <h1 class="text-2xl">No posts found.</h1>
       </div>
     </div>
+
+    <SelectionActionBar
+      floating
+      :selected-count="selection.selectedCount.value"
+      :matching-count="itemsTotal"
+      :is-selecting-all="isSelectingAll"
+      @select-all="selectAll"
+      @clear="selection.clear"
+    >
+      <template #actions>
+        <BulkPostActions :posts="selection.selectedRows.value as any" @processed="onProcessed" />
+      </template>
+    </SelectionActionBar>
 
     <ListingPaginator
       :first="firstItemIndex"

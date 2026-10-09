@@ -25,7 +25,16 @@ const {
   changePage,
   refresh,
   onFiltersSettingsApply,
+  fetchAllMatching,
 } = useContentListing('uploaderContents')
+
+// Select mode for admins: bulk moderation straight from the listing.
+const authStore = useAuthStore()
+const { selecting, isSelectingAll, selection, toggleSelecting, selectAll, onProcessed } =
+  useBulkSelect(() => items.value as any[], {
+    fetchAll: fetchAllMatching as () => Promise<any[]>,
+    refresh: () => refresh(),
+  })
 
 const uploaderName = computed(() => decodeURIComponent(route.params.name as string))
 const uploader = ref<any>(null)
@@ -133,6 +142,15 @@ onMounted(loadUploader)
         <span v-if="joinedAt" class="text-xs text-night-500 font-mono mt-0.5">
           joined {{ joinedAt }}
         </span>
+        <UButton
+          v-if="authStore.isAdmin"
+          class="ml-auto"
+          :icon="selecting ? 'i-lucide-check' : 'i-lucide-square-check'"
+          :label="isMobile ? undefined : selecting ? 'Done' : 'Select'"
+          color="neutral"
+          :variant="selecting ? 'solid' : 'outline'"
+          @click="toggleSelecting"
+        />
       </div>
     </div>
 
@@ -146,12 +164,18 @@ onMounted(loadUploader)
     </div>
     <ContentGrid v-else-if="items.length !== 0" :columns="columns">
       <template #default="{ item }">
-        <CardBaseContent
-          v-if="(item as any).original"
-          :content="item as any"
-          @filters-apply="onFiltersSettingsApply"
-          @changed="refresh"
-        />
+        <SelectOverlay
+          :active="selecting"
+          :selected="selection.isSelected(item as any)"
+          @toggle="selection.toggle(item as any)"
+        >
+          <CardBaseContent
+            v-if="(item as any).original"
+            :content="item as any"
+            @filters-apply="onFiltersSettingsApply"
+            @changed="refresh"
+          />
+        </SelectOverlay>
       </template>
     </ContentGrid>
     <div v-else>
@@ -159,6 +183,19 @@ onMounted(loadUploader)
         <h1 class="text-2xl">No posts found.</h1>
       </div>
     </div>
+
+    <SelectionActionBar
+      floating
+      :selected-count="selection.selectedCount.value"
+      :matching-count="itemsTotal"
+      :is-selecting-all="isSelectingAll"
+      @select-all="selectAll"
+      @clear="selection.clear"
+    >
+      <template #actions>
+        <BulkPostActions :posts="selection.selectedRows.value as any" @processed="onProcessed" />
+      </template>
+    </SelectionActionBar>
 
     <ListingPaginator
       :first="firstItemIndex"

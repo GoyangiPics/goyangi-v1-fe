@@ -131,3 +131,18 @@ describe('useRowSelection', () => {
     expect(s.selectedCount.value).toBe(2)
   })
 })
+
+describe('useRowSelection across pages', () => {
+  it('keeps rows selected from elsewhere, after the page ones', () => {
+    const page = ref([{ id: 'a' }, { id: 'b' }])
+    const s = useRowSelection(page, { keyOf: (r: { id: string }) => r.id, linksOf: () => [] })
+    s.selectRows([{ id: 'z' }, { id: 'a' }])
+    s.toggle({ id: 'b' })
+    expect(s.selectedRows.value.map((r) => r.id)).toEqual(['a', 'b', 'z'])
+
+    page.value = [{ id: 'c' }]
+    expect(s.selectedRows.value.map((r) => r.id).toSorted()).toEqual(['a', 'b', 'z'])
+    s.deselect(['a', 'z'])
+    expect(s.selectedRows.value.map((r) => r.id)).toEqual(['b'])
+  })
+})

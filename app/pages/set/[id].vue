@@ -71,7 +71,16 @@ const {
   changePage,
   refresh,
   onFiltersSettingsApply,
+  fetchAllMatching,
 } = useContentListing('setContents')
+
+// Select mode: anyone can collect, label, download or copy a selection; owners
+// and admins can also edit, move and delete it. See useBulkSelect.
+const { selecting, isSelectingAll, selection, toggleSelecting, selectAll, onProcessed } =
+  useBulkSelect(() => items.value as ContentsItem[], {
+    fetchAll: fetchAllMatching as () => Promise<ContentsItem[]>,
+    refresh: () => refresh(),
+  })
 
 // ─── Fullscreen viewer for the whole listing ─────────────────────────────────
 // One viewer per page rather than one per card, so prev/next steps across the
@@ -191,6 +200,13 @@ async function likeAll() {
       >
         <template #actions>
           <UButton
+            :icon="selecting ? 'i-lucide-check' : 'i-lucide-square-check'"
+            :label="isMobile ? undefined : selecting ? 'Done' : 'Select'"
+            color="neutral"
+            :variant="selecting ? 'solid' : 'outline'"
+            @click="toggleSelecting"
+          />
+          <UButton
             icon="i-lucide-heart"
             :label="isMobile ? undefined : 'Like all'"
             color="neutral"
@@ -262,15 +278,21 @@ async function likeAll() {
     </div>
     <ContentGrid v-else-if="items.length !== 0" :columns="columns">
       <template #default="{ item }">
-        <CardBaseContent
-          v-if="(item as any).original"
-          :content="item as any"
-          hide-set
-          fullscreen-host
-          @filters-apply="onFiltersSettingsApply"
-          @changed="onCardChanged"
-          @open-fullscreen="openFullscreen"
-        />
+        <SelectOverlay
+          :active="selecting"
+          :selected="selection.isSelected(item as any)"
+          @toggle="selection.toggle(item as any)"
+        >
+          <CardBaseContent
+            v-if="(item as any).original"
+            :content="item as any"
+            hide-set
+            fullscreen-host
+            @filters-apply="onFiltersSettingsApply"
+            @changed="onCardChanged"
+            @open-fullscreen="openFullscreen"
+          />
+        </SelectOverlay>
       </template>
     </ContentGrid>
     <div v-else>
@@ -278,6 +300,19 @@ async function likeAll() {
         <h1 class="text-2xl">No posts found.</h1>
       </div>
     </div>
+
+    <SelectionActionBar
+      floating
+      :selected-count="selection.selectedCount.value"
+      :matching-count="itemsTotal"
+      :is-selecting-all="isSelectingAll"
+      @select-all="selectAll"
+      @clear="selection.clear"
+    >
+      <template #actions>
+        <BulkPostActions :posts="selection.selectedRows.value as any" @processed="onProcessed" />
+      </template>
+    </SelectionActionBar>
 
     <ListingPaginator
       :first="firstItemIndex"

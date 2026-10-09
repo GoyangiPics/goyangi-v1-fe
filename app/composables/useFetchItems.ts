@@ -298,6 +298,9 @@ export function useFetchItems(variation: FetchVariation) {
   // latest fetch gets to touch state; a superseded one leaves everything alone.
   let generation = 0
 
+  /** The filter and sort the listing last fetched with. */
+  let lastQuery: { sort: string; filter: string } | null = null
+
   async function fetchItems(page: number) {
     const mine = ++generation
     isLoading.value = true
@@ -336,6 +339,7 @@ export function useFetchItems(variation: FetchVariation) {
       // overridden by the variation's default.
       const sort = userSort ?? config.defaultSort ?? '-created'
 
+      lastQuery = { sort, filter }
       const records = await pb
         .collection(config.collection)
         .getList(page, +settingsStore.settings.contentCount, {
@@ -362,6 +366,21 @@ export function useFetchItems(variation: FetchVariation) {
     }
   }
 
+  /**
+   * Every item the last fetch matched, across all pages — for "select all"
+   * before a bulk action. Same filter, sort, expand and item mapping as the
+   * listing, so what gets selected is exactly what the pages would show.
+   */
+  async function fetchAllMatching() {
+    if (!lastQuery) return []
+    const records = await pb.collection(config.collection).getFullList({
+      ...lastQuery,
+      expand: config.expand,
+      requestKey: null,
+    })
+    return config.mapItem ? records.map(config.mapItem).filter((item) => item !== null) : records
+  }
+
   return {
     items,
     itemsTotal,
@@ -369,5 +388,6 @@ export function useFetchItems(variation: FetchVariation) {
     isLoading,
     error,
     fetchItems,
+    fetchAllMatching,
   }
 }

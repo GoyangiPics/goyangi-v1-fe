@@ -43,6 +43,7 @@ const {
   changePage,
   refresh,
   onFiltersSettingsApply,
+  fetchAllMatching,
 } = useContentListing('allContents', {
   groupedVariation: 'allSetsUnified',
   viewModeKey: 'homeViewMode',
@@ -53,6 +54,16 @@ const {
   // by this very call, so naming it bare here reads it before it is assigned.
   onQueryCleared: () => restoreStoredViewMode(),
 })
+
+// Select mode for admins. Grouped shows sets and ungrouped posts, so the bulk
+// actions follow the view, and switching views starts the selection over.
+const authStore = useAuthStore()
+const { selecting, isSelectingAll, selection, toggleSelecting, selectAll, onProcessed } =
+  useBulkSelect(() => items.value as any[], {
+    fetchAll: fetchAllMatching as () => Promise<any[]>,
+    refresh: () => refresh(),
+  })
+watch(isGrouped, () => selection.clear())
 
 // ─── Fullscreen viewer for the whole listing ─────────────────────────────────
 // One viewer per page rather than one per card, so prev/next steps across the
@@ -162,6 +173,14 @@ async function likedRowToggle() {
         :total-label="isGrouped ? 'sets' : 'posts'"
       >
         <template #actions>
+          <UButton
+            v-if="authStore.isAdmin"
+            :icon="selecting ? 'i-lucide-check' : 'i-lucide-square-check'"
+            :label="isMobile ? undefined : selecting ? 'Done' : 'Select'"
+            color="neutral"
+            :variant="selecting ? 'solid' : 'outline'"
+            @click="toggleSelecting"
+          />
           <!-- Left of the grouping toggle so that control keeps its position. -->
           <UButton
             icon="i-lucide-star"
@@ -198,28 +217,34 @@ async function likedRowToggle() {
       </div>
       <ContentGrid v-else-if="items.length !== 0" :columns="columns">
         <template #default="{ item }">
-          <div class="relative">
-            <span
-              v-if="isNew(item as any)"
-              class="absolute -top-1.5 -left-1.5 z-30 px-2 py-0.5 rounded-full bg-pink-500 text-white text-[10px] font-semibold uppercase tracking-wide shadow-md select-none pointer-events-none"
-            >
-              New
-            </span>
-            <CardUnified
-              v-if="isGrouped"
-              :content="item as any"
-              @filters-apply="onFiltersSettingsApply"
-              @changed="refresh"
-            />
-            <CardBaseContent
-              v-else-if="(item as any).original"
-              :content="item"
-              fullscreen-host
-              @filters-apply="onFiltersSettingsApply"
-              @changed="refresh"
-              @open-fullscreen="openFullscreen"
-            />
-          </div>
+          <SelectOverlay
+            :active="selecting"
+            :selected="selection.isSelected(item as any)"
+            @toggle="selection.toggle(item as any)"
+          >
+            <div class="relative">
+              <span
+                v-if="isNew(item as any)"
+                class="absolute -top-1.5 -left-1.5 z-30 px-2 py-0.5 rounded-full bg-pink-500 text-white text-[10px] font-semibold uppercase tracking-wide shadow-md select-none pointer-events-none"
+              >
+                New
+              </span>
+              <CardUnified
+                v-if="isGrouped"
+                :content="item as any"
+                @filters-apply="onFiltersSettingsApply"
+                @changed="refresh"
+              />
+              <CardBaseContent
+                v-else-if="(item as any).original"
+                :content="item"
+                fullscreen-host
+                @filters-apply="onFiltersSettingsApply"
+                @changed="refresh"
+                @open-fullscreen="openFullscreen"
+              />
+            </div>
+          </SelectOverlay>
         </template>
       </ContentGrid>
       <div v-else>
@@ -228,6 +253,28 @@ async function likedRowToggle() {
         </div>
       </div>
     </div>
+
+    <SelectionActionBar
+      floating
+      :selected-count="selection.selectedCount.value"
+      :matching-count="itemsTotal"
+      :is-selecting-all="isSelectingAll"
+      @select-all="selectAll"
+      @clear="selection.clear"
+    >
+      <template #actions>
+        <BulkSetActions
+          v-if="isGrouped"
+          :sets="selection.selectedRows.value as any"
+          @processed="onProcessed"
+        />
+        <BulkPostActions
+          v-else
+          :posts="selection.selectedRows.value as any"
+          @processed="onProcessed"
+        />
+      </template>
+    </SelectionActionBar>
 
     <ListingPaginator
       :first="firstItemIndex"

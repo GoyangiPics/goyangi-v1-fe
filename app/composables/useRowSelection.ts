@@ -45,23 +45,57 @@ export function useRowSelection<T>(rows: MaybeRefOrGetter<T[]>, opts: RowSelecti
     return selectedKeys.value.has(opts.keyOf(row))
   }
 
+  /**
+   * Rows seen selected, by key — so a selection can outlive the page it was
+   * made on ("select all matching" pulls in rows from every page) and bulk
+   * actions still get the full rows. Not reactive itself: `selectedKeys` is.
+   */
+  const known = new Map<string, T>()
+  function remember(row: T) {
+    known.set(opts.keyOf(row), row)
+  }
+
   function toggle(row: T) {
     const key = opts.keyOf(row)
     // Reassigned rather than mutated: a Set mutation isn't reactive.
     const next = new Set(selectedKeys.value)
     if (next.has(key)) next.delete(key)
-    else next.add(key)
+    else {
+      next.add(key)
+      remember(row)
+    }
     selectedKeys.value = next
   }
 
-  const selectedRows = computed(() => selectableRows.value.filter(isSelected))
+  /** Page rows in page order, then any selected from elsewhere. */
+  const selectedRows = computed(() => {
+    const onPage = selectableRows.value.filter(isSelected)
+    const pageKeys = new Set(onPage.map(opts.keyOf))
+    const elsewhere = [...selectedKeys.value]
+      .filter((key) => !pageKeys.has(key))
+      .map((key) => known.get(key))
+      .filter((row): row is T => !!row && (opts.selectable ? opts.selectable(row) : true))
+    return [...onPage, ...elsewhere]
+  })
 
   const allSelected = computed({
     get: () => selectableRows.value.length > 0 && selectableRows.value.every(isSelected),
     set: (value: boolean) => {
+      selectableRows.value.forEach(remember)
       selectedKeys.value = value ? new Set(selectableRows.value.map(opts.keyOf)) : new Set()
     },
   })
+
+  /** Add these rows (e.g. every match, across pages) to the selection. */
+  function selectRows(more: T[]) {
+    const next = new Set(selectedKeys.value)
+    for (const row of more) {
+      if (opts.selectable && !opts.selectable(row)) continue
+      remember(row)
+      next.add(opts.keyOf(row))
+    }
+    selectedKeys.value = next
+  }
 
   const someSelected = computed(() => selectedRows.value.length > 0 && !allSelected.value)
 
@@ -77,6 +111,9 @@ export function useRowSelection<T>(rows: MaybeRefOrGetter<T[]>, opts: RowSelecti
 
   return {
     selectedKeys,
+    /** The selected rows themselves, for bulk actions. */
+    selectedRows,
+    selectRows,
     isSelected,
     toggle,
     allSelected,
@@ -88,6 +125,12 @@ export function useRowSelection<T>(rows: MaybeRefOrGetter<T[]>, opts: RowSelecti
     hdUrls: computed(() => collect('hd')),
     clear: () => {
       selectedKeys.value = new Set()
+    },
+    /** Drop these keys — e.g. the rows a bulk action finished, leaving its failures selected. */
+    deselect: (keys: Iterable<string>) => {
+      const next = new Set(selectedKeys.value)
+      for (const key of keys) next.delete(key)
+      selectedKeys.value = next
     },
   }
 }

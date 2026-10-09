@@ -18,19 +18,23 @@ const {
   fetchItems,
   changePage,
   onFiltersSettingsApply,
+  fetchAllMatching,
 } = useContentListing('mySets')
+
+const { isMobile } = useWindowSize()
 
 const layout = ref<'grid' | 'list'>('grid')
 
 const { copyLinks } = useCopyLinks()
 
-const selection = useRowSelection(() => items.value as any[], {
-  keyOf: (set: any) => set.id,
-  // A set row contributes one link-triple per clip, which is what makes
-  // "select three sets, copy every preview link" work in one action.
-  linksOf: (set: any) =>
-    ((set.expand?.contents_via_set ?? []) as any[]).map((clip) => shortLinks(clip)),
-})
+// One selection for both layouts, spanning pages — see useBulkSelect.
+const { selecting, isSelectingAll, selection, toggleSelecting, selectAll, onProcessed } =
+  useBulkSelect(() => items.value as any[], {
+    links: (set: any) =>
+      ((set.expand?.contents_via_set ?? []) as any[]).map((clip) => shortLinks(clip)),
+    fetchAll: fetchAllMatching as () => Promise<any[]>,
+    refresh: () => fetchItems(itemsCurrentPage.value),
+  })
 
 const copyMap = computed(() => ({
   preview: { urls: selection.previewUrls.value, label: 'Preview' },
@@ -43,10 +47,7 @@ function onCopy(kind: 'preview' | 'sd' | 'hd') {
   copyLinks(urls, label)
 }
 
-// Selection is per page — useRowSelection tracks the rows currently loaded — so
-// clear it on navigation rather than letting a copy act on rows nobody can see.
 async function onPageChange(e: any) {
-  selection.clear()
   await changePage(e)
 }
 </script>
@@ -60,6 +61,14 @@ async function onPageChange(e: any) {
     <div class="mt-4">
       <PageHeader emoji="🎞️" title="My sets" :total="itemsTotal" total-label="sets">
         <template #actions>
+          <UButton
+            v-if="layout === 'grid'"
+            :icon="selecting ? 'i-lucide-check' : 'i-lucide-square-check'"
+            :label="isMobile ? undefined : selecting ? 'Done' : 'Select'"
+            color="neutral"
+            :variant="selecting ? 'solid' : 'outline'"
+            @click="toggleSelecting"
+          />
           <ListingLayoutToggle v-model="layout" storage-key="me-sets" />
         </template>
       </PageHeader>
@@ -74,12 +83,18 @@ async function onPageChange(e: any) {
         <!-- Grid -->
         <ContentGrid v-if="layout === 'grid'" :columns="columns" :gap="8">
           <template #default="{ item }">
-            <CardStackedContent
-              :content="item as any"
-              :is-set="true"
-              @filters-apply="onFiltersSettingsApply"
-              @changed="fetchItems(itemsCurrentPage)"
-            />
+            <SelectOverlay
+              :active="selecting"
+              :selected="selection.isSelected(item as any)"
+              @toggle="selection.toggle(item as any)"
+            >
+              <CardStackedContent
+                :content="item as any"
+                :is-set="true"
+                @filters-apply="onFiltersSettingsApply"
+                @changed="fetchItems(itemsCurrentPage)"
+              />
+            </SelectOverlay>
           </template>
         </ContentGrid>
 
@@ -126,6 +141,19 @@ async function onPageChange(e: any) {
         </div>
       </div>
     </div>
+
+    <SelectionActionBar
+      floating
+      :selected-count="selection.selectedCount.value"
+      :matching-count="itemsTotal"
+      :is-selecting-all="isSelectingAll"
+      @select-all="selectAll"
+      @clear="selection.clear"
+    >
+      <template #actions>
+        <BulkSetActions :sets="selection.selectedRows.value as any" @processed="onProcessed" />
+      </template>
+    </SelectionActionBar>
 
     <ListingPaginator
       :first="firstItemIndex"
