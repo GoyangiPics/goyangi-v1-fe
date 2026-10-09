@@ -157,6 +157,9 @@ const items = computed<DropdownMenuItem[][]>(() => [
   ],
   [
     { type: 'label', label: 'Account' },
+    ...(authStore.isAdmin
+      ? [{ label: 'Admin', icon: 'i-lucide-shield', to: '/admin', slot: 'admin' as const }]
+      : []),
     {
       label: 'My profile',
       icon: 'i-lucide-user',
@@ -175,6 +178,26 @@ const items = computed<DropdownMenuItem[][]>(() => [
     },
   ],
 ])
+
+// Open reports, badged on the Admin entry. One count query when someone turns
+// out to be an admin; /admin itself is where they're worked through.
+const openReports = ref(0)
+const pb = usePocketBase()
+watch(
+  () => authStore.isAdmin,
+  async (isAdmin) => {
+    if (!import.meta.client || !isAdmin) return
+    try {
+      const page = await pb
+        .collection('contents_reports')
+        .getList(1, 1, { fields: 'id', requestKey: 'header_open_reports' })
+      openReports.value = page.totalItems
+    } catch {
+      // Just a badge.
+    }
+  },
+  { immediate: true },
+)
 
 function showComingSoon() {
   toast.add({
@@ -227,6 +250,9 @@ function showComingSoon() {
       <ClientOnly>
         <div v-if="authStore.isValid">
           <UDropdownMenu :items="items">
+            <template #admin-trailing>
+              <UBadge v-if="openReports" :label="openReports" color="error" size="sm" />
+            </template>
             <UAvatar
               :src="avatarUrl ?? undefined"
               :icon="avatarUrl ? undefined : 'i-lucide-user'"
