@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 useHead({ title: 'My uploads' })
 
 definePageMeta({
@@ -21,6 +21,42 @@ const {
 } = useContentListing('myContents')
 
 const layout = ref<'grid' | 'list'>('grid')
+
+// ─── Failed uploads ──────────────────────────────────────────────────────────
+// Counted across all pages, so a failure on page 3 still gets noticed here.
+const pb = usePocketBase()
+const authStore = useAuthStore()
+const { run } = useBulkAction()
+const failedIds = ref<string[]>([])
+
+async function loadFailed() {
+  if (!authStore.uploader) return
+  try {
+    const rows = await pb.collection('contents').getFullList({
+      filter: pb.filter("uploader = {:up} && preview = '' && encodeError != ''", {
+        up: authStore.uploader.id,
+      }),
+      fields: 'id',
+      requestKey: null,
+    })
+    failedIds.value = rows.map((r) => r.id)
+  } catch {
+    failedIds.value = []
+  }
+}
+
+async function retryAllFailed() {
+  await run({
+    items: failedIds.value,
+    action: (id) => pb.send(`/api/contents/${id}/reprocess`, { method: 'POST', requestKey: null }),
+    progress: 'Retrying…',
+    success: (n) => `Retrying ${n} post${n === 1 ? '' : 's'}`,
+    failure: "Couldn't retry",
+  })
+  await Promise.all([loadFailed(), refresh()])
+}
+
+onMounted(loadFailed)
 
 const { copyLinks } = useCopyLinks()
 
@@ -61,6 +97,25 @@ async function onPageChange(e: any) {
       </PageHeader>
       <PageHandoffTitle />
 
+      <UAlert
+        v-if="failedIds.length"
+        color="error"
+        variant="soft"
+        icon="i-lucide-circle-x"
+        class="mb-4"
+        :title="`${failedIds.length} post${failedIds.length === 1 ? '' : 's'} couldn't be processed`"
+        description="Retrying usually fixes it. If not, delete them and upload again."
+        :actions="[
+          {
+            label: 'Retry all',
+            icon: 'i-lucide-refresh-cw',
+            color: 'error',
+            variant: 'solid',
+            onClick: retryAllFailed,
+          },
+        ]"
+      />
+
       <div v-if="isLoading" class="flex justify-center items-center mt-16">
         <LoadingSpinner />
       </div>
@@ -68,8 +123,15 @@ async function onPageChange(e: any) {
       <template v-else-if="items.length !== 0">
         <ContentGrid v-if="layout === 'grid'" :columns="columns">
           <template #default="{ item }">
+            <!-- Processing or failed: a stand-in card with Retry and Delete, rather
+                 than skipping the post while still counting it. -->
+            <CardPendingContent
+              v-if="!(item as any).preview"
+              :content="item as any"
+              @changed="refresh"
+            />
             <CardBaseContent
-              v-if="(item as any).original"
+              v-else-if="(item as any).original"
               :content="item as any"
               hide-uploader
               @filters-apply="onFiltersSettingsApply"

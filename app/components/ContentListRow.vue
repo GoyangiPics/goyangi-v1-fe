@@ -40,6 +40,15 @@ const groups = computed<any[]>(() => (props.content.expand as any)?.group ?? [])
         {{ content.title || content.id }}
       </NuxtLink>
       <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+        <!-- No renditions yet: say whether it's on its way or stuck. -->
+        <UBadge
+          v-if="!content.preview"
+          :label="content.encodeError ? 'Couldn\'t process' : 'Processing'"
+          :color="content.encodeError ? 'error' : 'warning'"
+          :icon="content.encodeError ? 'i-lucide-circle-x' : 'i-lucide-loader-circle'"
+          variant="soft"
+          class="text-xs!"
+        />
         <UBadge
           v-if="content.filetype"
           :label="content.filetype"
