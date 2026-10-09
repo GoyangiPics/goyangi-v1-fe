@@ -95,6 +95,41 @@ const isIOS =
 onMounted(() => markFullscreen(true))
 onBeforeUnmount(() => markFullscreen(false))
 
+// ─── Back closes the viewer ──────────────────────────────────────────────────
+//
+// On a phone the viewer feels like a page, so back is how people leave it —
+// and with nothing in history for it, back left the PAGE instead, losing the
+// place in the grid. Opening pushes an entry for the same URL; back pops it and
+// closes. Every other close (tap, Escape, swipe-free click) pops the entry
+// itself, so the history isn't left with a dead step.
+//
+// Same URL on purpose: the listing pages read their state from the query, and
+// re-sync only when its filter keys change (useContentListing), so a bare entry
+// is invisible to them. The router's own state is copied in, so its position
+// bookkeeping (and the scroll it restores) sees the entry as the same place.
+//
+// The token tells our entry apart. If the route changed while the viewer was
+// up, the top entry is the router's, and popping it would undo the navigation.
+let historyToken: string | null = null
+
+function onPopState(e: PopStateEvent) {
+  if (!historyToken || e.state?.goyangiFullscreen === historyToken) return
+  historyToken = null
+  handleVisibilityChange(false)
+}
+
+onMounted(() => {
+  historyToken = Math.random().toString(36).slice(2)
+  history.pushState({ ...history.state, goyangiFullscreen: historyToken }, '')
+  window.addEventListener('popstate', onPopState)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('popstate', onPopState)
+  if (historyToken && history.state?.goyangiFullscreen === historyToken) history.back()
+  historyToken = null
+})
+
 defineShortcuts({
   arrowleft: () => {
     if (props.hasNavigation) emit('prev')
