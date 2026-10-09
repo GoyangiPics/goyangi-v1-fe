@@ -131,8 +131,10 @@ interface UploadResult {
   /**
    * `slow` means uploaded and still encoding after we stopped watching — a
    * success we lost sight of, distinct from `error`, which is a real failure.
+   * `failed` is uploaded but the server couldn't process it (`encodeError`) —
+   * retryable, unlike `error`, where nothing reached the server.
    */
-  status: 'uploading' | 'processing' | 'done' | 'error' | 'slow'
+  status: 'uploading' | 'processing' | 'done' | 'error' | 'slow' | 'failed'
   /** Animated AVIF/WebP preview — the Discord-embeddable link. */
   avifUrl?: string
   /** AV1 1080p MP4 — the canonical rendition. */
@@ -583,7 +585,9 @@ const processingCount = computed(
       (r) => r.status === 'processing' || r.status === 'uploading' || r.status === 'slow',
     ).length,
 )
-const errorCount = computed(() => uploadResults.value.filter((r) => r.status === 'error').length)
+const errorCount = computed(
+  () => uploadResults.value.filter((r) => r.status === 'error' || r.status === 'failed').length,
+)
 
 // The backend encodes one file at a time, so a batch dropped behind someone
 // else's sits untouched until theirs clears. processingCount is this page's own
@@ -875,6 +879,11 @@ async function pollForAvif(result: UploadResult) {
         // Unique request key per file avoids PocketBase auto-cancelling parallel polls
         requestKey: `poll_${result.recordId}_${i}`,
       })
+      if (!record.preview && record.encodeError) {
+        result.status = 'failed'
+        result.error = "Couldn't process this file."
+        return
+      }
       if (record.preview) {
         result.avifUrl = record.preview
         // The server may have reclassified the hint (see hintFiletype); the
@@ -915,6 +924,98 @@ async function copyAll(urls: string[], label: string) {
     color: 'success',
     duration: 2000,
   })
+}
+
+// ─── Per-result tools ────────────────────────────────────────────────────────
+// Fix a typo or drop a wrong file right after uploading, without hunting for it
+// in My uploads.
+
+const { run: runBulk } = useBulkAction()
+const confirm = useConfirm()
+const editingRecord = ref<any>(null)
+
+/** Rows that reached the server and can be edited or deleted. */
+function hasRecord(r: UploadResult) {
+  return !!r.recordId && r.status !== 'error' && r.status !== 'uploading'
+}
+
+async function editResult(r: UploadResult) {
+  try {
+    editingRecord.value = await pb.collection('contents').getOne(r.recordId, {
+      expand: 'idol,tag',
+      requestKey: null,
+    })
+  } catch (error: any) {
+    toast.add({
+      title: "Couldn't load post",
+      description: pbErrorDetail(error, 'Try again.'),
+      color: 'error',
+    })
+  }
+}
+
+async function deleteResult(r: UploadResult) {
+  const ok = await confirm({
+    title: 'Delete this post?',
+    message: "This can't be undone.",
+    icon: 'i-lucide-trash-2',
+    confirmLabel: 'Delete',
+    cancelLabel: 'Cancel',
+    color: 'error',
+  })
+  if (!ok) return
+  try {
+    await pb.collection('contents').delete(r.recordId)
+    uploadResults.value = uploadResults.value.filter((x) => x !== r)
+    toast.add({ title: 'Post deleted', color: 'success', duration: 2000 })
+  } catch (error: any) {
+    toast.add({
+      title: "Couldn't delete post",
+      description: pbErrorDetail(error, 'Try again.'),
+      color: 'error',
+    })
+  }
+}
+
+async function retryResult(r: UploadResult) {
+  try {
+    await pb.send(`/api/contents/${r.recordId}/reprocess`, { method: 'POST' })
+    r.status = 'processing'
+    r.error = undefined
+    pollForAvif(r)
+  } catch (error: any) {
+    toast.add({
+      title: "Couldn't retry",
+      description: pbErrorDetail(error, 'Try again.'),
+      color: 'error',
+    })
+  }
+}
+
+const selectedWithRecords = computed(() =>
+  uploadResults.value.filter((r) => r.selected && hasRecord(r)),
+)
+
+async function deleteSelectedResults() {
+  const rows = selectedWithRecords.value
+  const ok = await confirm({
+    title: `Delete ${rows.length} post${rows.length === 1 ? '' : 's'}?`,
+    message: "This can't be undone.",
+    icon: 'i-lucide-trash-2',
+    confirmLabel: 'Delete',
+    cancelLabel: 'Cancel',
+    color: 'error',
+  })
+  if (!ok) return
+  const result = await runBulk({
+    items: rows,
+    action: (r) => pb.collection('contents').delete(r.recordId, { requestKey: null }),
+    progress: 'Deleting posts…',
+    success: (n) => `Deleted ${n} post${n === 1 ? '' : 's'}`,
+    failure: "Couldn't delete posts",
+  })
+  const gone = new Set(result.done)
+  uploadResults.value = uploadResults.value.filter((r) => !gone.has(r))
 }
 
 function clearResults() {
@@ -1820,11 +1921,21 @@ onMounted(async () => {
               @click="copyAll(allHdUrls, 'HD')"
             />
             <UButton
+              v-if="selectedWithRecords.length"
+              :label="`Delete selected (${selectedWithRecords.length})`"
               icon="i-lucide-trash-2"
               size="sm"
               color="error"
               variant="outline"
+              @click="deleteSelectedResults"
+            />
+            <UButton
+              icon="i-lucide-x"
+              size="sm"
+              color="neutral"
+              variant="outline"
               aria-label="Clear results"
+              title="Clear this list (your posts stay)"
               @click="clearResults"
             />
           </div>
@@ -1909,6 +2020,33 @@ onMounted(async () => {
                   </p>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
+                  <template v-if="hasRecord(result)">
+                    <UButton
+                      v-if="result.status === 'failed'"
+                      icon="i-lucide-refresh-cw"
+                      label="Retry"
+                      size="xs"
+                      color="warning"
+                      variant="soft"
+                      @click="retryResult(result)"
+                    />
+                    <UButton
+                      icon="i-lucide-pencil"
+                      size="xs"
+                      color="neutral"
+                      variant="ghost"
+                      aria-label="Edit post"
+                      @click="editResult(result)"
+                    />
+                    <UButton
+                      icon="i-lucide-trash-2"
+                      size="xs"
+                      color="error"
+                      variant="ghost"
+                      aria-label="Delete post"
+                      @click="deleteResult(result)"
+                    />
+                  </template>
                   <NuxtLink
                     v-if="result.status === 'done' && result.recordId"
                     :to="`/single/${result.recordId}`"
@@ -2000,7 +2138,10 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <p v-else-if="result.status === 'error'" class="text-xs text-red-400">
+              <p
+                v-else-if="result.status === 'error' || result.status === 'failed'"
+                class="text-xs text-red-400"
+              >
                 {{ result.error }}
               </p>
               <p v-else-if="result.status === 'slow'" class="text-xs text-amber-400">
@@ -2018,6 +2159,14 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+
+    <DialogContentEdit
+      v-if="editingRecord"
+      :is-visible="!!editingRecord"
+      :content="editingRecord"
+      @update:is-visible="!$event && (editingRecord = null)"
+      @saved="editingRecord = null"
+    />
 
     <DialogImgurImport
       v-if="isImgurImportVisible"
