@@ -6,9 +6,11 @@
  * list view, this one is action-oriented and appears once something is selected.
  * Both can render at once.
  *
- * `floating` pins it to the bottom of the screen, so a long grid can be scrolled
- * and selected through with the actions always in reach. Inline otherwise, for
- * pages that show more than one selection at a time.
+ * `floating` pins it near the bottom of the screen, so a long grid can be
+ * scrolled and selected through with the actions always in reach — above the
+ * floating paginator (ListingPaginator, the bottom ~70px), which every page
+ * with a selection also has. Inline otherwise, for pages that show more than
+ * one selection at a time.
  */
 withDefaults(
   defineProps<{
@@ -33,7 +35,7 @@ const emit = defineEmits<{
     class="flex flex-wrap items-center gap-2 p-3 rounded-xl border border-primary/30"
     :class="
       floating
-        ? 'fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-max max-w-[calc(100vw-2rem)] bg-night-950/95 backdrop-blur-md shadow-2xl'
+        ? 'fixed bottom-22 left-1/2 -translate-x-1/2 z-50 w-max max-w-[calc(100vw-2rem)] bg-night-950/95 backdrop-blur-md shadow-2xl'
         : 'mb-3 bg-primary/5'
     "
   >
