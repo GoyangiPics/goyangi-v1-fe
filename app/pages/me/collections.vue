@@ -5,10 +5,6 @@ definePageMeta({
   middleware: ['auth'],
 })
 
-const toast = useToast()
-const confirm = useConfirm()
-const pb = usePocketBase()
-
 const {
   items,
   itemsTotal,
@@ -31,36 +27,14 @@ function openCreate() {
   isCreateVisible.value = true
 }
 
-async function saveEdit(content: any, { title, isPublic }: { title: string; isPublic: boolean }) {
-  try {
-    await pb.collection('contents_collections').update(content.id, { title, isPublic })
-    content.title = title
-    content.isPublic = isPublic
-    toast.add({ title: 'Collection saved', color: 'success', duration: 2000 })
-  } catch {
-    toast.add({ title: "Couldn't save collection", color: 'error', duration: 3000 })
-  }
+const { saveCollection, deleteCollection } = useCollectionActions()
+
+async function saveEdit(content: any, changes: { title: string; isPublic: boolean }) {
+  await saveCollection(content, changes)
 }
 
 async function confirmDelete(_event: Event, content: any) {
-  if (
-    await confirm({
-      title: `Delete "${content.title}"?`,
-      message: "This can't be undone.",
-      icon: 'i-lucide-trash-2',
-      confirmLabel: 'Delete',
-      cancelLabel: 'Cancel',
-      color: 'error',
-    })
-  ) {
-    try {
-      await pb.collection('contents_collections').delete(content.id)
-      await fetchItems(itemsCurrentPage.value)
-      toast.add({ title: 'Collection deleted', color: 'success', duration: 2000 })
-    } catch {
-      toast.add({ title: "Couldn't delete collection", color: 'error', duration: 3000 })
-    }
-  }
+  if (await deleteCollection(content)) await fetchItems(itemsCurrentPage.value)
 }
 </script>
 

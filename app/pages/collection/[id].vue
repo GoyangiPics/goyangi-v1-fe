@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ContentsItem } from '~/types/appTypes'
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { MostLikedModes } from '~/types/typesFilters'
 
 definePageMeta({
@@ -18,6 +18,40 @@ const filtersStore = useFiltersStore()
 const { isMobile } = useWindowSize()
 
 const collectionId = route.params.id as string
+
+// The owner's tools, here as well as on My collections: edit and delete.
+const authStore = useAuthStore()
+const router = useRouter()
+const collectionRecord = ref<any>(null)
+const isOwner = computed(() => {
+  const owners = (collectionRecord.value?.user ?? []) as string[]
+  return !!authStore.user && owners.includes(authStore.user.id)
+})
+const { saveCollection, deleteCollection } = useCollectionActions()
+
+async function loadCollectionRecord() {
+  try {
+    collectionRecord.value = await pb
+      .collection('contents_collections')
+      .getOne(collectionId, { fields: 'id,title,isPublic,user', requestKey: null })
+  } catch {
+    collectionRecord.value = null
+  }
+}
+
+async function onCollectionSave(changes: { title: string; isPublic: boolean }) {
+  if (collectionRecord.value && (await saveCollection(collectionRecord.value, changes))) {
+    if (ogData.value) ogData.value.title = changes.title
+  }
+}
+
+async function onCollectionDelete() {
+  if (collectionRecord.value && (await deleteCollection(collectionRecord.value))) {
+    router.push('/me/collections')
+  }
+}
+
+onMounted(loadCollectionRecord)
 
 const { ogData } = useDetailSeo({
   type: 'collection',
@@ -155,6 +189,13 @@ async function likedRowToggle() {
         :total-label="itemsTotal === 1 ? 'post' : 'posts'"
       >
         <template #actions>
+          <CollectionActionsMenu
+            v-if="isOwner && collectionRecord"
+            :title="collectionRecord.title"
+            :is-public="collectionRecord.isPublic"
+            @save="onCollectionSave"
+            @delete="onCollectionDelete"
+          />
           <UButton
             icon="i-lucide-heart"
             :label="isMobile ? undefined : 'Like all'"
