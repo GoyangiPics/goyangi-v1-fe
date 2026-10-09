@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { CollectionsItem, SetsItem } from '~/types/appTypes'
-import { computed, ref } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 
 const props = defineProps<{
   content: SetsItem | CollectionsItem
@@ -21,14 +21,8 @@ const emit = defineEmits<{
   deleted: []
 }>()
 
-const pb = usePocketBase()
-const toast = useToast()
-const confirm = useConfirm()
-const authStore = useAuthStore()
-
 const isSetupVisible = ref(false)
 const isSlideshowVisible = ref(false)
-const isEditVisible = ref(false)
 
 const slideshowOptions = ref({
   columns: 1,
@@ -59,64 +53,14 @@ const { likeAllIn } = useLikeAll()
 // mean and the checkbox says so.
 const isAddToCollectionVisible = ref(false)
 
-/**
- * Whether the signed-in user is one of the set's uploaders.
- *
- * Mirrors contents_sets.deleteRule (uploader.user ?= @request.auth.id). Needs
- * `uploader.user` in the expand, which SET_EXPAND and UNIFIED_SET_EXPAND both
- * already request. The rules and the propagate endpoint are the real gates —
- * this only decides whether to offer the action.
- */
-const isSetUploader = computed(() => {
-  const uploaders = ((props.content.expand as any)?.uploader ?? []) as any[]
-  const userId = authStore.user?.id
-  if (!userId) return false
-  return [uploaders].flat().some((u: any) => u?.user === userId || u?.expand?.user?.id === userId)
-})
-
-const canEditSet = computed(
-  () => props.isSet && authStore.canUpload && (isSetUploader.value || authStore.isAdmin),
-)
-
-const canDeleteSet = computed(
-  () => props.isSet && authStore.canUpload && (isSetUploader.value || authStore.isAdmin),
-)
-
-async function deleteSet() {
-  const count = ((props.content.expand as any)?.contents_via_set ?? []).length
-  if (
-    !(await confirm({
-      title: 'Delete this set?',
-      message: count
-        ? `Its ${count} post${count === 1 ? '' : 's'} will be deleted too.`
-        : "This can't be undone.",
-      icon: 'i-lucide-trash-2',
-      confirmLabel: 'Delete',
-      cancelLabel: 'Cancel',
-      color: 'error',
-    }))
-  ) {
-    return
-  }
-  try {
-    // contents.set is cascadeDelete, so this takes the clips and their R2
-    // objects with it — which is what the confirm message spells out.
-    await pb.collection('contents_sets').delete(props.content.id)
-    toast.add({ title: 'Set deleted', color: 'success', duration: 2000 })
-    emit('deleted')
-  } catch (error: any) {
-    toast.add({
-      title: "Couldn't delete set",
-      description: error?.response?.message ?? 'Try again.',
-      color: 'error',
-      duration: 4000,
-    })
-  }
-}
+// Edit / delete for owners and admins — sets only; collections have
+// CollectionActionsMenu. Shared sets offer "delete my posts" instead.
+// shallowRef: a deep ref's type unwrapping of DropdownMenuItem overflows tsc.
+const manageRef = shallowRef<{ groups: DropdownMenuItem[][] } | null>(null)
 
 // computed so the label tracks isSet — this component serves collections too
 // (CardStackedContent passes :is-set through).
-const items = computed<DropdownMenuItem[]>(() => [
+const baseItems = computed<DropdownMenuItem[]>(() => [
   {
     label: 'Play slideshow',
     icon: 'i-lucide-circle-play',
@@ -141,29 +85,11 @@ const items = computed<DropdownMenuItem[]>(() => [
       isAddToCollectionVisible.value = true
     },
   },
-  // Set-only: this component also serves collections, which have their own
-  // CollectionActionsMenu for editing and deleting.
-  ...(canEditSet.value
-    ? [
-        {
-          label: 'Edit set',
-          icon: 'i-lucide-pencil',
-          onSelect: () => {
-            isEditVisible.value = true
-          },
-        },
-      ]
-    : []),
-  ...(canDeleteSet.value
-    ? [
-        {
-          label: 'Delete set',
-          icon: 'i-lucide-trash-2',
-          color: 'error' as const,
-          onSelect: () => deleteSet(),
-        },
-      ]
-    : []),
+])
+
+const items = computed<DropdownMenuItem[][]>(() => [
+  baseItems.value,
+  ...(props.isSet ? (manageRef.value?.groups ?? []) : []),
 ])
 </script>
 
@@ -218,11 +144,11 @@ const items = computed<DropdownMenuItem[]>(() => [
     @update:is-visible="isSlideshowVisible = $event"
   />
 
-  <DialogSetEdit
-    v-if="isEditVisible && isSet"
-    :is-visible="isEditVisible"
+  <ManageActions
+    v-if="isSet"
+    ref="manageRef"
     :set="content as SetsItem"
-    @update:is-visible="isEditVisible = $event"
-    @saved="emit('saved')"
+    @changed="emit('saved')"
+    @set-deleted="emit('deleted')"
   />
 </template>

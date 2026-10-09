@@ -194,8 +194,8 @@ async function requestPasswordReset() {
           <!-- OAuth implicitly registers first-time users, so the consent line
                register.vue shows must appear on this path too. -->
           <p class="text-xs text-night-500 mt-3">
-            Logging in with Discord creates an account if you don't have one. You confirm you're 18 or older and
-            agree to the
+            Logging in with Discord creates an account if you don't have one. You confirm you're 18
+            or older and agree to the
             <NuxtLink to="/terms" class="text-pink-400 hover:text-pink-300 transition-colors"
               >Terms</NuxtLink
             >

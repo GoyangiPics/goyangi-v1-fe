@@ -5,7 +5,7 @@ import type { Group, Idol } from '~/types/appTypes'
  *
  * Group is never chosen directly anywhere in the app — it is always derived from
  * the selected idols, so the two can't disagree. This existed as an identical
- * inline computed in uploads.vue and UploadsActionsMenu, and the set-edit dialog
+ * inline computed in uploads.vue and the post edit form, and the set-edit dialog
  * would have been a third copy.
  */
 export function inferGroups(idols: Idol[], allGroups: Group[]): Group[] {

@@ -47,8 +47,11 @@ const isFullscreenVisible = ref(false)
 const autoplayInFullscreen = ref(false)
 
 const mediaAreaRef = ref<HTMLElement | null>(null)
-const { menuRef: actionsMenuRef, adminMenuRef, onContextMenu } = useContextMenuTrigger(mediaAreaRef)
-const authStore = useAuthStore()
+const { menuRef: actionsMenuRef, onContextMenu } = useContextMenuTrigger(mediaAreaRef)
+const { canManagePost } = useOwnership()
+/** The owner's (or an admin's) tools, as visible buttons — same code as the menu. */
+const canManage = computed(() => canManagePost(props.content))
+const manage = computed(() => (actionsMenuRef.value as any)?.manage ?? null)
 
 /**
  * After an admin delete there is nothing left for this page to show.
@@ -336,6 +339,48 @@ function openExternal(url?: string) {
             @click="openActionsMenu"
           />
         </div>
+
+        <!-- Owner and admin tools, visible rather than tucked in the menu: on its
+             own page, a post's owner is the person most likely to want them. -->
+        <div v-if="canManage" class="grid grid-cols-2 gap-2 pt-2.5 border-t border-night-800">
+          <UButton
+            icon="i-lucide-pencil"
+            label="Edit"
+            color="neutral"
+            variant="outline"
+            size="sm"
+            block
+            @click="manage?.editPost()"
+          />
+          <UButton
+            icon="i-lucide-folder-input"
+            label="Move to set"
+            color="neutral"
+            variant="outline"
+            size="sm"
+            block
+            @click="manage?.movePost()"
+          />
+          <UButton
+            v-if="!content.preview"
+            icon="i-lucide-refresh-cw"
+            label="Retry processing"
+            color="warning"
+            variant="outline"
+            size="sm"
+            block
+            @click="manage?.retryPost()"
+          />
+          <UButton
+            icon="i-lucide-trash-2"
+            label="Delete"
+            color="error"
+            variant="outline"
+            size="sm"
+            block
+            @click="manage?.deletePost()"
+          />
+        </div>
       </div>
 
       <div class="surface-card p-3 flex flex-col gap-3">
@@ -511,21 +556,12 @@ function openExternal(url?: string) {
   <ContentActionsMenu
     ref="actionsMenuRef"
     :content="content"
+    @changed="emit('changed')"
+    @content-deleted="onContentDeleted"
+    @set-deleted="onSetDeleted"
     @open-collections="openAddToCollection"
     @open-labels="openLabels"
     @open-report="openReport"
     @like-all-in-set="likeAllInSet"
-  />
-
-  <!-- Hidden behind ADMIN_MENU_KEY + right-click, admins only. Unlike a card in
-       a listing, this page IS the record — a delete has to navigate, not refetch. -->
-  <AdminActionsMenu
-    v-if="authStore.isAdmin"
-    ref="adminMenuRef"
-    :content="content"
-    :set-id="content.set || null"
-    @changed="emit('changed')"
-    @content-deleted="onContentDeleted"
-    @set-deleted="onSetDeleted"
   />
 </template>

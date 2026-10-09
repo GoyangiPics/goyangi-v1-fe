@@ -6,10 +6,6 @@ definePageMeta({
   middleware: ['auth'],
 })
 
-const pb = usePocketBase()
-const toast = useToast()
-const confirm = useConfirm()
-
 const {
   items,
   itemsTotal,
@@ -49,27 +45,6 @@ async function onPageChange(e: any) {
   selection.clear()
   await changePage(e)
 }
-
-async function deleteContent(_event: Event, content: any) {
-  if (
-    await confirm({
-      title: `Delete "${content.title}"?`,
-      message: "This can't be undone.",
-      icon: 'i-lucide-trash-2',
-      confirmLabel: 'Delete',
-      cancelLabel: 'Cancel',
-      color: 'error',
-    })
-  ) {
-    try {
-      await pb.collection('contents').delete(content.id)
-      toast.add({ title: 'Post deleted', color: 'success', duration: 2000 })
-      await fetchItems(itemsCurrentPage.value)
-    } catch {
-      toast.add({ title: "Couldn't delete post", color: 'error', duration: 3000 })
-    }
-  }
-}
 </script>
 
 <template>
@@ -101,10 +76,12 @@ async function deleteContent(_event: Event, content: any) {
               @changed="refresh"
             >
               <template #actions>
-                <UploadsActionsMenu
-                  :content="item"
-                  @delete="deleteContent($event, item)"
-                  @saved="fetchItems(itemsCurrentPage)"
+                <ContentActionsMenu
+                  :content="item as any"
+                  with-trigger
+                  @changed="refresh"
+                  @content-deleted="refresh"
+                  @set-deleted="refresh"
                 />
               </template>
             </CardBaseContent>
@@ -133,10 +110,12 @@ async function deleteContent(_event: Event, content: any) {
               @toggle="selection.toggle(item as any)"
             >
               <template #actions>
-                <UploadsActionsMenu
-                  :content="item"
-                  @delete="deleteContent($event, item)"
-                  @saved="fetchItems(itemsCurrentPage)"
+                <ContentActionsMenu
+                  :content="item as any"
+                  with-trigger
+                  @changed="refresh"
+                  @content-deleted="refresh"
+                  @set-deleted="refresh"
                 />
               </template>
             </ContentListRow>

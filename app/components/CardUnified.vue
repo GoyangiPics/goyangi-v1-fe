@@ -348,11 +348,8 @@ watch(isFullscreenModalVisible, (v) => {
   if (!v) autoplayInFullscreen.value = false
 })
 
-const {
-  menuRef: contentActionsMenuRef,
-  adminMenuRef,
-  onContextMenu: handleContextMenu,
-} = useContextMenuTrigger(mediaAreaRef)
+const { menuRef: contentActionsMenuRef, onContextMenu: handleContextMenu } =
+  useContextMenuTrigger(mediaAreaRef)
 
 useSwipe(mediaAreaRef, {
   onSwipeEnd: (_, direction) => {
@@ -588,24 +585,14 @@ function handleMediaClick() {
       ref="contentActionsMenuRef"
       :key="activeContent.id"
       :content="activeContent"
-      @open-collections="openAddToCollection"
-      @open-labels="openLabels"
-      @open-report="openReport"
-      @like-all-in-set="likeAllInSet"
-    />
-
-    <!-- Hidden behind ADMIN_MENU_KEY + right-click, and rendered for admins only
-         so nobody else pays for the extra menu. Both halves are on hand here:
-         the set is this card's record, the content is whichever the carousel is
-         showing — which is exactly the one right-clicked. -->
-    <AdminActionsMenu
-      v-if="authStore.isAdmin"
-      ref="adminMenuRef"
-      :content="activeContent"
       :set="content"
       @changed="emit('changed')"
       @content-deleted="emit('changed')"
       @set-deleted="emit('changed')"
+      @open-collections="openAddToCollection"
+      @open-labels="openLabels"
+      @open-report="openReport"
+      @like-all-in-set="likeAllInSet"
     />
   </template>
 </template>

@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
-import type { ContentsItem } from '~/types/appTypes'
-import { computed, onMounted, ref } from 'vue'
+import type { ContentsItem, SetsItem, SetsUnifiedItem } from '~/types/appTypes'
+import { computed, onMounted, shallowRef } from 'vue'
 
 const props = defineProps<{
   content: ContentsItem
+  /** The post's set record, when the card holds one; otherwise its id is used. */
+  set?: SetsItem | SetsUnifiedItem | null
+  /**
+   * A visible wrench as well as right-click/long-press — for list rows, where
+   * a dense row has no obvious surface to right-click.
+   */
+  withTrigger?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -12,18 +19,33 @@ const emit = defineEmits<{
   openLabels: []
   openReport: []
   likeAllInSet: []
+  /** From the manage actions: edited or moved, the listing should refetch. */
+  changed: []
+  contentDeleted: []
+  setDeleted: []
 }>()
 
 const toast = useToast()
 const { downloadAllIn } = useDownloadAll()
-const items = ref<DropdownMenuItem[][]>([])
+const baseItems = shallowRef<DropdownMenuItem[][]>([])
+
+// Edit / move / delete for owners and admins, from the shared ManageActions.
+// Placed just above Report, which stays last.
+// shallowRef: a deep ref's type unwrapping of DropdownMenuItem overflows tsc.
+const manageRef = shallowRef<{ groups: DropdownMenuItem[][] } | null>(null)
+const items = computed<DropdownMenuItem[][]>(() => {
+  const manage = manageRef.value?.groups ?? []
+  const base = baseItems.value
+  if (!manage.length) return base
+  return [...base.slice(0, -1), ...manage, ...base.slice(-1)]
+})
 
 // Programmatic context menu: parents call `show(event)` (right-click or
 // long-press) and the menu opens anchored to a virtual element at the
 // pointer position. Registered with the global single-open-menu registry.
 const { open, reference, show } = useContextMenuAnchor()
 
-defineExpose({ show })
+defineExpose({ show, manage: manageRef })
 
 async function copyPreview() {
   // Null when there is no preview object; what gets copied is the short link —
@@ -321,7 +343,7 @@ onMounted(() => {
   ]
 
   // Drop empties so a record missing a whole category leaves no stray separator.
-  items.value = [organise, transfer, retrieve, flag].filter((group) => group.length > 0)
+  baseItems.value = [organise, transfer, retrieve, flag].filter((group) => group.length > 0)
 })
 </script>
 
@@ -330,8 +352,23 @@ onMounted(() => {
     v-model:open="open"
     :items="items"
     :modal="false"
-    :content="{ reference, side: 'bottom', align: 'start', sideOffset: 2 }"
+    :content="
+      withTrigger
+        ? { side: 'bottom', align: 'end', sideOffset: 4 }
+        : { reference, side: 'bottom', align: 'start', sideOffset: 2 }
+    "
   >
+    <!-- Default slot only when asked for: an empty one is what keeps the
+         right-click mode anchored to the pointer. -->
+    <UButton
+      v-if="withTrigger"
+      icon="i-lucide-ellipsis"
+      color="neutral"
+      variant="ghost"
+      size="xs"
+      square
+      aria-label="Post actions"
+    />
     <!-- Text glyphs ("HD" / "SD") from app/assets/cards.css, in the style of
          the "MP4" one this menu used before the renditions were split. -->
     <template #hd-leading>
@@ -357,4 +394,13 @@ onMounted(() => {
       </span>
     </template>
   </UDropdownMenu>
+
+  <ManageActions
+    ref="manageRef"
+    :content="content"
+    :set="set"
+    @changed="emit('changed')"
+    @content-deleted="emit('contentDeleted')"
+    @set-deleted="emit('setDeleted')"
+  />
 </template>

@@ -15,11 +15,8 @@ const { filtersApply } = useFilterApply(() => emit('filtersApply'))
 const { titleTagRef, titleOverflows, checkTitleOverflow } = useTitleOverflow()
 
 const mediaAreaRef = ref<HTMLElement | null>(null)
-const {
-  menuRef: setActionsMenuRef,
-  adminMenuRef,
-  onContextMenu: handleContextMenu,
-} = useContextMenuTrigger(mediaAreaRef)
+const { menuRef: setActionsMenuRef, onContextMenu: handleContextMenu } =
+  useContextMenuTrigger(mediaAreaRef)
 
 // Up to 4 thumbnails from the set/collection's expanded contents.
 //
@@ -143,16 +140,6 @@ function stashTitle() {
     :is-set="isSet"
     @saved="emit('changed')"
     @deleted="emit('changed')"
-  />
-
-  <!-- Hidden behind ADMIN_MENU_KEY + right-click. Sets only: a collection is its
-       owner's, and CollectionActionsMenu already covers editing and deleting one. -->
-  <AdminActionsMenu
-    v-if="authStore.isAdmin && isSet"
-    ref="adminMenuRef"
-    :set="content as SetsItem"
-    @changed="emit('changed')"
-    @set-deleted="emit('changed')"
   />
 </template>
 

@@ -113,7 +113,6 @@ const { views, register: registerView } = useViewCounter('set', setId)
 
 // The page previously only had ogData (a flattened projection for SEO); the edit
 // dialog needs the record itself, with idols/uploaders expanded.
-const authStore = useAuthStore()
 const setRecord = ref<any>(null)
 const isEditVisible = ref(false)
 
@@ -127,16 +126,26 @@ async function loadSetRecord() {
   }
 }
 
-/** Mirrors contents_sets.deleteRule; the rules are the real gate. */
-const canEditSet = computed(() => {
-  if (!authStore.canUpload) return false
-  if (authStore.isAdmin) return true
-  const uploaders = (setRecord.value?.expand?.uploader ?? []) as any[]
-  const userId = authStore.user?.id
-  return (
-    !!userId && uploaders.some((u: any) => u?.user === userId || u?.expand?.user?.id === userId)
-  )
-})
+// Owner and admin tools for the set itself — same code as every menu.
+const { canManageSet } = useOwnership()
+const canEditSet = computed(() => canManageSet(setRecord.value))
+const setManageRef = ref<{ deleteSet: () => Promise<void> } | null>(null)
+const router = useRouter()
+
+/** Nothing left to show once the set is gone. */
+function onSetDeleted() {
+  router.push('/')
+}
+
+/**
+ * A card's menu can delete the set this page is showing, or move its last post
+ * out (which deletes the set server-side). Refetch, and leave if it's gone.
+ */
+async function onCardChanged() {
+  await loadSetRecord()
+  if (!setRecord.value) return onSetDeleted()
+  await refresh()
+}
 
 function openEdit() {
   isEditVisible.value = true
@@ -218,6 +227,15 @@ async function likeAll() {
             @click="openEdit"
           />
           <UButton
+            v-if="canEditSet"
+            icon="i-lucide-trash-2"
+            :label="isMobile ? undefined : 'Delete'"
+            color="error"
+            variant="outline"
+            size="sm"
+            @click="setManageRef?.deleteSet()"
+          />
+          <UButton
             v-if="ogData?.source?.trim()"
             icon="i-lucide-link"
             :label="isMobile ? undefined : 'Source'"
@@ -250,7 +268,7 @@ async function likeAll() {
           hide-set
           fullscreen-host
           @filters-apply="onFiltersSettingsApply"
-          @changed="refresh"
+          @changed="onCardChanged"
           @open-fullscreen="openFullscreen"
         />
       </template>
@@ -277,6 +295,14 @@ async function likeAll() {
       :scope="{ setId }"
       :live="items as any"
       @update:is-visible="isAddToCollectionVisible = $event"
+    />
+
+    <ManageActions
+      v-if="setRecord"
+      ref="setManageRef"
+      :set="setRecord"
+      @changed="onSetSaved"
+      @set-deleted="onSetDeleted"
     />
 
     <DialogSetEdit

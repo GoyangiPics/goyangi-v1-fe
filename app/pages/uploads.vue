@@ -764,19 +764,8 @@ async function doUpload(files: File[], existingSetId: string | null): Promise<bo
     const existingSet = matchingSets.value.find((s) => s.id === existingSetId)
     createdSetId.value = existingSetId
     createdSetTitle.value = existingSet?.title ?? 'Set'
-
-    if (authStore.uploader?.id) {
-      try {
-        const existingUploaderIds: string[] = existingSet?.uploader ?? []
-        if (!existingUploaderIds.includes(authStore.uploader.id)) {
-          await pb.collection('contents_sets').update(existingSetId, {
-            'uploader+': authStore.uploader.id,
-          })
-        }
-      } catch {
-        // Non-fatal
-      }
-    }
+    // No co-uploader append: a set's uploaders are derived from its posts on
+    // the server now, so adding a file here is what makes you one.
   }
 
   for (const { file, meta } of plan) {

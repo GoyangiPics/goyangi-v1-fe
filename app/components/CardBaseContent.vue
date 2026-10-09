@@ -68,11 +68,8 @@ watch(isFullscreenModalVisible, (v) => {
 })
 
 const mediaAreaRef = ref<HTMLElement | null>(null)
-const {
-  menuRef: contentActionsMenuRef,
-  adminMenuRef,
-  onContextMenu: handleContextMenu,
-} = useContextMenuTrigger(mediaAreaRef)
+const { menuRef: contentActionsMenuRef, onContextMenu: handleContextMenu } =
+  useContextMenuTrigger(mediaAreaRef)
 
 // Unlike CardUnified, this card holds a single item, so the set has to be
 // fetched rather than reused from an expand.
@@ -236,23 +233,13 @@ function handleMediaClick() {
   <ContentActionsMenu
     ref="contentActionsMenuRef"
     :content="content"
+    @changed="emit('changed')"
+    @content-deleted="emit('changed')"
+    @set-deleted="emit('changed')"
     @open-collections="openAddToCollection"
     @open-labels="openLabels"
     @open-report="openReport"
     @like-all-in-set="likeAllInSet"
-  />
-
-  <!-- Hidden behind ADMIN_MENU_KEY + right-click, and rendered for admins only
-       so nobody else pays for the extra menu. `set-id` rather than a record:
-       this card holds one item and only knows the set it belongs to by id. -->
-  <AdminActionsMenu
-    v-if="authStore.isAdmin"
-    ref="adminMenuRef"
-    :content="content"
-    :set-id="content.set || null"
-    @changed="emit('changed')"
-    @content-deleted="emit('changed')"
-    @set-deleted="emit('changed')"
   />
 </template>
 

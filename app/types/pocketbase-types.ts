@@ -130,6 +130,8 @@ export type ContentsRecord = {
 	created: IsoAutoDateString
 	date?: IsoDateString
 	discord?: string
+	encodeAttempts?: number
+	encodeError?: string
 	file?: FileNameString
 	filename?: string
 	filetype?: ContentsFiletypeOptions
