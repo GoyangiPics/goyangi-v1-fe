@@ -24,6 +24,7 @@
     "@nuxt/ui": "^4.11.3",
     "@pinia/nuxt": "^1.0.2",
     "nuxt": "^4.6.0",
+    "pinia": "^4.0.3",
     "pinia-plugin-persistedstate": "^4.7.1",
     "pocketbase": "^0.28.1",
     "tailwindcss": "^4.3.3",
@@ -31,16 +32,17 @@
     "vue-router": "^5.4.0"
   },
   "devDependencies": {
+    "@golar/vue": "^0.1.10",
     "@iconify-json/lucide": "^1.2.142",
     "@iconify-json/simple-icons": "^1.2.99",
     "@vueuse/core": "^15.0.0",
     "@vueuse/nuxt": "^15.0.0",
+    "golar": "^0.1.10",
     "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
     "pocketbase-typegen": "^1.5.0",
-    "typescript": "^6.0.3",
-    "vitest": "^5.0.3",
-    "vue-tsc": "^3.3.12"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
   },
   "engines": {
     "node": ">=26.0.0"

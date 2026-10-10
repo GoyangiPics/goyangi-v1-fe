@@ -33,9 +33,12 @@ export default defineEventHandler(async (event) => {
       skipTotal: '1',
     })
     if (spec.filter) q.set('filter', spec.filter)
+    // A plain `string` URL: it's PocketBase, not one of our routes, and matching a
+    // template literal against Nitro's typed routes is needlessly deep.
+    const url: string = `${baseUrl}api/collections/${spec.collection}/records?${q}`
     let res: { items: { id: string; updated?: string }[] }
     try {
-      res = await $fetch(`${baseUrl}api/collections/${spec.collection}/records?${q}`)
+      res = await $fetch<typeof res>(url)
     } catch {
       throw createError({ statusCode: 502, statusMessage: 'Upstream unavailable' })
     }

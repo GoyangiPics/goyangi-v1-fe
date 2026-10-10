@@ -36,8 +36,8 @@ See [.env.example](.env.example). Both vars are public (`NUXT_PUBLIC_*`) and shi
 | `pnpm start`             | Run the built server                                                              |
 | `pnpm preview`           | Preview the production build                                                      |
 | `pnpm generate`          | Static-site generation                                                            |
-| `pnpm lint` / `lint:fix` | ESLint                                                                            |
-| `pnpm typecheck`         | Type-check the project                                                            |
+| `pnpm lint` / `lint:fix` | Oxlint                                                                            |
+| `pnpm typecheck`         | Type-check with Golar                                                             |
 | `pnpm typegen`           | Regenerate `app/types/pocketbase-types.ts` from `../goyangi-v1-be/pb_schema.json` |
 
 ## Embed variants
