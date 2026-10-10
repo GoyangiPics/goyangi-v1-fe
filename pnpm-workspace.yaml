@@ -6,11 +6,6 @@
 shellEmulator: true
 trustPolicy: no-downgrade
 
-# Swap Vite's internals for the Rust bundler (Rolldown). Experimental but
-# Nuxt-supported since 4.1 — delete this override to fall back to stock Vite.
-overrides:
-  vite: npm:rolldown-vite@^7
-
 # semver@6.3.1 (July 2023, transitive via @babel/core) predates npm provenance
 # and trips the downgrade check as a false positive — excluded, not trusted less.
 trustPolicyExclude:

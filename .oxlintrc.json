@@ -4,5 +4,8 @@
     "correctness": "error",
     "suspicious": "warn"
   },
+  "rules": {
+    "unicorn/consistent-function-scoping": "off"
+  },
   "ignorePatterns": ["app/types/pocketbase-types.ts", ".nuxt/**", ".output/**", ".claude/**"]
 }

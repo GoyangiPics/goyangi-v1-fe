@@ -46,5 +46,3 @@ export enum MostLikedModes {
   OneMonth = '1month',
   OneWeek = '1week',
 }
-
-export type { Group, Idol, SavedFilter, Tag, Uploader } from '~/types/appTypes'
