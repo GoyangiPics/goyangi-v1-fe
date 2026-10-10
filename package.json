@@ -9,6 +9,7 @@
     "preview": "nuxt preview",
     "start": "node .output/server/index.mjs",
     "postinstall": "nuxt prepare",
+    "prepare": "vp config --hooks --no-agent",
     "lint": "vp lint",
     "lint:fix": "vp lint --fix",
     "fmt": "vp fmt",

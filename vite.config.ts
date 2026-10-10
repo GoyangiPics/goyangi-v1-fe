@@ -35,6 +35,18 @@ export default defineConfig({
     include: ['test/**/*.test.ts'],
   },
 
+  /**
+   * Pre-commit (`.vite-hooks/pre-commit` → `vp staged`): format and lint the
+   * staged files, fixing what can be fixed. When code changes, also type-check
+   * and test the whole project — both take seconds, and a commit that breaks
+   * either shouldn't land. The functions take no file list: those two always
+   * look at everything.
+   */
+  staged: {
+    '*': 'vp check --fix',
+    '*.{ts,vue}': [() => 'nuxt typecheck', () => 'vp test run'],
+  },
+
   fmt: {
     semi: false,
     singleQuote: true,
