@@ -8,8 +8,43 @@ trustPolicy: no-downgrade
 
 # semver@6.3.1 (July 2023, transitive via @babel/core) predates npm provenance
 # and trips the downgrade check as a false positive — excluded, not trusted less.
+#
+# cssnano and its postcss plugins (Nuxt's CSS minifier): npm started writing
+# their trusted-publisher id without its `oidc:` prefix, and pnpm 12 reads the
+# changed string as a takeover. Checked per version — same OIDC config id, same
+# repo and publish workflow in the provenance — so these exact versions only.
 trustPolicyExclude:
+  - cssnano-preset-default@9.4.0
+  - cssnano-utils@8.2.1
+  - cssnano@9.4.0
+  - postcss-colormin@9.0.7
+  - postcss-convert-values@9.0.8
+  - postcss-discard-comments@9.0.7
+  - postcss-discard-duplicates@9.0.6
+  - postcss-discard-empty@9.0.7
+  - postcss-discard-overridden@9.0.6
+  - postcss-merge-longhand@9.3.0
+  - postcss-merge-rules@9.1.3
+  - postcss-minify-font-values@9.0.8
+  - postcss-minify-gradients@9.0.7
+  - postcss-minify-params@9.0.7
+  - postcss-minify-selectors@9.0.7
+  - postcss-normalize-charset@9.0.6
+  - postcss-normalize-display-values@9.0.6
+  - postcss-normalize-positions@9.0.7
+  - postcss-normalize-repeat-style@9.0.6
+  - postcss-normalize-string@9.0.6
+  - postcss-normalize-timing-functions@9.0.6
+  - postcss-normalize-unicode@9.0.6
+  - postcss-normalize-url@9.0.6
+  - postcss-normalize-whitespace@9.0.6
+  - postcss-ordered-values@9.0.8
+  - postcss-reduce-initial@9.0.7
+  - postcss-reduce-transforms@9.0.5
+  - postcss-svgo@9.0.5
+  - postcss-unique-selectors@9.0.6
   - semver@6.3.1
+  - stylehacks@9.0.8
 
 allowBuilds:
   '@parcel/watcher': true

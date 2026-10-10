@@ -4,8 +4,8 @@ Nuxt 4 + Vue 3 + Nuxt UI + Pinia + Tailwind 4, with [Vite+](https://viteplus.dev
 
 ## Requirements
 
-- Node 26+ (see [.node-version](.node-version))
-- pnpm 11+ (managed via Corepack — `corepack enable`)
+- Node 26.11+ (see [.node-version](.node-version))
+- pnpm 12 — any recent pnpm switches to the version pinned in `packageManager` by itself
 - PocketBase backend running (locally on `:8090`, or a remote instance)
 
 ## Setup
