@@ -92,9 +92,9 @@ export function useLikeAll() {
         if (!item) continue
         try {
           const likeRecord = await createLike(userId!, item.id)
-          if (!item.expand) item.expand = {} as any
-          if (!item.expand!.likes) item.expand!.likes = []
-          item.expand!.likes.push({ ...likeRecord } as any)
+          if (!item.expand) item.expand = {}
+          if (!item.expand.likes) item.expand.likes = []
+          item.expand.likes.push({ ...likeRecord })
           result.liked++
         } catch (error) {
           result.failed++

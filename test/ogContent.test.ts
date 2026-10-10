@@ -1,5 +1,5 @@
 import type PocketBase from 'pocketbase'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vite-plus/test'
 import { firstEmbeddableContent } from '~/utils/ogContent'
 
 const READY = { id: 'ready', preview: 'https://cdn/a.avif', original: 'https://cdn/a.mp4' }

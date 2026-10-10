@@ -1,5 +1,5 @@
 import type { Group, Idol } from '~/types/appTypes'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { inferGroups } from '~/utils/inferGroups'
 import { toSlug } from '~/utils/toSlug'
 

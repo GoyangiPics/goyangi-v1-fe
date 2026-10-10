@@ -1,5 +1,5 @@
 import type { Group, Idol, Tag } from '~/types/appTypes'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import {
   buildContentTitle,
   buildFormData,

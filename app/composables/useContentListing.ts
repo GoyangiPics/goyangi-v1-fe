@@ -121,7 +121,7 @@ export function useContentListing(
     const newPage = e.page + 1
     const query = { ...route.query, page: String(newPage) }
     syncedQuery = queryKey(query)
-    router.replace({ query })
+    void router.replace({ query })
     setPage(newPage)
     await fetchItems(newPage)
     window.scrollTo(0, 0)
@@ -171,7 +171,7 @@ export function useContentListing(
       if (applied) {
         const expanded = Object.fromEntries(new URLSearchParams(filtersStore.queryParams))
         syncedQuery = queryKey(expanded)
-        router.replace({ query: expanded })
+        void router.replace({ query: expanded })
       } else {
         filtersStore.applyQueryFilters(route.query)
         syncedQuery = queryKey(route.query)
@@ -190,7 +190,7 @@ export function useContentListing(
 
     // Labels restored from `?label=` are bare slugs; resolve their display names
     // after the fetch, since the filter clause matches on slug and doesn't wait.
-    filtersStore.hydrateLabelNames()
+    void filtersStore.hydrateLabelNames()
   }
 
   async function onFiltersSettingsApply() {
@@ -199,7 +199,7 @@ export function useContentListing(
     syncedQuery = queryKey(query)
     // push, not replace: applying a filter is a step the back button undoes,
     // which is what "restore filters on back/forward" means in practice.
-    router.push({ query })
+    void router.push({ query })
     setPage(1)
     // The route path doesn't change, so the router keeps the scroll position —
     // and a chip clicked at the bottom of page 3 landed the new page 1 with its
@@ -270,13 +270,13 @@ export function useContentListing(
     // another page's filters, and the items are that other query's.
     if (queryKey(route.query) !== syncedQuery) {
       refetchOnActivate = false
-      syncFromRoute()
+      void syncFromRoute()
       return
     }
     if (refetchOnActivate) {
       refetchOnActivate = false
       setPage(1)
-      fetchItems(1)
+      void fetchItems(1)
     }
   })
 
@@ -287,7 +287,7 @@ export function useContentListing(
         refetchOnActivate = true
         return
       }
-      onFiltersSettingsApply()
+      void onFiltersSettingsApply()
     },
   )
 
@@ -329,7 +329,7 @@ export function useContentListing(
     setPage(1)
     const { page: _page, ...query } = route.query
     syncedQuery = queryKey(query)
-    router.replace({ query })
+    void router.replace({ query })
     await fetchItems(1)
     window.scrollTo(0, 0)
   }

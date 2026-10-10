@@ -9,13 +9,14 @@
     "preview": "nuxt preview",
     "start": "node .output/server/index.mjs",
     "postinstall": "nuxt prepare",
-    "lint": "oxlint --deny-warnings",
-    "lint:fix": "oxlint --deny-warnings --fix",
-    "fmt": "oxfmt",
-    "fmt:check": "oxfmt --check",
+    "lint": "vp lint",
+    "lint:fix": "vp lint --fix",
+    "fmt": "vp fmt",
+    "fmt:check": "vp fmt --check",
     "typecheck": "nuxt typecheck",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "check": "vp check && nuxt typecheck",
+    "test": "vp test run",
+    "test:watch": "vp test",
     "typegen": "pocketbase-typegen --json ../goyangi-v1-be/pb_schema.json --out app/types/pocketbase-types.ts"
   },
   "dependencies": {
@@ -38,11 +39,9 @@
     "@vueuse/core": "^15.0.0",
     "@vueuse/nuxt": "^15.0.0",
     "golar": "^0.1.10",
-    "oxfmt": "^0.72.0",
-    "oxlint": "^1.87.0",
     "pocketbase-typegen": "^1.5.0",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.3"
+    "vite-plus": "catalog:"
   },
   "engines": {
     "node": ">=26.0.0"

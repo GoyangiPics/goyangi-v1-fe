@@ -3,7 +3,7 @@ import { isGatewayStatus, isNetworkError } from '~/utils/backendStatus'
 
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
-  const pb = new PocketBase(config.public.baseUrl as string)
+  const pb = new PocketBase(config.public.baseUrl)
 
   // Outage detection is browser-only. An SSR page rendered while the backend is
   // down shows its own empty state, and the startup check below swaps it for

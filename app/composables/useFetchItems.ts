@@ -49,7 +49,7 @@ interface VariationConfig {
    * queries a join collection and hands back the content it points at; null
    * drops the row (a like whose content is gone).
    */
-  mapItem?: (record: any) => any | null
+  mapItem?: (record: any) => any
 }
 
 const CONTENT_EXPAND = 'idol,group,tag,labels,uploader,uploader.user,likes'

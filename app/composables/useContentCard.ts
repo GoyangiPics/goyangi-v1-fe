@@ -51,7 +51,7 @@ export function useContentCard(content: MaybeRefOrGetter<ContentsItem | null>) {
 
   function download() {
     const url = toValue(content)?.original
-    if (url) downloadFile(url)
+    if (url) void downloadFile(url)
   }
 
   onScopeDispose(() => {

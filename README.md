@@ -1,10 +1,10 @@
 # goyangi v1 — frontend
 
-Nuxt 4 + Vue 3 + PrimeVue + Pinia + Tailwind 4. Talks to a PocketBase backend ([../goyangi-v1-be](../goyangi-v1-be)).
+Nuxt 4 + Vue 3 + Nuxt UI + Pinia + Tailwind 4, with [Vite+](https://viteplus.dev) for lint, format and tests (configured in `vite.config.ts`). Talks to a PocketBase backend ([../goyangi-v1-be](../goyangi-v1-be)).
 
 ## Requirements
 
-- Node 26+ (see [.nvmrc](.nvmrc))
+- Node 26+ (see [.node-version](.node-version))
 - pnpm 11+ (managed via Corepack — `corepack enable`)
 - PocketBase backend running (locally on `:8090`, or a remote instance)
 
@@ -36,8 +36,11 @@ See [.env.example](.env.example). Both vars are public (`NUXT_PUBLIC_*`) and shi
 | `pnpm start`             | Run the built server                                                              |
 | `pnpm preview`           | Preview the production build                                                      |
 | `pnpm generate`          | Static-site generation                                                            |
-| `pnpm lint` / `lint:fix` | Oxlint                                                                            |
+| `pnpm check`             | Everything static: format, lint, type-check                                       |
+| `pnpm lint` / `lint:fix` | Lint (`vp lint`: Oxlint, type-aware)                                              |
+| `pnpm fmt` / `fmt:check` | Format (`vp fmt`: Oxfmt)                                                          |
 | `pnpm typecheck`         | Type-check with Golar                                                             |
+| `pnpm test`              | Unit tests (`vp test`: Vitest)                                                    |
 | `pnpm typegen`           | Regenerate `app/types/pocketbase-types.ts` from `../goyangi-v1-be/pb_schema.json` |
 
 ## Embed variants

@@ -25,3 +25,17 @@ onlyBuiltDependencies:
   - esbuild
   - unrs-resolver
   - vue-demi
+
+# Vite+ (from `vp migrate`): every `vite` in the tree, Nuxt's included, is
+# Vite+'s core build of Vite 8, so the dev server, the build and `vp test` all
+# run the same Vite. Bump both together, via `vp migrate` or by hand.
+catalog:
+  vite: npm:@voidzero-dev/vite-plus-core@1.1.0
+  vite-plus: 1.1.0
+overrides:
+  vite@*: 'catalog:'
+peerDependencyRules:
+  allowAny:
+    - vite
+  allowedVersions:
+    vite: '*'

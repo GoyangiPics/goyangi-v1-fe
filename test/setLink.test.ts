@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { setContents, setHref, soleSetContentId } from '~/utils/setLink'
 
 const withContents = (id: string, contentIds: string[]) => ({

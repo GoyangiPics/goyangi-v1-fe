@@ -153,9 +153,7 @@ export const useFiltersStore = defineStore(
       }
 
       if (query.search) {
-        searchValue.value = Array.isArray(query.search)
-          ? String(query.search[0] ?? '')
-          : String(query.search)
+        searchValue.value = Array.isArray(query.search) ? (query.search[0] ?? '') : query.search
       }
 
       const matchByName = <T extends { name: string }>(
@@ -215,12 +213,12 @@ export const useFiltersStore = defineStore(
       if (query.date) {
         const parts = Array.isArray(query.date)
           ? (query.date[0] as string).split(',')
-          : (query.date as string).split(',')
+          : query.date.split(',')
         const start = parts[0] ? new Date(parts[0]) : null
         const end = parts[1] ? new Date(parts[1]) : start
         filters.value.date = [start, end].filter(
           (d) => d instanceof Date && !Number.isNaN(d.getTime()),
-        ) as Date[]
+        )
       }
     }
 

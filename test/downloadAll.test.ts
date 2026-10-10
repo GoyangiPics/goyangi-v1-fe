@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { renditionCount, renditionUrl } from '~/composables/useDownloadAll'
 
 const hdOnly = { original: 'https://cdn/x.mp4' }

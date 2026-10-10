@@ -80,7 +80,7 @@ export function useImgurTools() {
         title: `Tools ${formatShortDate(new Date().toISOString())}`,
         links: linksArray,
       })
-      router.push(`/tools/${record.id}`)
+      void router.push(`/tools/${record.id}`)
     } catch (error) {
       console.error('Failed to create PocketBase record:', error)
       toast.add({ title: "Couldn't share", color: 'error', duration: 2500 })

@@ -5,7 +5,7 @@
  */
 export default defineEventHandler(async (event) => {
   const { baseUrl, siteUrl } = useRuntimeConfig().public
-  const site = String(siteUrl).replace(/\/+$/, '')
+  const site = siteUrl.replace(/\/+$/, '')
 
   async function total(collection: string, filter: string): Promise<number> {
     const q = new URLSearchParams({ perPage: '1', fields: 'id' })

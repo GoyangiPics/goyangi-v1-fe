@@ -40,8 +40,7 @@ export function useDetailSeo<T extends OgBase>(opts: DetailSeoOptions<T>) {
   const route = useRoute()
 
   const { data } = useAsyncData(`og-${opts.type}-${opts.id}`, opts.fetchOg)
-  // useAsyncData's transform typing widens the value; normalize back to T | null.
-  const ogData = computed<T | null>(() => (data.value ?? null) as T | null)
+  const ogData = computed<T | null>(() => data.value ?? null)
 
   // `?sd` embeds the H.264 720p copy. It exists because Safari below A17 Pro / M3
   // renders an AV1 MP4 as a blank frame rather than degrading, so a link shared

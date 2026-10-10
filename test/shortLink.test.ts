@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { shortLink, shortLinks } from '~/utils/shortLink'
 
 const ORIGIN = 'https://goyangi.pics'

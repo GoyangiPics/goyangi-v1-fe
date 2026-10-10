@@ -45,9 +45,9 @@ export function useLikeItem(content: MaybeRefOrGetter<ContentsItem | null>) {
     const userId = authStore.user?.id
     if (!c || !userId || isPending.value) return
 
-    if (!c.expand) c.expand = {} as any
-    if (!c.expand!.likes) c.expand!.likes = []
-    const likes = c.expand!.likes
+    if (!c.expand) c.expand = {}
+    if (!c.expand.likes) c.expand.likes = []
+    const likes = c.expand.likes
 
     isPending.value = true
 
@@ -66,7 +66,7 @@ export function useLikeItem(content: MaybeRefOrGetter<ContentsItem | null>) {
         await removeLike(likeRecord.id, c.id)
       } catch (error) {
         // Rollback
-        likes.push(likeRecord as any)
+        likes.push(likeRecord)
         console.error('Error unliking content:', error)
         toast.add({
           title: "Couldn't unlike",
@@ -82,7 +82,7 @@ export function useLikeItem(content: MaybeRefOrGetter<ContentsItem | null>) {
       try {
         const likeRecord = await createLike(userId, c.id)
         const idx = likes.findIndex((l) => l.id === OPTIMISTIC_LIKE_ID)
-        if (idx !== -1) likes.splice(idx, 1, { ...likeRecord } as any)
+        if (idx !== -1) likes.splice(idx, 1, { ...likeRecord })
       } catch (error) {
         // Rollback
         const idx = likes.findIndex((l) => l.id === OPTIMISTIC_LIKE_ID)

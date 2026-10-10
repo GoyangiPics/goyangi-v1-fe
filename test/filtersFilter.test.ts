@@ -1,5 +1,5 @@
 import type { Filters } from '~/types/typesFilters'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { MostLikedModes } from '~/types/typesFilters'
 import { buildPbFilter, combinePbFilters, pbQuote } from '~/utils/filtersFilter'
 

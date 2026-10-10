@@ -15,7 +15,7 @@ export function useBackendStatus() {
   const nuxtApp = useNuxtApp()
 
   function check(): Promise<boolean> {
-    pending ??= pingBackend(config.public.baseUrl as string)
+    pending ??= pingBackend(config.public.baseUrl)
       .then(async (up) => {
         // Not mid-hydration: swapping out a server-rendered page before its
         // Suspense resolves leaves the app hydrating forever, and head updates

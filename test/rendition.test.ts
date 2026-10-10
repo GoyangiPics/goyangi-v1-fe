@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { resolveRenditionMode } from '~/utils/rendition'
 
 const base = { av1Supported: true as boolean | null, hasSd: true }

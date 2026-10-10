@@ -38,7 +38,7 @@ export function useAuthGate() {
           color: 'neutral',
           variant: 'outline',
           onClick: () => {
-            router.push({ path: '/login', query: { redirect: route.fullPath } })
+            void router.push({ path: '/login', query: { redirect: route.fullPath } })
           },
         },
       ],

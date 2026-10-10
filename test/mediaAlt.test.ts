@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { contentAltText } from '~/utils/mediaAlt'
 
 const ive = { expand: { idol: [{ name: 'Wonyoung' }], group: [{ name: 'IVE' }] } }

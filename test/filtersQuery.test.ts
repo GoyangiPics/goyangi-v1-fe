@@ -1,7 +1,7 @@
 import type { Group, Idol } from '~/types/appTypes'
 import type { Filters } from '~/types/typesFilters'
 import { MostLikedModes } from '~/types/typesFilters'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { serializeFiltersToQuery } from '~/utils/filtersQuery'
 
 function emptyFilters(): Filters {

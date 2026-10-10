@@ -8,7 +8,7 @@ export function useOwnership() {
   const pb = usePocketBase()
 
   const viewer = computed<Viewer>(() => ({
-    isAdmin: !!authStore.isAdmin,
+    isAdmin: authStore.isAdmin,
     uploaderId: authStore.uploader?.id ?? null,
   }))
 

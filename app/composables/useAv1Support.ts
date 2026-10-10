@@ -48,6 +48,6 @@ async function detectAv1() {
 }
 
 export function useAv1Support() {
-  if (import.meta.client && !detectionStarted) detectAv1()
+  if (import.meta.client && !detectionStarted) void detectAv1()
   return av1Supported
 }

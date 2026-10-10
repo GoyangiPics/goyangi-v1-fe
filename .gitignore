@@ -25,3 +25,4 @@ logs
 
 # Local Claude Code settings
 .claude/
+.vitest/

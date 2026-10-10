@@ -162,12 +162,12 @@ export const useAuthStore = defineStore('authStore', () => {
   // signed-out state (user=null). That hydration runs after the factory,
   // so without re-syncing we'd render briefly logged-out on the client.
   if (import.meta.client) {
-    syncFromPb()
+    void syncFromPb()
     queueMicrotask(syncFromPb)
     pb.authStore.onChange(() => {
-      syncFromPb()
+      void syncFromPb()
     })
-    refreshSession()
+    void refreshSession()
   }
 
   return {

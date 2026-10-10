@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vite-plus/test'
 import { contentTypes, relabelFiletypes } from '~/utils/contentTypes'
 
 describe('contentTypes', () => {
