@@ -51,7 +51,7 @@ describe('pickPlayable across a carousel swap', () => {
   // card that just took the slot sits one past the cut, holding it.
   it('does not let a card that just took a freed slot evict the swapped-in item', () => {
     const items = column('abcdefghij'.split(''))
-    const centre = items.filter((i) => 'defg'.includes(i.item as string))
+    const centre = items.filter((i) => 'defg'.includes(i.item))
     const before = pickPlayable(items, 1000, 4, new Set())
     expect(before).toEqual(new Set(centre.map((i) => i.item)))
 

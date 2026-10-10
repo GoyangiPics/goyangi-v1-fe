@@ -53,16 +53,6 @@ export default defineConfig({
       'typescript/no-unsafe-type-assertion': 'off',
       'vite-plus/prefer-vite-plus-imports': 'error',
     },
-    overrides: [
-      {
-        // test/ isn't in any tsconfig, so `~/…` imports resolve to error types
-        // there and every fixture's `as any` looks "unnecessary".
-        files: ['test/**'],
-        rules: {
-          'typescript/no-unnecessary-type-assertion': 'off',
-        },
-      },
-    ],
     ignorePatterns: ['app/types/pocketbase-types.ts', '.nuxt/**', '.output/**', '.claude/**'],
     options: {
       // Type-aware rules (floating promises, needless assertions…) on .ts files.

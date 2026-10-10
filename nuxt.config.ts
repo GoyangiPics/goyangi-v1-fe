@@ -86,6 +86,13 @@ export default defineNuxtConfig({
       include: ['pocketbase'],
     },
   },
+  typescript: {
+    tsConfig: {
+      // The unit tests (vp test) live outside app/, so nothing type-checked
+      // them. They import app code through `~`, so the app project fits.
+      include: ['../test/**/*'],
+    },
+  },
   runtimeConfig: {
     public: {
       hostUrl: 'https://cdn.goyangi.pics/',

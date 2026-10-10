@@ -11,7 +11,7 @@ describe('runPool', () => {
       concurrency: 2,
       onProgress: (settled) => progress.push(settled),
     })
-    expect(result.done.toSorted()).toEqual([1, 2, 3, 4, 5])
+    expect(result.done.toSorted((a, b) => a - b)).toEqual([1, 2, 3, 4, 5])
     expect(result.failed).toEqual([])
     expect(progress).toEqual([1, 2, 3, 4, 5])
   })
