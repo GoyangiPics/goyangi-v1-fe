@@ -227,6 +227,7 @@ export type GroupsRecord = {
 
 export type GroupsIdolsRecord = {
 	aliases?: string
+	birthday?: IsoDateString
 	code: string
 	created: IsoAutoDateString
 	group?: RecordIdString
