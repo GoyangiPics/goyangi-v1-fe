@@ -222,22 +222,35 @@ async function likedRowToggle() {
             :selected="selection.isSelected(item as any)"
             @toggle="selection.toggle(item as any)"
           >
-            <CardUnified
-              v-if="isGrouped"
-              :content="item as any"
-              :is-new="isNew(item as any)"
-              @filters-apply="onFiltersSettingsApply"
-              @changed="refresh"
-            />
-            <CardBaseContent
-              v-else-if="(item as any).original"
-              :content="item"
-              :is-new="isNew(item as any)"
-              fullscreen-host
-              @filters-apply="onFiltersSettingsApply"
-              @changed="refresh"
-              @open-fullscreen="openFullscreen"
-            />
+            <div class="relative">
+              <!-- Quiet on purpose: a dark pill with the colour reduced to a dot,
+                   so a page of new posts doesn't shout. It hangs off the card's
+                   corner, as the loud pink one did, so it takes no room from the
+                   title and covers no more than its edge. Near-opaque rather than
+                   frosted, because half of it sits on the page background. Hidden
+                   while selecting, when SelectOverlay's checkbox is in that corner. -->
+              <span
+                v-if="isNew(item as any) && !selecting"
+                class="absolute -top-1.5 -left-1.5 z-30 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-night-900/90 ring-1 ring-white/10 backdrop-blur-md text-white/75 text-[10px] font-medium leading-none select-none pointer-events-none"
+              >
+                <span class="size-1.5 rounded-full bg-pink-500" />
+                New
+              </span>
+              <CardUnified
+                v-if="isGrouped"
+                :content="item as any"
+                @filters-apply="onFiltersSettingsApply"
+                @changed="refresh"
+              />
+              <CardBaseContent
+                v-else-if="(item as any).original"
+                :content="item"
+                fullscreen-host
+                @filters-apply="onFiltersSettingsApply"
+                @changed="refresh"
+                @open-fullscreen="openFullscreen"
+              />
+            </div>
           </SelectOverlay>
         </template>
       </ContentGrid>
