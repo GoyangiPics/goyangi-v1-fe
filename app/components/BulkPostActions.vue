@@ -102,6 +102,11 @@ function copy(kind: 'preview' | 'sd' | 'hd', label: string) {
   copyLinks(urls, label)
 }
 
+/** The imgur mirrors, for the selected posts that have one (see bot/links.go). */
+const mirrorLinks = computed(() =>
+  props.posts.map((p) => p.mirror?.trim()).filter((u): u is string => !!u),
+)
+
 const more = computed<DropdownMenuItem[][]>(() => [
   [
     {
@@ -122,6 +127,16 @@ const more = computed<DropdownMenuItem[][]>(() => [
       icon: 'i-lucide-download',
       onSelect: () => void downloadAll(props.posts, 'sd'),
     },
+    // Only when some of the selection was mirrored to imgur; most never was.
+    ...(mirrorLinks.value.length
+      ? [
+          {
+            label: 'Copy Imgur links',
+            icon: 'i-simple-icons-imgur',
+            onSelect: () => copyLinks(mirrorLinks.value, 'Imgur'),
+          },
+        ]
+      : []),
     {
       label: 'Copy Discord links',
       icon: 'i-simple-icons-discord',
