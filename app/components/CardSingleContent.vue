@@ -524,6 +524,7 @@ function openExternal(url?: string) {
     :like-animating="isLikeAnimating"
     :like-count="likeCount"
     @like="handleLike"
+    @like-one="handleLike"
     @update:is-visible="isFullscreenVisible = $event"
   />
 

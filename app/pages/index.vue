@@ -297,6 +297,7 @@ async function likedRowToggle() {
       :like-animating="fsLikeAnimating"
       :like-count="fsLikeCount"
       @like="fsHandleLike"
+      @like-one="fsHandleLike"
       @prev="fsPrev"
       @next="fsNext"
       @update:is-visible="!$event && closeFullscreen()"

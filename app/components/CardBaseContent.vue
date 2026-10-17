@@ -102,7 +102,11 @@ function handleMediaClick() {
     case 'a':
       openAddToCollection()
       break
+    // One post either way: this card holds one. In the grouped view L likes
+    // the whole set and S this post; S works here too so the key means the
+    // same thing everywhere.
     case 'l':
+    case 's':
       likeContent()
       break
     case 'd':
@@ -199,6 +203,7 @@ function handleMediaClick() {
     :like-animating="isLikeAnimating"
     :like-count="likeCount"
     @like="handleLike"
+    @like-one="handleLike"
     @update:is-visible="isFullscreenModalVisible = $event"
   />
 

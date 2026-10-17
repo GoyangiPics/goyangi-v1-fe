@@ -304,7 +304,12 @@ function showComingSoon() {
             keys: [
               { key: 'C', icon: 'i-lucide-copy', label: 'Copy image link' },
               { key: 'A', icon: 'i-lucide-folder-plus', label: 'Add to collection' },
-              { key: 'L', icon: 'i-lucide-heart', label: 'Like or unlike' },
+              {
+                key: 'L',
+                icon: 'i-lucide-heart',
+                label: 'Like or unlike (whole set in grouped view)',
+              },
+              { key: 'S', icon: 'i-lucide-heart', label: 'Like or unlike only this post' },
               { key: 'D', icon: 'i-lucide-download', label: 'Download' },
             ],
           },
@@ -314,7 +319,12 @@ function showComingSoon() {
               { key: '← →', icon: 'i-lucide-arrow-left-right', label: 'Previous or next' },
               { key: 'C', icon: 'i-lucide-copy', label: 'Copy image link' },
               { key: 'A', icon: 'i-lucide-folder-plus', label: 'Add to collection' },
-              { key: 'L', icon: 'i-lucide-heart', label: 'Like or unlike' },
+              {
+                key: 'L',
+                icon: 'i-lucide-heart',
+                label: 'Like or unlike (whole set in grouped view)',
+              },
+              { key: 'S', icon: 'i-lucide-heart', label: 'Like or unlike only this post' },
               { key: 'D', icon: 'i-lucide-download', label: 'Download' },
               { key: 'Esc', icon: 'i-lucide-x', label: 'Close' },
             ],
@@ -337,9 +347,9 @@ function showComingSoon() {
         </div>
       </div>
 
-      <!-- This modal is where the app documents its hidden interactions, so the
-           hold gesture belongs here — the context-menu entry is the discoverable
-           path, this is the shortcut. -->
+      <!-- This modal is where the app documents its hidden interactions, so how
+           the heart behaves in each view belongs here — the context-menu entries
+           are the discoverable path. -->
       <p class="text-sm text-night-400 mb-3">Gestures</p>
       <div class="flex items-center gap-3">
         <kbd
@@ -349,7 +359,8 @@ function showComingSoon() {
         </kbd>
         <UIcon name="i-lucide-heart" class="text-night-400 text-sm shrink-0" />
         <span class="text-sm text-night-200">
-          Hold the like button for 1.5s to like the whole set
+          In grouped view the like button likes the whole set, tapped or held. Like a single post
+          from its menu, or with S
         </span>
       </div>
     </template>

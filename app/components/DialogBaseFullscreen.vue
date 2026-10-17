@@ -26,7 +26,9 @@ const props = defineProps<{
   nextContent?: ContentsItem | null
 }>()
 
-const emit = defineEmits(['update:isVisible', 'like', 'prev', 'next'])
+// `like` is whatever the parent's heart does (the whole set, from a grouped
+// card); `likeOne` is always the single post on screen, for the S key.
+const emit = defineEmits(['update:isVisible', 'like', 'likeOne', 'prev', 'next'])
 
 function handleVisibilityChange(value: boolean) {
   emit('update:isVisible', value)
@@ -88,7 +90,8 @@ const isIOS =
   (/iP(hone|ad|od)/.test(navigator.userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
 
-// Keyboard: navigate the set with arrows, like with "l". The dialog is
+// Keyboard: navigate the set with arrows, like with "l" (or "s" for only the
+// post on screen, where "l" likes a whole set). The dialog is
 // v-if'd by its parents, so these bind only while fullscreen is open.
 // Pause every card video behind the backdrop while this is up. Mounted IS
 // open: every parent v-if's this dialog.
@@ -157,6 +160,9 @@ defineShortcuts({
   }),
   l: viewerKeys(() => {
     if (props.likeCount !== undefined) emit('like')
+  }),
+  s: viewerKeys(() => {
+    if (props.likeCount !== undefined) emit('likeOne')
   }),
   c: viewerKeys(() => copyAvif()),
   d: viewerKeys(() => download()),

@@ -13,6 +13,12 @@ const props = defineProps<{
    * a dense row has no obvious surface to right-click.
    */
   withTrigger?: boolean
+  /**
+   * What the card's own heart likes. `set` (a grouped card's) puts "Like only
+   * this post" here; `post`, the default, puts "Like whole set" — the menu
+   * always offers the other one.
+   */
+  likeScope?: 'set' | 'post'
 }>()
 
 const emit = defineEmits<{
@@ -20,6 +26,7 @@ const emit = defineEmits<{
   openLabels: []
   openReport: []
   likeAllInSet: []
+  likeOne: []
   /** From the manage actions: edited or moved, the listing should refetch. */
   changed: []
   contentDeleted: []
@@ -36,9 +43,38 @@ const baseItems = shallowRef<DropdownMenuItem[][]>([])
 // Placed just above Report, which stays last.
 // shallowRef: a deep ref's type unwrapping of DropdownMenuItem overflows tsc.
 const manageRef = shallowRef<{ groups: DropdownMenuItem[][] } | null>(null)
+const { isLiked } = useLikeItem(() => props.content)
+
+/**
+ * The like that the card's heart doesn't do. Computed rather than built on
+ * mount with the rest: "Like" / "Unlike" has to follow the post's state while
+ * the menu stays mounted.
+ */
+const likeEntry = computed<DropdownMenuItem | null>(() => {
+  if (props.likeScope === 'set') {
+    return {
+      label: isLiked.value ? 'Unlike only this post' : 'Like only this post',
+      icon: 'i-lucide-heart',
+      onSelect: () => emit('likeOne'),
+    }
+  }
+  // Liking a card only ever liked that one item, which people kept missing on
+  // multi-item sets. Emitted rather than handled here so each card can supply
+  // the cheapest source of items: CardUnified already holds the whole set with
+  // `likes` expanded, while CardBaseContent has to fetch.
+  if (!props.content.set?.trim()) return null
+  return {
+    label: 'Like whole set',
+    icon: 'i-lucide-heart',
+    onSelect: () => emit('likeAllInSet'),
+  }
+})
+
 const items = computed<DropdownMenuItem[][]>(() => {
   const manage = manageRef.value?.groups ?? []
-  const base = baseItems.value
+  // The like sits at the end of the first group (add to collection, add label).
+  const [organise = [], ...rest] = baseItems.value
+  const base = likeEntry.value ? [[...organise, likeEntry.value], ...rest] : baseItems.value
   if (!manage.length) return base
   return [...base.slice(0, -1), ...manage, ...base.slice(-1)]
 })
@@ -180,17 +216,7 @@ onMounted(() => {
     },
   ]
 
-  // Liking a card only ever liked that one item, which people kept missing on
-  // multi-item sets. Emitted rather than handled here so each card can supply
-  // the cheapest source of items: CardUnified already holds the whole set with
-  // `likes` expanded, while CardBaseContent has to fetch.
-  if (c.set?.trim()) {
-    organise.push({
-      label: 'Like whole set',
-      icon: 'i-lucide-heart',
-      onSelect: () => emit('likeAllInSet'),
-    })
-  }
+  // The like entry joins this group in `items`, where it can stay reactive.
 
   // The two video renditions, resolved once for both the copy and download
   // entries below. HD is the AV1 1080p original, SD the H.264 720p fallback;

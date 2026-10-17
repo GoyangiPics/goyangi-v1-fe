@@ -213,15 +213,41 @@ const titleHref = computed(() => setHref(props.content))
 
 // ─── Like / copy / download on the active item ───────────────────────────────
 
-const { isLiked, likeContent, isLikeAnimating, likeCount, handleLike, copyAvif, download } =
-  useContentCard(() => activeContent.value)
+const {
+  isLiked,
+  likeContent,
+  isLikeAnimating,
+  likeCount,
+  handleLike,
+  playLikeAnimation,
+  copyAvif,
+  download,
+} = useContentCard(() => activeContent.value)
 
+// In the grouped view the heart stands for the whole set: one tap likes every
+// item, and when they all are, unlikes them all. Single posts are reached from
+// the menu ("Like only this post") and the S key. A one-item set is just a post,
+// so it keeps the plain heart.
+//
 // sortedContents is the whole set with `likes` already expanded (see
 // UNIFIED_SET_EXPAND), so this costs no extra requests and updates in place.
-const { likeAllItems } = useLikeAll()
+const { isSetLiked, toggleSetLike } = useLikeSet(() => sortedContents.value)
 
-function likeAllInSet() {
-  likeAllItems(sortedContents.value)
+const heartLiked = computed(() => (hasMultiple.value ? isSetLiked.value : isLiked.value))
+
+function likeSet() {
+  if (!hasMultiple.value) return handleLike()
+  const wasLiked = isSetLiked.value
+  // Not awaited before checking: the likes are optimistic, so the set reads as
+  // liked as soon as the call starts, and the pop should land with the tap.
+  const done = toggleSetLike()
+  if (!wasLiked && isSetLiked.value) void playLikeAnimation()
+  return done
+}
+
+/** Only the post on screen, whatever the heart does. */
+function likeOne() {
+  return hasMultiple.value ? likeContent() : handleLike()
 }
 
 // ─── Media readiness ─────────────────────────────────────────────────────────
@@ -390,7 +416,10 @@ function handleMediaClick() {
       openAddToCollection()
       break
     case 'l':
-      likeContent()
+      likeSet()
+      break
+    case 's':
+      likeOne()
       break
     case 'd':
       download()
@@ -508,14 +537,16 @@ function handleMediaClick() {
             </button>
           </div>
 
+          <!-- The hold gesture stays, with its progress fill, but does what a
+               tap does: the tap already likes the whole set. -->
           <CardLikeButton
             v-if="activeContent && showExtras"
-            :liked="isLiked"
+            :liked="heartLiked"
             :animating="isLikeAnimating"
             :count="likeCount"
             :allow-like-all="hasMultiple"
-            @like="handleLike"
-            @like-all="likeAllInSet"
+            @like="likeSet"
+            @like-all="likeSet"
           />
 
           <!-- Gated on hasMultiple only, NOT showExtras: the arrows above aren't
@@ -548,17 +579,18 @@ function handleMediaClick() {
       :has-navigation="hasMultiple"
       :count="contentCount"
       :index="activeIndex"
-      :liked="isLiked"
+      :liked="heartLiked"
       :like-animating="isLikeAnimating"
       :like-count="likeCount"
-      @like="handleLike"
+      @like="likeSet"
+      @like-one="likeOne"
       @prev="prevContent"
       @next="nextContent"
       @update:is-visible="isFullscreenModalVisible = $event"
     />
 
-    <!-- `scope-items` rather than a `scope`, for the same reason likeAllInSet
-         passes sortedContents: the whole set is already here, so the modal's
+    <!-- `scope-items` rather than a `scope`, for the same reason the heart
+         uses sortedContents: the whole set is already here, so the modal's
          bulk add needs no fetch. -->
     <QuickCollectionModal
       v-if="isAddToCollectionVisible && activeContent"
@@ -595,7 +627,8 @@ function handleMediaClick() {
       @open-collections="openAddToCollection"
       @open-labels="openLabels"
       @open-report="openReport"
-      @like-all-in-set="likeAllInSet"
+      :like-scope="hasMultiple ? 'set' : 'post'"
+      @like-one="likeOne"
     />
   </template>
 </template>

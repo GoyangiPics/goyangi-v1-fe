@@ -20,18 +20,21 @@ export function useContentCard(content: MaybeRefOrGetter<ContentsItem | null>) {
   const likeIcon = computed(() => 'i-lucide-heart')
   const likeCount = computed(() => `${toValue(content)?.expand?.likes?.length ?? 0}`)
 
+  /** The cat-ear pop. Exposed for hearts that like something else (a set). */
+  async function playLikeAnimation() {
+    isLikeAnimating.value = false
+    await nextTick()
+    isLikeAnimating.value = true
+    if (likeAnimTimer) clearTimeout(likeAnimTimer)
+    likeAnimTimer = setTimeout(() => {
+      isLikeAnimating.value = false
+    }, 1200)
+  }
+
   async function handleLike() {
     const wasLiked = isLiked.value
     await likeContent()
-    if (!wasLiked && isLiked.value) {
-      isLikeAnimating.value = false
-      await nextTick()
-      isLikeAnimating.value = true
-      if (likeAnimTimer) clearTimeout(likeAnimTimer)
-      likeAnimTimer = setTimeout(() => {
-        isLikeAnimating.value = false
-      }, 1200)
-    }
+    if (!wasLiked && isLiked.value) await playLikeAnimation()
   }
 
   async function copyAvif() {
@@ -66,6 +69,7 @@ export function useContentCard(content: MaybeRefOrGetter<ContentsItem | null>) {
     likeIcon,
     likeCount,
     handleLike,
+    playLikeAnimation,
     copyAvif,
     download,
   }
