@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test'
-import { ageTurning, isBirthdayOn, localDateKey, parseBirthday } from '~/utils/birthdays'
+import { isBirthdayOn, localDateKey, parseBirthday } from '~/utils/birthdays'
 
 // Local-time constructors throughout: the comparison is against the visitor's
 // calendar day, whatever timezone the test runs in.
@@ -37,17 +37,6 @@ describe('isBirthdayOn', () => {
 
   it('is false without a birthday', () => {
     expect(isBirthdayOn('', on(2026, 1, 1))).toBe(false)
-  })
-})
-
-describe('ageTurning', () => {
-  it('is the year difference', () => {
-    expect(ageTurning('2004-08-31 00:00:00.000Z', on(2026, 8, 31))).toBe(22)
-  })
-
-  it('is null for an implausible year', () => {
-    expect(ageTurning('0001-08-31 00:00:00.000Z', on(2026, 8, 31))).toBeNull()
-    expect(ageTurning(undefined, on(2026, 8, 31))).toBeNull()
   })
 })
 

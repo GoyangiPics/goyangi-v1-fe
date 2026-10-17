@@ -1,5 +1,8 @@
 <script setup lang="ts">
 const settingsStore = useSettingsStore()
+
+// Toasts for idols whose birthday is today, once per day per browser.
+useBirthdayToasts()
 </script>
 
 <template>
@@ -23,9 +26,6 @@ const settingsStore = useSettingsStore()
          the grid itself — therefore shares one width. An earlier attempt held the
          bars narrower than the grid; it read worse than having them line up. -->
     <main class="mx-auto w-full px-4 pb-8">
-      <ClientOnly>
-        <BirthdayAnnouncements />
-      </ClientOnly>
       <slot />
     </main>
     <DialogBaseSettings

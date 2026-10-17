@@ -40,14 +40,6 @@ export function isBirthdayOn(birthday: string | null | undefined, today: Date): 
   return parts.month === month && parts.day === day
 }
 
-/** The age being turned on `today`, or null when the year can't be trusted. */
-export function ageTurning(birthday: string | null | undefined, today: Date): number | null {
-  const parts = parseBirthday(birthday)
-  if (!parts) return null
-  const age = today.getFullYear() - parts.year
-  return age > 0 && age < 100 ? age : null
-}
-
 /** The visitor's calendar date as YYYY-MM-DD, for keying per-day state. */
 export function localDateKey(today: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0')
