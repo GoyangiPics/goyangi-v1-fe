@@ -259,14 +259,14 @@ onMounted(() => {
   // can name the destination instead of the vague "mirror".
   if (c.mirror?.trim()) {
     copyItem.push({
-      label: 'Imgur link',
+      label: 'Imgur',
       icon: 'i-simple-icons-imgur',
       onSelect: () => copyMirror(),
       flat: { label: 'Copy Imgur link' },
     })
     offerForSet(
       'mirror',
-      { label: 'Imgur links', icon: 'i-simple-icons-imgur' },
+      { label: 'Imgur', icon: 'i-simple-icons-imgur' },
       'Imgur',
       'Copy set Imgur links',
     )
@@ -280,12 +280,14 @@ onMounted(() => {
       onSelect: () => copyPreview(),
       flat: { label: previewCopyLabel.value },
     })
-    // "Discord", not WebP/AVIF: a set can hold both.
+    // Named like this post's entry, by format: the two groups list the same
+    // kinds, and a set is uploaded together, so it's mostly one format.
+    const previewLabel = previewCopyLabel.value.replace(/^Copy /, '')
     offerForSet(
       'preview',
-      { label: 'Discord links', icon: 'i-simple-icons-discord' },
-      'Discord',
-      'Copy set Discord links',
+      { label: previewLabel, icon: 'i-simple-icons-discord' },
+      previewLabel,
+      `Copy set ${previewLabel} links`,
     )
   }
 

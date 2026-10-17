@@ -97,14 +97,57 @@ async function removeFromSets() {
   )
 }
 
-function copy(kind: 'preview' | 'sd' | 'hd', label: string) {
-  const urls = props.posts.map((p) => shortLink(p, kind)).filter((u): u is string => !!u)
-  copyLinks(urls, label)
-}
+/** Each kind of link the selection can copy, for the posts that have one. */
+const links = computed(() => {
+  const short = (kind: 'preview' | 'sd' | 'hd') =>
+    props.posts.map((p) => shortLink(p, kind)).filter((u): u is string => !!u)
+  return {
+    // `mirror` holds imgur links and nothing else (see bot/links.go).
+    imgur: props.posts.map((p) => p.mirror?.trim()).filter((u): u is string => !!u),
+    preview: short('preview'),
+    hd: short('hd'),
+    sd: short('sd'),
+  }
+})
 
-/** The imgur mirrors, for the selected posts that have one (see bot/links.go). */
-const mirrorLinks = computed(() =>
-  props.posts.map((p) => p.mirror?.trim()).filter((u): u is string => !!u),
+/**
+ * The preview's format, which is what the post menu calls it too. Stills are
+ * AVIF and gifs mostly WebP, so a mixed selection names both.
+ */
+const previewLabel = computed(() => {
+  const formats = new Set(
+    links.value.preview.map((u) => /\.(webp|avif)$/i.exec(u)?.[1]?.toLowerCase()),
+  )
+  if (formats.size === 1 && formats.has('avif')) return 'AVIF'
+  if (formats.has('avif') && formats.has('webp')) return 'WebP / AVIF'
+  return 'WebP'
+})
+
+/**
+ * In the bar rather than under More: copying links is most of what a
+ * selection is for. Every kind is listed with its count, and a kind none of
+ * the selection has is disabled rather than hidden, so it's clear it exists.
+ */
+const copyItems = computed<DropdownMenuItem[]>(() =>
+  [
+    { key: 'imgur', label: 'Imgur', icon: 'i-simple-icons-imgur', toast: 'Imgur' },
+    {
+      key: 'preview',
+      label: previewLabel.value,
+      icon: 'i-simple-icons-discord',
+      toast: previewLabel.value,
+    },
+    { key: 'hd', label: 'HD', icon: 'i-lucide-copy', toast: 'HD' },
+    { key: 'sd', label: 'SD', icon: 'i-lucide-copy', toast: 'SD' },
+  ].map(({ key, label, icon, toast }) => {
+    const urls = links.value[key as keyof typeof links.value]
+    return {
+      label: `${label} (${urls.length})`,
+      icon,
+      disabled: urls.length === 0,
+      onSelect: () => copyLinks(urls, toast),
+    }
+  }),
 )
 
 const more = computed<DropdownMenuItem[][]>(() => [
@@ -127,23 +170,6 @@ const more = computed<DropdownMenuItem[][]>(() => [
       icon: 'i-lucide-download',
       onSelect: () => void downloadAll(props.posts, 'sd'),
     },
-    // Only when some of the selection was mirrored to imgur; most never was.
-    ...(mirrorLinks.value.length
-      ? [
-          {
-            label: 'Copy Imgur links',
-            icon: 'i-simple-icons-imgur',
-            onSelect: () => copyLinks(mirrorLinks.value, 'Imgur'),
-          },
-        ]
-      : []),
-    {
-      label: 'Copy Discord links',
-      icon: 'i-simple-icons-discord',
-      onSelect: () => copy('preview', 'preview'),
-    },
-    { label: 'Copy HD links', icon: 'i-lucide-copy', onSelect: () => copy('hd', 'HD') },
-    { label: 'Copy SD links', icon: 'i-lucide-copy', onSelect: () => copy('sd', 'SD') },
   ],
   ...(inSets.value.length
     ? [
@@ -186,6 +212,9 @@ const more = computed<DropdownMenuItem[][]>(() => [
       @click="deleteAll"
     />
   </template>
+  <UDropdownMenu :items="copyItems" :content="{ side: 'top', align: 'end' }">
+    <UButton icon="i-lucide-copy" label="Copy" size="xs" color="neutral" variant="outline" />
+  </UDropdownMenu>
   <UDropdownMenu :items="more" :content="{ side: 'top', align: 'end' }">
     <UButton icon="i-lucide-ellipsis" label="More" size="xs" color="neutral" variant="outline" />
   </UDropdownMenu>
