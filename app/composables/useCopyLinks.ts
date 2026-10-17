@@ -59,5 +59,48 @@ export function useCopyLinks() {
     }
   }
 
-  return { copyLinks, copyLink }
+  /**
+   * Like copyLinks, for links that have to be fetched first (a whole set from
+   * a card's menu).
+   *
+   * Safari only lets a page write the clipboard during the click itself, and a
+   * fetch ends that. So the write starts synchronously with a ClipboardItem
+   * whose text is a promise, which every current browser accepts; the plain
+   * await-then-writeText path is only the fallback for browsers without it.
+   */
+  async function copyLinksFrom(load: () => Promise<string[]>, label: string) {
+    const kind = linkKind(label)
+    let count = 0
+    let empty = false
+    const text = load().then((urls) => {
+      count = urls.length
+      empty = count === 0
+      if (empty) throw new Error('nothing to copy')
+      return urls.join('\n')
+    })
+    try {
+      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard.write) {
+        const blob = text.then((t) => new Blob([t], { type: 'text/plain' }))
+        await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })])
+      } else {
+        await navigator.clipboard.writeText(await text)
+      }
+      toast.add({
+        title: count === 1 ? `${kind} link copied` : `${count} ${kind} links copied`,
+        color: 'success',
+        duration: 2000,
+      })
+    } catch {
+      // A load that found no links rejects too; wait for it to say which.
+      await text.catch(() => {})
+      toast.add({
+        title: empty ? 'Nothing to copy' : "Couldn't copy links",
+        description: empty ? `No ${kind} links here.` : undefined,
+        color: empty ? 'warning' : 'error',
+        duration: 3000,
+      })
+    }
+  }
+
+  return { copyLinks, copyLink, copyLinksFrom }
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { ContentsItem, SetsItem, SetsUnifiedItem } from '~/types/appTypes'
+import type { ShortLinkVariant } from '~/utils/shortLink'
 import { computed, onMounted, shallowRef } from 'vue'
 
 const props = defineProps<{
@@ -26,7 +27,9 @@ const emit = defineEmits<{
 }>()
 
 const toast = useToast()
+const pb = usePocketBase()
 const { downloadAllIn } = useDownloadAll()
+const { copyLinksFrom } = useCopyLinks()
 const baseItems = shallowRef<DropdownMenuItem[][]>([])
 
 // Edit / move / delete for owners and admins, from the shared ManageActions.
@@ -96,6 +99,27 @@ async function copyMirror() {
 
 function openDiscord() {
   openDiscordMessage(props.content.discord)
+}
+
+/** What "Copy → Whole set" can hand out, one link per post that has it. */
+type SetLinkKind = 'mirror' | ShortLinkVariant
+
+/**
+ * Every post in the set, fetched on select like the whole-set download: the
+ * menu opens without counting anything, and the toast says how many there were.
+ */
+function copySetLinks(setId: string, kind: SetLinkKind, label: string) {
+  void copyLinksFrom(async () => {
+    const posts = await pb.collection('contents').getFullList<ContentsItem>({
+      filter: pb.filter('set={:id}', { id: setId }),
+      fields: 'id,preview,original,sd,mirror',
+      sort: 'created',
+      requestKey: null,
+    })
+    return posts
+      .map((post) => (kind === 'mirror' ? post.mirror?.trim() : shortLink(post, kind)))
+      .filter((url): url is string => !!url)
+  }, label)
 }
 
 /**
@@ -185,46 +209,80 @@ onMounted(() => {
   // download alongside the per-item ones the flat menu ran past fifteen rows;
   // separators alone stopped being enough. Inside a submenu the parent already
   // says the verb, so the entries name only the rendition.
-  const copy: MenuEntry[] = []
+  //
+  // Four kinds, in the order people reach for them: the imgur mirror when the
+  // post has one, the Discord-friendly preview, then the two video renditions.
+  const copyItem: MenuEntry[] = []
+  const copySet: MenuEntry[] = []
+  const setId = c.set?.trim()
 
-  if (filetype !== 'video') {
-    copy.push({
-      label: previewCopyLabel.value.replace(/^Copy /, ''),
-      icon: 'i-simple-icons-discord',
-      onSelect: () => copyPreview(),
-      flat: { label: previewCopyLabel.value },
+  // The whole set offers what this post does — sets are uploaded and encoded
+  // together, so it's a fair guess for the rest, the same bet the whole-set
+  // download makes with SD. Posts lacking a kind are skipped, and a set with
+  // none at all says so.
+  function offerForSet(kind: SetLinkKind, entry: MenuEntry, toastLabel: string, flatLabel: string) {
+    if (!setId) return
+    copySet.push({
+      ...entry,
+      onSelect: () => copySetLinks(setId, kind, toastLabel),
+      flat: { label: flatLabel },
     })
-  }
-
-  if (filetype === 'video' || filetype === 'gif') {
-    if (hdLink) {
-      copy.push({
-        label: 'HD MP4',
-        slot: 'hd',
-        onSelect: () => copyRendition(hdLink, 'HD'),
-        flat: { label: 'Copy HD MP4' },
-      })
-    }
-
-    if (sdLink) {
-      copy.push({
-        label: 'SD MP4',
-        slot: 'sd',
-        onSelect: () => copyRendition(sdLink, 'SD'),
-        flat: { label: 'Copy SD MP4' },
-      })
-    }
   }
 
   // `mirror` holds imgur links and nothing else (see bot/links.go), so the entry
   // can name the destination instead of the vague "mirror".
   if (c.mirror?.trim()) {
-    copy.push({
+    copyItem.push({
       label: 'Imgur link',
-      icon: 'i-lucide-copy',
+      icon: 'i-simple-icons-imgur',
       onSelect: () => copyMirror(),
       flat: { label: 'Copy Imgur link' },
     })
+    offerForSet(
+      'mirror',
+      { label: 'Imgur links', icon: 'i-simple-icons-imgur' },
+      'Imgur',
+      'Copy set Imgur links',
+    )
+  }
+
+  // A video's preview is its mp4, the same file as HD, so it gets no entry.
+  if (filetype !== 'video') {
+    copyItem.push({
+      label: previewCopyLabel.value.replace(/^Copy /, ''),
+      icon: 'i-simple-icons-discord',
+      onSelect: () => copyPreview(),
+      flat: { label: previewCopyLabel.value },
+    })
+    // "Discord", not WebP/AVIF: a set can hold both.
+    offerForSet(
+      'preview',
+      { label: 'Discord links', icon: 'i-simple-icons-discord' },
+      'Discord',
+      'Copy set Discord links',
+    )
+  }
+
+  if (filetype === 'video' || filetype === 'gif') {
+    if (hdLink) {
+      copyItem.push({
+        label: 'HD MP4',
+        slot: 'hd',
+        onSelect: () => copyRendition(hdLink, 'HD'),
+        flat: { label: 'Copy HD MP4' },
+      })
+      offerForSet('hd', { label: 'HD MP4', slot: 'hd' }, 'HD', 'Copy set HD links')
+    }
+
+    if (sdLink) {
+      copyItem.push({
+        label: 'SD MP4',
+        slot: 'sd',
+        onSelect: () => copyRendition(sdLink, 'SD'),
+        flat: { label: 'Copy SD MP4' },
+      })
+      offerForSet('sd', { label: 'SD MP4', slot: 'sd' }, 'SD', 'Copy set SD links')
+    }
   }
 
   // Download, split by rendition for anything with two of them.
@@ -273,7 +331,6 @@ onMounted(() => {
   // open. SD is offered when this item has one — sets are encoded together, so
   // it's a fair guess for the rest, and the summary toast names any that lack it.
   const downloadSet: MenuEntry[] = []
-  const setId = c.set?.trim()
 
   if (setId) {
     if (isMotion) {
@@ -311,8 +368,18 @@ onMounted(() => {
         ]
       : [downloadItem, downloadSet]
 
+  // Always headed when both scopes are there: "HD MP4" for this post and for
+  // the set would otherwise be two identical rows.
+  const copyGroups =
+    copyItem.length && copySet.length
+      ? [
+          [{ type: 'label' as const, label: 'This post' }, ...copyItem],
+          [{ type: 'label' as const, label: 'Whole set' }, ...copySet],
+        ]
+      : [copyItem, copySet]
+
   const transfer = [
-    submenu('Copy', 'i-lucide-copy', [copy]),
+    submenu('Copy', 'i-lucide-copy', copyGroups),
     submenu('Download', 'i-lucide-download', downloadGroups),
   ].filter((item): item is DropdownMenuItem => !!item)
 
