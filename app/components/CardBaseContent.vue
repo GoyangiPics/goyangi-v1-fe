@@ -13,6 +13,8 @@ const props = defineProps<{
    * the collection page and the ungrouped home grid prev/next.
    */
   fullscreenHost?: boolean
+  /** New since the visitor's last visit (home page only); see CardNewBadge. */
+  isNew?: boolean
 }>()
 
 const emit = defineEmits(['filtersApply', 'changed', 'openFullscreen'])
@@ -131,6 +133,7 @@ function handleMediaClick() {
   <div class="relative">
     <div class="p-2.5 relative surface-card" :class="{ invisible: !loaded }">
       <div v-if="showExtras" class="flex items-center gap-3 mb-1.5">
+        <CardNewBadge v-if="isNew" class="-mr-1.5" />
         <NuxtLink :to="`/single/${content.id}`" class="flex-1 min-w-0 flex items-center">
           <UTooltip :text="content.title" :disabled="!titleOverflows" :content="{ side: 'top' }">
             <UBadge

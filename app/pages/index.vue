@@ -222,33 +222,22 @@ async function likedRowToggle() {
             :selected="selection.isSelected(item as any)"
             @toggle="selection.toggle(item as any)"
           >
-            <div class="relative">
-              <!-- Quiet on purpose: the same frosted pill as the like count, with
-                   the colour reduced to a dot, so a page of new posts doesn't
-                   shout. Inside the corner rather than hanging off it, and hidden
-                   while selecting, when SelectOverlay's checkbox takes the spot. -->
-              <span
-                v-if="isNew(item as any) && !selecting"
-                class="absolute top-2 left-2 z-30 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 text-[10px] font-medium leading-none select-none pointer-events-none"
-              >
-                <span class="size-1.5 rounded-full bg-pink-500" />
-                New
-              </span>
-              <CardUnified
-                v-if="isGrouped"
-                :content="item as any"
-                @filters-apply="onFiltersSettingsApply"
-                @changed="refresh"
-              />
-              <CardBaseContent
-                v-else-if="(item as any).original"
-                :content="item"
-                fullscreen-host
-                @filters-apply="onFiltersSettingsApply"
-                @changed="refresh"
-                @open-fullscreen="openFullscreen"
-              />
-            </div>
+            <CardUnified
+              v-if="isGrouped"
+              :content="item as any"
+              :is-new="isNew(item as any)"
+              @filters-apply="onFiltersSettingsApply"
+              @changed="refresh"
+            />
+            <CardBaseContent
+              v-else-if="(item as any).original"
+              :content="item"
+              :is-new="isNew(item as any)"
+              fullscreen-host
+              @filters-apply="onFiltersSettingsApply"
+              @changed="refresh"
+              @open-fullscreen="openFullscreen"
+            />
           </SelectOverlay>
         </template>
       </ContentGrid>
