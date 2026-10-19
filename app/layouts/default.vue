@@ -28,6 +28,11 @@ useBirthdayToasts()
     <main class="mx-auto w-full px-4 pb-8">
       <slot />
     </main>
+    <!-- ClientOnly: auth state is client-only, and /set/** and /single/** are
+         server-rendered. -->
+    <ClientOnly>
+      <DialogChooseUsername />
+    </ClientOnly>
     <DialogBaseSettings
       :is-visible="settingsStore.isSettingsOpen"
       @update:is-visible="settingsStore.isSettingsOpen = $event"

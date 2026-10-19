@@ -34,7 +34,8 @@ async function onUserAvatarChange(e: Event) {
 }
 
 // ─── Uploader ─────────────────────────────────────────────────────────────────
-const uploaderName = ref(authStore.uploader?.name ?? '')
+// Falls back to the account name, which the uploader name is kept equal to.
+const uploaderName = ref(authStore.uploader?.name ?? displayName(authStore.user?.name))
 const isSavingUploaderName = ref(false)
 
 async function saveUploaderName() {

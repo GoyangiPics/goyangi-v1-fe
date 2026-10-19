@@ -21,7 +21,9 @@ defineShortcuts({
 const toast = useToast()
 const authStore = useAuthStore()
 
-const name = ref('')
+// The account's name by default: the two are kept equal (hooks/usernames.go
+// in the backend), so this is usually just a confirmation.
+const name = ref(displayName(authStore.user?.name))
 const isSubmitting = ref(false)
 
 async function handleCreate() {

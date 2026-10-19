@@ -25,6 +25,12 @@ export const useAuthStore = defineStore('authStore', () => {
    */
   let sessionEpoch = 0
   let refreshRequested = false
+  /**
+   * Whether this page load's refreshSession has answered. The cached record can
+   * be stale in ways that matter for prompts — a name the backend has since
+   * backfilled reads as missing until then.
+   */
+  const isSessionFresh = ref(false)
 
   const authRefreshKey = 'authStore:authRefresh'
 
@@ -55,6 +61,8 @@ export const useAuthStore = defineStore('authStore', () => {
       // in localStorage renders a signed-in UI whose every request fails.
       // Aborts (status 0) and network blips must not sign anyone out.
       if (error?.status === 401 || error?.status === 403) pb.authStore.clear()
+    } finally {
+      isSessionFresh.value = true
     }
   }
 
@@ -67,17 +75,20 @@ export const useAuthStore = defineStore('authStore', () => {
 
   async function login(email: string, password: string) {
     await pb.collection('users').authWithPassword(email, password)
+    isSessionFresh.value = true // straight from the server
     await syncFromPb()
   }
 
-  async function register(email: string, password: string, passwordConfirm: string) {
-    await pb.collection('users').create({ email, password, passwordConfirm })
+  async function register(name: string, email: string, password: string, passwordConfirm: string) {
+    await pb.collection('users').create({ name: name.trim(), email, password, passwordConfirm })
     await pb.collection('users').authWithPassword(email, password)
+    isSessionFresh.value = true // straight from the server
     await syncFromPb()
   }
 
   async function loginWithOAuth(providerType: string) {
     await pb.collection('users').authWithOAuth2({ provider: providerType })
+    isSessionFresh.value = true // straight from the server
     await syncFromPb()
   }
 
@@ -121,6 +132,7 @@ export const useAuthStore = defineStore('authStore', () => {
       name: name.trim(),
       user: user.value.id,
     })
+    adoptUploaderName()
   }
 
   async function updateUploaderName(name: string) {
@@ -128,6 +140,26 @@ export const useAuthStore = defineStore('authStore', () => {
     uploader.value = await pb.collection('uploaders').update<Uploader>(uploader.value.id, {
       name: name.trim(),
     })
+    adoptUploaderName()
+  }
+
+  /**
+   * The backend copies an uploader's name onto its account (hooks/usernames.go).
+   * Mirrored into the cached record so the header and owner chips update now,
+   * not after the next sign-in.
+   */
+  function adoptUploaderName() {
+    const record = pb.authStore.record
+    if (!record || !uploader.value?.name || record.name === uploader.value.name) return
+    pb.authStore.save(pb.authStore.token, { ...record, name: uploader.value.name })
+  }
+
+  /** For accounts that predate required usernames — see DialogChooseUsername. */
+  async function updateUsername(name: string) {
+    if (!user.value) return
+    const record = await pb.collection('users').update(user.value.id, { name: name.trim() })
+    pb.authStore.save(pb.authStore.token, record)
+    user.value = record
   }
 
   /** The uploader's own opt-out from automatic Discord import (bot/ingest.go). */
@@ -174,6 +206,7 @@ export const useAuthStore = defineStore('authStore', () => {
     user,
     uploader,
     isValid,
+    isSessionFresh,
     canUpload,
     isAdmin,
     login,
@@ -182,6 +215,7 @@ export const useAuthStore = defineStore('authStore', () => {
     logout,
     createUploader,
     updateUploaderName,
+    updateUsername,
     setDiscordImport,
     updateUserAvatar,
     deleteAccount,

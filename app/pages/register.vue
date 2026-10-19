@@ -12,13 +12,14 @@ const authStore = useAuthStore()
 const toast = useToast()
 const { redirectTarget } = useAuthRedirect()
 
+const username = ref('')
 const email = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
 
 async function registerWithData() {
   // Validation
-  if (!email.value || !password.value || !passwordConfirm.value) {
+  if (!username.value.trim() || !email.value || !password.value || !passwordConfirm.value) {
     toast.add({
       title: 'Fill in all fields',
       color: 'warning',
@@ -47,7 +48,7 @@ async function registerWithData() {
   }
 
   try {
-    await authStore.register(email.value, password.value, passwordConfirm.value)
+    await authStore.register(username.value, email.value, password.value, passwordConfirm.value)
     toast.add({
       title: 'Account created',
       color: 'success',
@@ -78,7 +79,25 @@ async function registerWithData() {
           <h2 class="text-2xl text-white font-semibold">Register</h2>
           <p class="text-sm text-night-400 mt-2">Create a new account</p>
           <form class="mt-6" @submit.prevent="registerWithData">
+            <!-- Required: Discord accounts arrive named, and an email account with
+                 no name showed up blank on everything it made. -->
             <div>
+              <label for="register-username" class="block text-sm text-night-300">Username</label>
+              <UInput
+                id="register-username"
+                v-model="username"
+                name="username"
+                autocomplete="username"
+                placeholder="Shown on your posts and collections"
+                maxlength="100"
+                class="w-full mt-2"
+                :ui="{ base: 'px-4 rounded-lg' }"
+                autofocus
+                required
+              />
+            </div>
+
+            <div class="mt-4">
               <label for="register-email" class="block text-sm text-night-300">Email</label>
               <UInput
                 id="register-email"
@@ -89,7 +108,6 @@ async function registerWithData() {
                 placeholder="Your email"
                 class="w-full mt-2"
                 :ui="{ base: 'px-4 rounded-lg' }"
-                autofocus
                 required
               />
             </div>
