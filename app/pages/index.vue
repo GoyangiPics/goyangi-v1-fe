@@ -95,6 +95,7 @@ const {
 const pb = usePocketBase()
 const { since: lastVisit, isNew } = useLastVisit()
 const newSinceCount = ref(0)
+const showNewBadges = computed(() => settingsStore.settings.noDistractionMode === 'Disabled')
 
 // All contents, not the filtered listing: "what did I miss" is a question about
 // the site, and the badges already show which of those are on this page.
@@ -228,9 +229,10 @@ async function likedRowToggle() {
                    corner, as the loud pink one did, so it takes no room from the
                    title and covers no more than its edge. Near-opaque rather than
                    frosted, because half of it sits on the page background. Hidden
-                   while selecting, when SelectOverlay's checkbox is in that corner. -->
+                   while selecting, when SelectOverlay's checkbox is in that corner,
+                   and in no-distraction mode, which strips the card's other extras. -->
               <span
-                v-if="isNew(item as any) && !selecting"
+                v-if="showNewBadges && isNew(item as any) && !selecting"
                 class="absolute -top-1.5 -left-1.5 z-30 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-night-900/90 ring-1 ring-white/10 backdrop-blur-md text-white/75 text-[10px] font-medium leading-none select-none pointer-events-none"
               >
                 <span class="size-1.5 rounded-full bg-pink-500" />
