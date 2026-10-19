@@ -10,19 +10,21 @@ export default defineNuxtConfig({
       // No titleTemplate here: a string template with no %s replaced every
       // page's title with the literal word. The template is a function now, in
       // app.vue — head config in this file has to be serialisable.
-      title: 'goyangi',
+      //
+      // No title, description or og:site_name either. This head is the whole
+      // server response for every SPA route, and those three are what Discord
+      // builds a link embed from — so /collections, /sets, /labels and the rest
+      // all unfurled as the same generic site card. Only the homepage gets them
+      // (server/plugins/home-preview.ts); the detail pages set their own
+      // (useDetailSeo). In the browser, app.vue's titleTemplate still names
+      // every tab.
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        {
-          name: 'description',
-          content: 'K-pop pics, gifs and videos to browse, like and collect.',
-        },
         // night-950 (oklch(0.145 0.012 340)) — keep in sync with main.css
         // and public/site.webmanifest.
         { name: 'theme-color', content: '#0e080c' },
         { name: 'apple-mobile-web-app-title', content: 'goyangi' },
-        { property: 'og:site_name', content: '🐱 goyangi.pics' },
       ],
       link: [
         // Modern minimal favicon set (see public/): SVG for modern browsers,
