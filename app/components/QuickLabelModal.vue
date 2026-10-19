@@ -10,10 +10,21 @@ import { computed, onMounted, ref } from 'vue'
  * interaction: a searchable list, checkbox rows, and inline creation of a new
  * entry. Differences come from labels being a shared namespace rather than a
  * per-user one — see the removal gate below.
+ *
+ * Opened from a grouped card it also gets the rest of the set, and a toggle to
+ * label every post in it. Off by default, unlike the collection modal's: a
+ * label describes what's in one picture ("hat", "mirror selca") far more often
+ * than it describes a whole set, and labels that landed on thirty posts by
+ * mistake can only come off one applier at a time.
  */
 const props = defineProps<{
   isVisible: boolean
   content: ContentsItem
+  /**
+   * The whole set, clicked post included, when the caller holds it. Two or more
+   * show the "every post in this set" toggle.
+   */
+  scopeItems?: ContentsItem[]
 }>()
 
 const emit = defineEmits<{
@@ -35,6 +46,12 @@ const results = ref<Label[]>([])
 const applied = ref<Label[]>([])
 const joins = ref<LabelJoin[]>([])
 const isBusy = ref(false)
+/** Per open, never remembered — see the note at the top. */
+const allInSet = ref(false)
+
+const others = computed(() => (props.scopeItems ?? []).filter((c) => c.id !== props.content.id))
+const hasSet = computed(() => others.value.length > 0)
+const setSize = computed(() => others.value.length + 1)
 
 const appliedIds = computed(() => new Set(applied.value.map((l) => l.id)))
 
@@ -70,12 +87,65 @@ onMounted(async () => {
   results.value = await searchLabels('')
 })
 
+/**
+ * The rest of the set, after the clicked post has been done.
+ *
+ * Sequenced after it rather than alongside, for adds: the clicked post's apply
+ * is what finds or creates the label, and several applies racing to create the
+ * same new label could each make one. The posts are the card's live records,
+ * so patching their `expand.labels` updates every chip row with no refetch.
+ */
+async function applyToOthers(label: Label) {
+  const result = await runPool(others.value, async (post) => {
+    const { applied: didApply } = await applyLabel(post.id, label.name)
+    if (!didApply) return
+    const current = post.expand?.labels ?? []
+    applyLabelsToContent(post, [...current, label])
+  })
+  const n = result.done.length + 1
+  toast.add({
+    title: `Labelled ${n} post${n === 1 ? '' : 's'}`,
+    description: result.failed.length ? `${result.failed.length} failed. Try again.` : undefined,
+    color: result.failed.length ? 'warning' : 'success',
+    duration: result.failed.length ? 5000 : 2000,
+  })
+}
+
+/**
+ * Removals cover the set too while the toggle is on — it's the undo for a
+ * set-wide add. Only posts carrying the label are tried, and a post where
+ * someone else applied it 403s under the delete rule and is left as it is.
+ */
+async function removeFromOthers(label: Label) {
+  const carrying = others.value.filter((post) =>
+    (post.expand?.labels ?? []).some((l: Label) => l.id === label.id),
+  )
+  const result = await runPool(carrying, async (post) => {
+    await removeLabel(post.id, label.id)
+    applyLabelsToContent(
+      post,
+      (post.expand?.labels ?? []).filter((l: Label) => l.id !== label.id),
+    )
+  })
+  const n = result.done.length + 1
+  toast.add({
+    title: `Removed from ${n} post${n === 1 ? '' : 's'}`,
+    description: result.failed.length
+      ? `${result.failed.length} kept it — someone else added it there.`
+      : undefined,
+    color: 'success',
+    duration: result.failed.length ? 4000 : 2000,
+  })
+}
+
 async function add(name: string) {
   if (!requireAuth('add labels')) return
   isBusy.value = true
   try {
     const { label, applied: didApply } = await applyLabel(props.content.id, name)
-    if (!didApply) {
+    if (allInSet.value && hasSet.value) {
+      await applyToOthers(label)
+    } else if (!didApply) {
       toast.add({
         title: 'Already added',
         description: `"${label.name}" is already on this post.`,
@@ -104,6 +174,7 @@ async function remove(label: Label) {
   isBusy.value = true
   try {
     await removeLabel(props.content.id, label.id)
+    if (allInSet.value && hasSet.value) await removeFromOthers(label)
     await refresh()
     emit('changed', [...applied.value])
   } catch {
@@ -134,6 +205,13 @@ function close() {
       <p class="text-xs text-night-500 mb-3">
         Anyone can add labels, like "hat" or "mirror selca".
       </p>
+
+      <div v-if="hasSet" class="mb-3 rounded-lg border border-white/10 px-3 py-2.5">
+        <UCheckbox v-model="allInSet" :label="`Label all ${setSize} posts in this set`" />
+        <p class="mt-1 pl-6 text-xs text-night-500">
+          Adds and removals cover the whole set, not just this post.
+        </p>
+      </div>
 
       <UInput
         v-model="term"

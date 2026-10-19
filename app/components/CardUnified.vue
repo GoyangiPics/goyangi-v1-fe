@@ -604,6 +604,7 @@ function handleMediaClick() {
       v-if="isLabelsVisible && activeContent"
       :is-visible="isLabelsVisible"
       :content="activeContent"
+      :scope-items="sortedContents"
       @update:is-visible="isLabelsVisible = $event"
       @changed="applyLabelsToContent(activeContent, $event)"
     />
