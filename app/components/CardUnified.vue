@@ -592,11 +592,13 @@ function handleMediaClick() {
     <!-- `scope-items` rather than a `scope`, for the same reason the heart
          uses sortedContents: the whole set is already here, so the modal's
          bulk add needs no fetch. -->
+    <!-- A one-post set gets no scope: "all posts in this set" would be the
+         post itself. -->
     <QuickCollectionModal
       v-if="isAddToCollectionVisible && activeContent"
       :is-visible="isAddToCollectionVisible"
       :content="activeContent"
-      :scope-items="sortedContents"
+      :scope-items="hasMultiple ? sortedContents : undefined"
       @update:is-visible="isAddToCollectionVisible = $event"
     />
 
