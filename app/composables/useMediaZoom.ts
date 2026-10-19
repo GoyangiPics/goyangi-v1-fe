@@ -114,6 +114,9 @@ export function useMediaZoom(box: Ref<HTMLElement | null>, opts: { onTap: () => 
   }
 
   function onPointerDown(e: PointerEvent) {
+    // Right and middle clicks are for the browser's menu or a new tab, not a
+    // tap: counted as one, a right-click closed the viewer under its own menu.
+    if (e.button !== 0) return
     ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
     animate.value = false
     pointers.set(e.pointerId, local(e))
@@ -192,6 +195,14 @@ export function useMediaZoom(box: Ref<HTMLElement | null>, opts: { onTap: () => 
     }, DOUBLE_TAP_MS)
   }
 
+  /**
+   * A context menu that opens on a primary press — ctrl+click on a Mac, or a
+   * long-press on touch — ends that press as no tap at all.
+   */
+  function onContextMenu() {
+    moved = true
+  }
+
   // ─── Wheel ─────────────────────────────────────────────────────────────────
   //
   // A trackpad pinch arrives as a wheel event with ctrlKey set, which is also
@@ -233,6 +244,7 @@ export function useMediaZoom(box: Ref<HTMLElement | null>, opts: { onTap: () => 
       pointermove: onPointerMove,
       pointerup: onPointerUp,
       pointercancel: onPointerUp,
+      contextmenu: onContextMenu,
       wheel: onWheel,
     },
   }
