@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const settingsStore = useSettingsStore()
 
-// Toasts for idols whose birthday is today, once per day per browser.
+// Toasts for idols whose birthday is today, once per day per browser, signed-in only.
 useBirthdayToasts()
 </script>
 

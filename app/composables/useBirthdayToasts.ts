@@ -1,4 +1,4 @@
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { isBirthdayOn, localDateKey } from '~/utils/birthdays'
 import { idolDisplayName, idolQueryToken } from '~/utils/idolSelection'
 
@@ -37,12 +37,17 @@ function writeShown(dateKey: string, ids: string[]) {
  * that day would turn a greeting into noise. "Today" is the visitor's own
  * calendar day, so this runs on mount — the server knows neither that nor
  * their storage.
+ *
+ * Signed-in visitors only, so the login and register pages stay quiet. The
+ * layout stays mounted across signing in, hence a watch rather than a one-off
+ * check: the greeting arrives as soon as the session does.
  */
 export function useBirthdayToasts() {
+  const authStore = useAuthStore()
   const referenceStore = useReferenceStore()
   const toast = useToast()
 
-  onMounted(async () => {
+  async function announce() {
     const today = new Date()
     const dateKey = localDateKey(today)
     // Shared with the listing pages, so on most of them this is already loaded.
@@ -81,5 +86,15 @@ export function useBirthdayToasts() {
       })
     }
     writeShown(dateKey, [...shown, ...celebrating.map((idol) => idol.id)])
+  }
+
+  onMounted(() => {
+    watch(
+      () => authStore.isValid,
+      (signedIn) => {
+        if (signedIn) void announce()
+      },
+      { immediate: true },
+    )
   })
 }
