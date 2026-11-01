@@ -52,7 +52,7 @@ interface VariationConfig {
   mapItem?: (record: any) => any
 }
 
-const CONTENT_EXPAND = 'idol,group,tag,labels,uploader,uploader.user,likes'
+export const CONTENT_EXPAND = 'idol,group,tag,labels,uploader,uploader.user,likes'
 // The same expand, reached through a `users_likes` row's `content` relation.
 const LIKED_CONTENT_EXPAND = [
   'content',
