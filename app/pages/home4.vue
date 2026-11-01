@@ -13,7 +13,8 @@ import { shortLink } from '~/utils/shortLink'
  * come back daily and puts uploaders in view.
  */
 useHead({ title: 'Home' })
-definePageMeta({ middleware: ['auth'] })
+// TEMP(dev): open to signed-out visitors for the home trials. Restore
+// `definePageMeta({ middleware: ['auth'] })` before this reaches main.
 
 const pb = usePocketBase()
 const { ready, referenceStore } = useHomeReady()

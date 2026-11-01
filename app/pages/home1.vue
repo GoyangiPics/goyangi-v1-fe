@@ -21,7 +21,8 @@ import {
  * Site uploads only; the full feed stays at `/`.
  */
 useHead({ title: 'Home' })
-definePageMeta({ middleware: ['auth'] })
+// TEMP(dev): open to signed-out visitors for the home trials. Restore
+// `definePageMeta({ middleware: ['auth'] })` before this reaches main.
 
 const { ready, referenceStore, starsStore } = useHomeReady()
 const tags = computed(() => referenceStore.tags)

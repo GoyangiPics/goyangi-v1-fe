@@ -6,7 +6,8 @@ import { MostLikedModes } from '~/types/typesFilters'
 useHead({ title: 'Home' })
 
 definePageMeta({
-  middleware: ['auth'],
+  // TEMP(dev): open to signed-out visitors for the home trials. Restore
+  // `middleware: ['auth'],` before this reaches main.
   // Kept alive so back from a /single/ page is instant with the scroll intact —
   // the SPA's version of bfcache. Capped: a cached page keeps its whole grid.
   // useContentListing guards its watchers for this; see the KeepAlive note there.

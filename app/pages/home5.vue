@@ -13,7 +13,8 @@ import { idolQueryToken } from '~/utils/idolSelection'
  * the groups that are busiest right now.
  */
 useHead({ title: 'Home' })
-definePageMeta({ middleware: ['auth'] })
+// TEMP(dev): open to signed-out visitors for the home trials. Restore
+// `definePageMeta({ middleware: ['auth'] })` before this reaches main.
 
 const pb = usePocketBase()
 const { ready, referenceStore, starsStore } = useHomeReady()

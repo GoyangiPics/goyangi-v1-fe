@@ -19,7 +19,8 @@ import {
  * get a nudge to pick some, and "Your idols" becomes the first chip once they do.
  */
 useHead({ title: 'Home' })
-definePageMeta({ middleware: ['auth'] })
+// TEMP(dev): open to signed-out visitors for the home trials. Restore
+// `definePageMeta({ middleware: ['auth'] })` before this reaches main.
 
 const route = useRoute()
 const router = useRouter()
