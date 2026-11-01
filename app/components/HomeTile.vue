@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { RouteLocationRaw } from 'vue-router'
 import type { ContentsItem } from '~/types/appTypes'
 import { computed, ref } from 'vue'
 
@@ -21,8 +22,8 @@ const props = withDefaults(
     aspect?: string
     /** Fill the parent's box instead of setting a shape — for bento grids. */
     fill?: boolean
-    /** Where the tile links. The post's page by default. */
-    to?: string
+    /** Where the tile links. The post's page by default; false for no link, when the parent wraps the tile in its own control. */
+    to?: RouteLocationRaw | false
     rounded?: string
   }>(),
   { aspect: '1', fill: false, to: undefined, rounded: 'rounded-xl' },
@@ -39,6 +40,7 @@ const { usePreviewImage, previewImageSrc, videoSources } = useContentSources(
 const gifVideoRef = ref<HTMLVideoElement | null>(null)
 useVideoVisibility(gifVideoRef, autoplay)
 
+const NuxtLink = resolveComponent('NuxtLink')
 const href = computed(() => props.to ?? `/single/${props.content.id}`)
 const alt = computed(() => contentAltText(props.content))
 const poster = computed(() => props.content.static || undefined)
@@ -46,8 +48,9 @@ const still = computed(() => contentThumbUrl(props.content))
 </script>
 
 <template>
-  <NuxtLink
-    :to="href"
+  <component
+    :is="href === false ? 'div' : NuxtLink"
+    :to="href === false ? undefined : href"
     class="group relative block overflow-hidden bg-night-900"
     :class="[rounded, fill ? 'h-full w-full' : '']"
     :style="fill ? undefined : { aspectRatio: aspect }"
@@ -114,5 +117,5 @@ const still = computed(() => contentThumbUrl(props.content))
       :class="rounded"
     />
     <slot />
-  </NuxtLink>
+  </component>
 </template>
