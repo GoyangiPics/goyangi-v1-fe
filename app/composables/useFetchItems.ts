@@ -23,12 +23,12 @@ interface VariationCtx {
   route: RouteLocationNormalizedLoaded
   userId: string | undefined
   /**
-   * Starred ids, passed in rather than read from the store inside a baseFilter.
-   * These closures run inside an async fetchItems, where Pinia's active instance
-   * isn't guaranteed — so the store is read in useFetchItems' setup instead.
+   * Whether the account has starred anything, passed in rather than read from
+   * the store inside a baseFilter. These closures run inside an async
+   * fetchItems, where Pinia's active instance isn't guaranteed — so the store is
+   * read in useFetchItems' setup instead.
    */
-  starIdolIds: string[]
-  starGroupIds: string[]
+  hasStars: boolean
 }
 
 interface VariationConfig {
@@ -76,6 +76,13 @@ const COLLECTION_EXPAND = 'user,contents_via_collections'
 /**
  * The starred-idols/groups clause, shared by the two feed variations.
  *
+ * Joined through `users_stars` on the server rather than spelled out as ids.
+ * The id list was one `idol.id?=` clause per star, and at ~150 stars it passed
+ * PocketBase's 3500-character filter limit and the feed answered 400. This
+ * stays the same short string however many stars there are, and the server
+ * resolves it against its own copy of them, so it can't go stale either.
+ * users_stars' list rule (owner only) applies inside the join too.
+ *
  * `contents` and `contents_sets` both carry plain `idol`/`group` relations, so the
  * same paths work against either — the same reason those two filter keys need no
  * `setPath` in FIELD_SPECS.
@@ -88,12 +95,10 @@ const COLLECTION_EXPAND = 'user,contents_via_collections'
  * grouped idol filter on /home has the same blind spot; fixing it belongs on the
  * upload path, not in this clause.
  */
-function starredScope({ starIdolIds, starGroupIds }: VariationCtx): string | null {
-  const parts = [
-    ...starIdolIds.map((id) => `idol.id?=${pbQuote(id)}`),
-    ...starGroupIds.map((id) => `group.id?=${pbQuote(id)}`),
-  ]
-  return parts.length > 0 ? `(${parts.join('||')})` : null
+function starredScope({ userId, hasStars }: VariationCtx): string | null {
+  if (!userId || !hasStars) return null
+  const me = pbQuote(userId)
+  return `(idol.users_stars_via_idol.user?=${me}||group.users_stars_via_group.user?=${me})`
 }
 
 const VARIATIONS: Record<FetchVariation, VariationConfig> = {
@@ -309,8 +314,7 @@ export function useFetchItems(variation: FetchVariation) {
       const ctx: VariationCtx = {
         route,
         userId: authStore.user?.id,
-        starIdolIds: starsStore.idolIds,
-        starGroupIds: starsStore.groupIds,
+        hasStars: starsStore.hasAny,
       }
 
       const baseFilter = config.baseFilter?.(ctx) ?? ''
