@@ -99,6 +99,25 @@ const COLLECTION_EXPAND = 'user,previews'
  * grouped idol filter on /home has the same blind spot; fixing it belongs on the
  * upload path, not in this clause.
  */
+// ─── Finished posts only, on the browsing feeds ─────────────────────────────
+//
+// A post has `preview` once its encode lands, whatever its type (a video's is
+// the mp4). Until then a card for it is a spinner that never resolves on its
+// own: the listing fetched it before the encode finished, and nothing refetches.
+// So home and My feed leave unfinished posts out. Owners still see them, with
+// a retry, on /me/uploads.
+//
+// The grouped views hold a set back until EVERY post in it is done — PocketBase
+// reads the non-`?` form on a back-relation as "all of them" — rather than show
+// a carousel with spinners in it. The same rule across a post's set in the
+// ungrouped views timed out (30 s on the live data), so those check the post
+// alone, and a set's finished posts show up there as they finish.
+//
+// A failed encode has no preview either, so its set stays off these views
+// until the owner retries or deletes it.
+const POST_FINISHED = 'preview != ""'
+const SET_FINISHED = 'contents_via_set.preview != ""'
+
 function starredScope({ userId, hasStars }: VariationCtx): string | null {
   if (!userId || !hasStars) return null
   const me = pbQuote(userId)
@@ -109,7 +128,7 @@ const VARIATIONS: Record<FetchVariation, VariationConfig> = {
   allContents: {
     collection: 'contents',
     expand: CONTENT_EXPAND,
-    baseFilter: () => 'filetype != "sticker"',
+    baseFilter: () => combinePbFilters('filetype != "sticker"', POST_FINISHED),
     applyUserFilters: true,
   },
   // Asked from the `users_likes` side, not `contents` filtered by `likes.user`.
@@ -165,7 +184,7 @@ const VARIATIONS: Record<FetchVariation, VariationConfig> = {
     // for a set with no contents. So an empty set used to consume a slot in the
     // page of 24, count towards the "N sets" total, and leave a hole in the
     // masonry — a page that looked short for no visible reason.
-    baseFilter: () => 'contents_via_set.id ?!= ""',
+    baseFilter: () => combinePbFilters('contents_via_set.id ?!= ""', SET_FINISHED),
     applyUserFilters: true,
     defaultSort: '-created',
     remapForSets: true,
@@ -242,7 +261,7 @@ const VARIATIONS: Record<FetchVariation, VariationConfig> = {
       // when signed out: an unscoped feed would look like the scope silently
       // failed rather than being empty.
       if (!scope) return 'id=""'
-      return combinePbFilters(scope, 'filetype != "sticker"')
+      return combinePbFilters(scope, 'filetype != "sticker"', POST_FINISHED)
     },
     applyUserFilters: true,
     defaultSort: '-created',
@@ -255,7 +274,7 @@ const VARIATIONS: Record<FetchVariation, VariationConfig> = {
       if (!scope) return 'id=""'
       // Plus the emptiness check allSets uses — a grouped view of empty sets is
       // just blank cards.
-      return combinePbFilters(scope, 'contents_via_set.id ?!= ""')
+      return combinePbFilters(scope, 'contents_via_set.id ?!= ""', SET_FINISHED)
     },
     applyUserFilters: true,
     defaultSort: '-created',
