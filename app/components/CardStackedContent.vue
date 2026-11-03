@@ -18,13 +18,14 @@ const mediaAreaRef = ref<HTMLElement | null>(null)
 const { menuRef: setActionsMenuRef, onContextMenu: handleContextMenu } =
   useContextMenuTrigger(mediaAreaRef)
 
-// Up to 4 thumbnails from the set/collection's expanded contents.
+// Up to 4 thumbnails: a set's expanded contents, or the newest few a collection
+// stores in `previews` (it has no cheap back-relation; see useFetchItems).
 //
 // contentThumbUrl rather than a bare `item.static`: static is best-effort on the
 // backend and stickers never get one, so mapping it directly and filtering
 // falsy values silently rendered a 4-item set as a single tile.
 const previewUrls = computed<string[]>(() => {
-  const contentField = props.isSet ? 'contents_via_set' : 'contents_via_collections'
+  const contentField = props.isSet ? 'contents_via_set' : 'previews'
   const items = ((props.content?.expand as any)?.[contentField] ?? []) as any[]
   return items.slice(0, 4).map(contentThumbUrl).filter(Boolean)
 })

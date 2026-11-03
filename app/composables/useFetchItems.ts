@@ -71,7 +71,11 @@ const UNIFIED_SET_EXPAND =
   'contents_via_set.idol,contents_via_set.group,contents_via_set.tag,' +
   'contents_via_set.labels,contents_via_set.uploader,contents_via_set.uploader.user,' +
   'contents_via_set.likes'
-const COLLECTION_EXPAND = 'user,contents_via_collections'
+// `previews`, not the `contents_via_collections` back-relation: that unpacked
+// every post's membership array (a JSON column, ~245k rows) and shipped each
+// collection's whole contents to draw four thumbnails. The backend keeps the
+// newest four on the collection itself (hooks/collection_previews.go).
+const COLLECTION_EXPAND = 'user,previews'
 
 /**
  * The starred-idols/groups clause, shared by the two feed variations.
@@ -169,9 +173,10 @@ const VARIATIONS: Record<FetchVariation, VariationConfig> = {
   allCollections: {
     collection: 'contents_collections',
     expand: COLLECTION_EXPAND,
-    // Public collections that actually contain something (see allSets note on
-    // the `?!=` emptiness check).
-    baseFilter: () => combinePbFilters('isPublic=true', 'contents_via_collections.id ?!= ""'),
+    // Public collections that actually contain something. A stored count, not
+    // allSets' `?!=` back-relation check, for the reason on COLLECTION_EXPAND —
+    // that check alone was ~2.7 s of a ~4.8 s page.
+    baseFilter: () => combinePbFilters('isPublic=true', 'contentCount > 0'),
     applyUserFilters: true,
     defaultSort: '-created',
     // A collection has no content fields of its own, so an idol filter carried

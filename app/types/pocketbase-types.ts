@@ -161,10 +161,12 @@ export type ContentsRecord = {
 }
 
 export type ContentsCollectionsRecord = {
+	contentCount?: number
 	cover?: string
 	created: IsoAutoDateString
 	id: string
 	isPublic?: boolean
+	previews?: RecordIdString[]
 	title?: string
 	updated: IsoAutoDateString
 	user?: RecordIdString[]
