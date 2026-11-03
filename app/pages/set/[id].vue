@@ -365,6 +365,9 @@ async function likeAll() {
       @like-one="fsHandleLike"
       @prev="fsPrev"
       @next="fsNext"
+      @changed="refresh"
+      @content-deleted="refresh"
+      @set-deleted="onSetDeleted"
       @update:is-visible="!$event && closeFullscreen()"
     />
   </div>

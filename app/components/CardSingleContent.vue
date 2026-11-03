@@ -525,6 +525,9 @@ function openExternal(url?: string) {
     :like-count="likeCount"
     @like="handleLike"
     @like-one="handleLike"
+    @changed="emit('changed')"
+    @content-deleted="onContentDeleted"
+    @set-deleted="onSetDeleted"
     @update:is-visible="isFullscreenVisible = $event"
   />
 

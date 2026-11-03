@@ -204,6 +204,9 @@ function handleMediaClick() {
     :like-count="likeCount"
     @like="handleLike"
     @like-one="handleLike"
+    @changed="emit('changed')"
+    @content-deleted="emit('changed')"
+    @set-deleted="emit('changed')"
     @update:is-visible="isFullscreenModalVisible = $event"
   />
 

@@ -315,6 +315,9 @@ async function likedRowToggle() {
       @like-one="fsHandleLike"
       @prev="fsPrev"
       @next="fsNext"
+      @changed="refresh"
+      @content-deleted="refresh"
+      @set-deleted="refresh"
       @update:is-visible="!$event && closeFullscreen()"
     />
   </div>

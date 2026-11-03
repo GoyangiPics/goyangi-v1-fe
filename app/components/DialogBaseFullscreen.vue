@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ContentsItem } from '~/types/appTypes'
+import type { ContentsItem, SetsItem, SetsUnifiedItem } from '~/types/appTypes'
 import { useSwipe } from '@vueuse/core'
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 
@@ -24,11 +24,26 @@ const props = defineProps<{
    * mountedContents.
    */
   nextContent?: ContentsItem | null
+  /** The post's set record, when the parent holds one — for the menu. */
+  set?: SetsItem | SetsUnifiedItem | null
+  /** What the viewer's heart likes; the menu offers the other. See ContentActionsMenu. */
+  likeScope?: 'set' | 'post'
 }>()
 
 // `like` is whatever the parent's heart does (the whole set, from a grouped
 // card); `likeOne` is always the single post on screen, for the S key.
-const emit = defineEmits(['update:isVisible', 'like', 'likeOne', 'prev', 'next'])
+// `changed`, `contentDeleted` and `setDeleted` pass the menu's manage actions
+// back, so the listing behind can catch up.
+const emit = defineEmits([
+  'update:isVisible',
+  'like',
+  'likeOne',
+  'prev',
+  'next',
+  'changed',
+  'contentDeleted',
+  'setDeleted',
+])
 
 function handleVisibilityChange(value: boolean) {
   emit('update:isVisible', value)
@@ -139,8 +154,53 @@ onBeforeUnmount(() => {
 const { copyAvif, download } = useContentCard(() => props.content)
 const { requireAuth } = useAuthGate()
 const isCollectVisible = ref(false)
+const isLabelsVisible = ref(false)
+const isReportVisible = ref(false)
 const viewerKeys = (fn: () => void) => () => {
-  if (!isCollectVisible.value) fn()
+  if (isCollectVisible.value || isLabelsVisible.value || isReportVisible.value) return
+  // The menu has the arrow keys while it's open; stepping the set under it
+  // would also swap the post it acts on.
+  if (menuRef.value?.open) return
+  fn()
+}
+
+// ─── Right-click menu ────────────────────────────────────────────────────────
+//
+// The card's menu, on whatever is on screen. The viewer owns it rather than
+// asking its parent to open one: three of its six parents are listing pages
+// that hold no menu for the post in view, and the menu's dialogs (collection,
+// label, report) have to sit above the viewer anyway. Right-click only — on
+// touch a long press is the picture's own (save image, zoom), and the card's
+// long-press menu is a step away.
+const menuRef = ref<{ show: (e: MouseEvent) => void; open: boolean } | null>(null)
+
+function onMenu(e: MouseEvent) {
+  menuRef.value?.show(e)
+}
+
+const { likeAllIn } = useLikeAll()
+
+// The same sign-in gates as the cards' own copies of these.
+function openCollections() {
+  if (requireAuth('add posts to a collection')) isCollectVisible.value = true
+}
+function openLabels() {
+  if (requireAuth('add labels')) isLabelsVisible.value = true
+}
+function openReport() {
+  if (requireAuth('report posts')) isReportVisible.value = true
+}
+
+/** The menu's "Like whole set", for parents whose heart likes one post. */
+function likeAllInSet() {
+  if (props.content.set) likeAllIn({ setId: props.content.set }, { live: [props.content] })
+}
+
+/** A deleted post (or its set) can't stay on screen. */
+function onDeleted(event: 'contentDeleted' | 'setDeleted') {
+  handleVisibilityChange(false)
+  if (event === 'contentDeleted') emit('contentDeleted')
+  else emit('setDeleted')
 }
 
 defineShortcuts({
@@ -166,9 +226,7 @@ defineShortcuts({
   }),
   c: viewerKeys(() => copyAvif()),
   d: viewerKeys(() => download()),
-  a: viewerKeys(() => {
-    if (requireAuth('add posts to a collection')) isCollectVisible.value = true
-  }),
+  a: viewerKeys(() => openCollections()),
 })
 
 /** Bottom strip of a video reserved for the native controls. */
@@ -269,7 +327,7 @@ function requestClose() {
         @wheel.passive="onWheel"
         @click.self="requestClose"
       >
-        <div class="relative rounded-xl shadow-2xl">
+        <div class="relative rounded-xl shadow-2xl" @contextmenu.prevent="onMenu">
           <!-- The active item plus, once stepped, the outgoing and next items
                (see mountedContents). Keyed by id so a step moves elements
                rather than remounting them — a remount restarts the fetch. -->
@@ -339,6 +397,39 @@ function requestClose() {
     :is-visible="isCollectVisible"
     :content="content"
     @update:is-visible="isCollectVisible = $event"
+  />
+
+  <QuickLabelModal
+    v-if="isLabelsVisible"
+    :is-visible="isLabelsVisible"
+    :content="content"
+    @update:is-visible="isLabelsVisible = $event"
+    @changed="applyLabelsToContent(content, $event)"
+  />
+
+  <DialogReport
+    v-if="isReportVisible"
+    :is-visible="isReportVisible"
+    :content-id="content.id"
+    @update:is-visible="isReportVisible = $event"
+  />
+
+  <!-- Keyed by post, as on the cards: stepping through a set must not carry
+       one post's manage state onto the next. -->
+  <ContentActionsMenu
+    ref="menuRef"
+    :key="content.id"
+    :content="content"
+    :set="set"
+    :like-scope="likeScope"
+    @changed="emit('changed')"
+    @content-deleted="onDeleted('contentDeleted')"
+    @set-deleted="onDeleted('setDeleted')"
+    @open-collections="openCollections"
+    @open-labels="openLabels"
+    @open-report="openReport"
+    @like-one="emit('likeOne')"
+    @like-all-in-set="likeAllInSet"
   />
 </template>
 

@@ -582,10 +582,15 @@ function handleMediaClick() {
       :liked="heartLiked"
       :like-animating="isLikeAnimating"
       :like-count="likeCount"
+      :set="content"
+      :like-scope="hasMultiple ? 'set' : 'post'"
       @like="likeSet"
       @like-one="likeOne"
       @prev="prevContent"
       @next="nextContent"
+      @changed="emit('changed')"
+      @content-deleted="emit('changed')"
+      @set-deleted="emit('changed')"
       @update:is-visible="isFullscreenModalVisible = $event"
     />
 

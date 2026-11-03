@@ -84,7 +84,9 @@ const items = computed<DropdownMenuItem[][]>(() => {
 // pointer position. Registered with the global single-open-menu registry.
 const { open, reference, show } = useContextMenuAnchor()
 
-defineExpose({ show, manage: manageRef })
+// `open` so a host with its own keys (the fullscreen viewer) can stand them
+// down while the menu has the arrow keys.
+defineExpose({ show, open, manage: manageRef })
 
 async function copyPreview() {
   // Null when there is no preview object; what gets copied is the short link —
