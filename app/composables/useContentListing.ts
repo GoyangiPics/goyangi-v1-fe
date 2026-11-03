@@ -46,6 +46,8 @@ export function useContentListing(
 ) {
   const route = useRoute()
   const router = useRouter()
+  /** This listing's own path, which its filters are remembered under and its watchers check. */
+  const ownPath = route.path
   const filtersStore = useFiltersStore()
   const referenceStore = useReferenceStore()
   const settingsStore = useSettingsStore()
@@ -181,6 +183,8 @@ export function useContentListing(
       syncedQuery = queryKey(route.query)
     }
 
+    filtersStore.rememberPage(ownPath)
+
     // After the filters are in place, since a URL-supplied sort is what decides this.
     honourLikeRanking()
 
@@ -197,6 +201,7 @@ export function useContentListing(
     honourLikeRanking()
     const query = Object.fromEntries(new URLSearchParams(filtersStore.queryParams))
     syncedQuery = queryKey(query)
+    filtersStore.rememberPage(ownPath)
     // push, not replace: applying a filter is a step the back button undoes,
     // which is what "restore filters on back/forward" means in practice.
     void router.push({ query })
@@ -250,7 +255,6 @@ export function useContentListing(
   //
   // And a settings change made while this page was cached has to apply when
   // it comes back, so it is remembered rather than dropped.
-  const ownPath = route.path
   const isActive = ref(true)
   let refetchOnActivate = false
 
@@ -264,8 +268,8 @@ export function useContentListing(
     // loadInitial is about to; starting a second fetch here was a flash of "No
     // results" as the SDK cancelled one of the pair.
     if (syncedQuery === null) return
-    // Back from /single/ lands here with the same query: nothing to do, which
-    // is the point of keep-alive. A nav link or a back/forward that arrives
+    // Back from /single/ lands here with the same query: nothing to refetch,
+    // which is the point of keep-alive. A nav link or a back/forward that arrives
     // with a different query has to be honoured — the store may still hold
     // another page's filters, and the items are that other query's.
     if (queryKey(route.query) !== syncedQuery) {
@@ -273,6 +277,13 @@ export function useContentListing(
       void syncFromRoute()
       return
     }
+    // Same query, so the items are right — but the store is shared, and the
+    // page just left had its own filters in it (each listing keeps separate
+    // ones; see utils/filterSupport). Put this page's back for the filter bar.
+    // No fetch: the store is only being made to say what the items already are.
+    filtersStore.applyQueryFilters(route.query)
+    filtersStore.rememberPage(ownPath)
+    void filtersStore.hydrateLabelNames()
     if (refetchOnActivate) {
       refetchOnActivate = false
       setPage(1)

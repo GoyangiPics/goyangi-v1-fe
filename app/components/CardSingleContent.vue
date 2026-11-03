@@ -29,8 +29,8 @@ const emit = defineEmits<{
 const router = useRouter()
 // Home with the filter in the URL: the listing reads its filters from there,
 // so a bare `/` would land unfiltered and undo the click.
-const { to } = useNavTarget()
-const { filtersApply } = useFilterApply(() => router.push(to('/')))
+const { withActive } = useNavTarget()
+const { filtersApply } = useFilterApply(() => router.push(withActive('/')))
 // `download` from here rather than a local one: it saves `original`, matching the
 // context menu's Download, instead of whichever rendition the format setting is
 // currently showing.

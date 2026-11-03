@@ -5,6 +5,8 @@ import { MostLikedModes } from '~/types/typesFilters'
 import { computed, ref } from 'vue'
 import { contentTypes, relabelFiletypes } from '~/utils/contentTypes'
 import { calculateDateRange } from '~/utils/dateRanges'
+import type { PageQueries } from '~/utils/filterSupport'
+import { rememberedQuery, rememberPageQuery } from '~/utils/filterSupport'
 import { serializeFiltersToQuery } from '~/utils/filtersQuery'
 import { resolveIdolToken } from '~/utils/idolSelection'
 
@@ -82,6 +84,12 @@ export const useFiltersStore = defineStore(
     const filters = ref<Filters>(makeDefaultFilters())
     const mostLikedMode = ref<MostLikedModes | null>(null)
     const searchValue = ref('')
+    /**
+     * Each listing's own last filters, so home, Sets and Collections keep
+     * separate ones (utils/filterSupport). Memory only, like the rest of this
+     * store: a fresh visit is unfiltered everywhere.
+     */
+    const pageQueries = ref<PageQueries>({})
 
     // Getters
     const isFilterSet = computed(() =>
@@ -247,6 +255,16 @@ export const useFiltersStore = defineStore(
       }
     }
 
+    /** Record what the listing at `path` is showing now. */
+    function rememberPage(path: string) {
+      pageQueries.value = rememberPageQuery(pageQueries.value, path, queryParams.value)
+    }
+
+    /** The query a nav link to `path` should carry: that page's own filters. */
+    function queryFor(path: string): Record<string, string> {
+      return rememberedQuery(pageQueries.value, path)
+    }
+
     function reset() {
       filters.value = makeDefaultFilters()
       mostLikedMode.value = null
@@ -271,6 +289,8 @@ export const useFiltersStore = defineStore(
       applySharedFilter,
       applyQueryFilters,
       hydrateLabelNames,
+      rememberPage,
+      queryFor,
       reset,
     }
   },

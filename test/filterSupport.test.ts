@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vite-plus/test'
-import { carryQuery, hasFilterParams, pageFilterParams, queryKey } from '~/utils/filterSupport'
+import {
+  carryQuery,
+  hasFilterParams,
+  pageFilterParams,
+  queryKey,
+  rememberedQuery,
+  rememberPageQuery,
+} from '~/utils/filterSupport'
 
 describe('carryQuery', () => {
   const active = 'idol=Winter~aespa&filetype=gif&page=3'
@@ -60,5 +67,37 @@ describe('queryKey', () => {
 
   it('keeps repeated keys', () => {
     expect(queryKey({ tag: ['a', 'b'] })).toBe('tag=a&tag=b')
+  })
+})
+
+describe('per-page filter memory', () => {
+  const homeQuery = 'search=winter&idol=Winter~aespa&page=3'
+
+  it('gives each listing back its own filters', () => {
+    let memory = rememberPageQuery({}, '/', homeQuery)
+    memory = rememberPageQuery(memory, '/collections', 'search=faves')
+    expect(rememberedQuery(memory, '/')).toEqual({ search: 'winter', idol: 'Winter~aespa' })
+    expect(rememberedQuery(memory, '/collections')).toEqual({ search: 'faves' })
+  })
+
+  // The bug: a search on home followed you into Sets.
+  it("doesn't hand one page's filters to another", () => {
+    const memory = rememberPageQuery({}, '/', homeQuery)
+    expect(rememberedQuery(memory, '/sets')).toEqual({})
+  })
+
+  it('forgets a page whose filters were cleared', () => {
+    let memory = rememberPageQuery({}, '/', homeQuery)
+    memory = rememberPageQuery(memory, '/', '')
+    expect(rememberedQuery(memory, '/')).toEqual({})
+  })
+
+  it('never remembers the page number', () => {
+    expect(rememberedQuery(rememberPageQuery({}, '/', homeQuery), '/')).not.toHaveProperty('page')
+  })
+
+  // A set or collection page is no nav target, so it starts unfiltered.
+  it('remembers nothing for pages without a filterable listing', () => {
+    expect(rememberPageQuery({}, '/set/abc', homeQuery)).toEqual({})
   })
 })

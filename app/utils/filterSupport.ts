@@ -8,14 +8,17 @@ import type { LocationQuery } from 'vue-router'
  * and an empty query means no filters. Nothing is remembered outside the URL,
  * so the browser's history is exactly the history of what was applied.
  *
- * That leaves in-app navigation to decide what a link carries. Clicking an idol
- * on home and hopping to Collections should still show that idol, so the nav
- * links carry the active query to any page that can consume it — and carry
- * nothing to a page that can't, rather than leaving parameters in the URL that
- * nothing applies. Before this, filters lived in a persisted store and leaked
- * into every page through the back door: arriving at /collections with an idol
- * filter meant a clause against a field the collection doesn't have, a 400 from
- * PocketBase, and an empty page with no visible reason.
+ * That leaves in-app navigation to decide what a link carries. Each listing
+ * keeps its OWN filters: a nav link to a page carries what that page last
+ * showed this session (see rememberPageQuery), not what the page being left
+ * shows. Carrying the active query everywhere was the earlier rule, and it
+ * meant a search on home followed you into Sets and Collections, and a filter
+ * set there followed you back — three listings that looked like one filter.
+ * A set or collection page is no nav target, so opening one starts unfiltered.
+ *
+ * The one deliberate carry left is a chip clicked where there is no listing (a
+ * single post's page): that is a request to see home filtered by it, and goes
+ * through useNavTarget's `withActive`.
  */
 
 /** Every key the filter query can carry. `filter` is a saved-filter id, `top` the Top Posts window. */
@@ -78,6 +81,29 @@ export function carryQuery(activeQuery: string, path: string): Record<string, st
     if (allowed.has(key) && value !== '') out[key] = value
   }
   return out
+}
+
+/** Which listing remembers which query, for the session. Path → query string. */
+export type PageQueries = Readonly<Record<string, string>>
+
+/**
+ * `memory` with `path`'s filters recorded as `activeQuery`. Only the listing
+ * pages are remembered, and only what they consume — never `page`, so coming
+ * back through the nav lands on page 1 of the same filters.
+ */
+export function rememberPageQuery(
+  memory: PageQueries,
+  path: string,
+  activeQuery: string,
+): PageQueries {
+  if (pageFilterParams(path).length === 0) return memory
+  const kept = new URLSearchParams(carryQuery(activeQuery, path)).toString()
+  return { ...memory, [path]: kept }
+}
+
+/** The query a nav link to `path` carries: that page's own last filters. */
+export function rememberedQuery(memory: PageQueries, path: string): Record<string, string> {
+  return carryQuery(memory[path] ?? '', path)
 }
 
 /**
