@@ -223,6 +223,7 @@ async function likeAll() {
             size="sm"
             @click="openAddToCollection"
           />
+          <SlideshowButton v-if="setRecord" :content="setRecord" is-set />
           <DownloadAllButton :items="items" />
           <UButton
             v-if="canShare"

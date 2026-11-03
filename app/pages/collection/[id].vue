@@ -229,6 +229,7 @@ async function likedRowToggle() {
             size="sm"
             @click="openAddToCollection"
           />
+          <SlideshowButton v-if="collectionRecord" :content="collectionRecord" :is-set="false" />
           <DownloadAllButton :items="items" />
         </template>
       </PageHeader>
