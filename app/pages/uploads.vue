@@ -370,6 +370,52 @@ const isImgurImportVisible = ref(false)
 /** Links handed over by the Imgur Tools page — see the handoff in onMounted. */
 const imgurHandoffLinks = ref('')
 
+// ─── X-imported files ────────────────────────────────────────────────────────
+// Same bookkeeping as imgurSources, for the X import. Each file keeps its own
+// post as `source` and claims the "twitter" origin when it uploads — per file,
+// not the batch's source field, so a batch from several posts credits each
+// file to the right one.
+interface XSource {
+  /** xItemKey, what a re-import dedupes on. */
+  key: string
+  postUrl: string
+}
+const xSources = ref<Record<string, XSource>>({})
+const isXImportVisible = ref(false)
+
+/**
+ * Stage what the X dialog fetched, and fill in what the post says.
+ *
+ * A batch that is all one post (the common case: one post, one drop) gets that
+ * post as the batch's source and its date as the batch date, unless either is
+ * already set. A batch spanning posts keeps the batch fields as they are and
+ * dates each file from its own post instead.
+ */
+function onXImported(items: XImportItem[]) {
+  const sources = { ...xSources.value }
+  for (const item of items) sources[fileKey(item.file)] = { key: item.key, postUrl: item.postUrl }
+  xSources.value = sources
+  selectedFiles.value = [...selectedFiles.value, ...items.map((item) => item.file)]
+
+  const posts = new Set(
+    selectedFiles.value.map((file) => xSources.value[fileKey(file)]?.postUrl ?? null),
+  )
+  const onlyPost = posts.size === 1 ? [...posts][0] : null
+  if (onlyPost) {
+    if (!source.value.trim()) source.value = onlyPost
+    const postedAt = items[0]?.postedAt
+    if (!selectedDate.value && postedAt) selectedDate.value = postedAt
+    return
+  }
+  for (const item of items) {
+    if (item.postedAt) setOverride(fileKey(item.file), 'date', item.postedAt)
+  }
+}
+
+function openXImport() {
+  isXImportVisible.value = true
+}
+
 /** Room left in the staging area, which is what the import dialog can fill. */
 const remainingFileSlots = computed(
   () => uploadTypeConfig[selectedUploadType.value].maxFiles - selectedFiles.value.length,
@@ -445,6 +491,12 @@ watch(selectedFiles, (files) => {
     if (live.has(key)) nextSources[key] = value
   }
   imgurSources.value = nextSources
+
+  const nextX: Record<string, XSource> = {}
+  for (const [key, value] of Object.entries(xSources.value)) {
+    if (live.has(key)) nextX[key] = value
+  }
+  xSources.value = nextX
 })
 
 // ─── Validation ──────────────────────────────────────────────────────────────
@@ -740,6 +792,8 @@ async function doUpload(files: File[], existingSetId: string | null): Promise<bo
       // nothing else (see hooks/origin.go).
       const allFromImgur =
         plan.length > 0 && plan.every(({ file }) => !!imgurSources.value[fileKey(file)]?.served)
+      // Same for a batch that is all X imports.
+      const allFromX = plan.length > 0 && plan.every(({ file }) => !!xSources.value[fileKey(file)])
 
       const setData = {
         title: setTitle,
@@ -747,7 +801,7 @@ async function doUpload(files: File[], existingSetId: string | null): Promise<bo
         group: union.group.map((group: any) => group.id),
         uploader: [authStore.uploader?.id],
         date: toLocalDateString(selectedDate.value ?? new Date()),
-        ...(allFromImgur ? { origin: 'imgur' } : {}),
+        ...(allFromImgur ? { origin: 'imgur' } : allFromX ? { origin: 'twitter' } : {}),
       }
       const setRecord = await pb.collection('contents_sets').create(setData)
       setId = setRecord.id
@@ -774,10 +828,13 @@ async function doUpload(files: File[], existingSetId: string | null): Promise<bo
 
   for (const { file, meta } of plan) {
     const inferredFiletype = hintFiletype(file.name, file.type, tab)
+    const fromX = xSources.value[fileKey(file)]
     const formData = buildFormData(
       file,
       meta,
-      uploadContext(setId, inferredFiletype),
+      fromX
+        ? { ...uploadContext(setId, inferredFiletype), source: fromX.postUrl, origin: 'twitter' }
+        : uploadContext(setId, inferredFiletype),
       imgurSources.value[fileKey(file)]?.served,
     )
 
@@ -1064,6 +1121,7 @@ function resetFormAfterUpload() {
   // same tick can't see overrides for files that are gone.
   overrides.value = {}
   imgurSources.value = {}
+  xSources.value = {}
 
   title.value = ''
   selectedIdols.value = []
@@ -1546,6 +1604,14 @@ onMounted(async () => {
                     variant="outline"
                     :disabled="!canUpload || remainingFileSlots < 1"
                     @click="openImgurImport()"
+                  />
+                  <UButton
+                    icon="i-simple-icons-x"
+                    label="From X"
+                    color="neutral"
+                    variant="outline"
+                    :disabled="!canUpload || remainingFileSlots < 1"
+                    @click="openXImport()"
                   />
                   <UButton
                     icon="i-lucide-cloud-upload"
@@ -2179,6 +2245,17 @@ onMounted(async () => {
       :initial-links="imgurHandoffLinks"
       @update:is-visible="isImgurImportVisible = $event"
       @imported="onImgurImported"
+    />
+    <DialogXImport
+      v-if="isXImportVisible"
+      :is-visible="isXImportVisible"
+      :remaining="remainingFileSlots"
+      :max-file-size-mb="uploadTypeConfig[selectedUploadType].maxFileSizeMB"
+      :accept="uploadTypeConfig[selectedUploadType].accept"
+      :staged="Object.values(xSources).map((s) => s.key)"
+      :type-label="uploadTypeConfig[selectedUploadType].label"
+      @update:is-visible="isXImportVisible = $event"
+      @imported="onXImported"
     />
     <DialogCreateUploader
       v-if="isCreateUploaderVisible"

@@ -61,6 +61,7 @@ const expand = () => (props.content.expand as any) ?? {}
 const origin = computed(() => contentOrigin(props.content))
 const isDirectUpload = computed(() => origin.value === 'direct')
 const isImgurImport = computed(() => origin.value === 'imgur')
+const isXImport = computed(() => origin.value === 'twitter')
 
 const labelsOpen = ref(false)
 const labels = computed<any[]>(() => expand().labels ?? [])
@@ -214,6 +215,15 @@ function applyLabelFilter(label: any) {
           color="success"
           variant="soft"
           label="Imgur"
+          class="select-none cursor-help mr-2 mt-2"
+        />
+      </UTooltip>
+      <UTooltip v-if="isXImport" text="Added from an X post" :content="{ side: 'top' }">
+        <UBadge
+          icon="i-simple-icons-x"
+          color="neutral"
+          variant="soft"
+          label="X"
           class="select-none cursor-help mr-2 mt-2"
         />
       </UTooltip>

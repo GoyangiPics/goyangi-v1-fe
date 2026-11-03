@@ -6,6 +6,7 @@ describe('contentOrigin', () => {
     expect(contentOrigin({ origin: 'direct' })).toBe('direct')
     expect(contentOrigin({ origin: 'discord' })).toBe('discord')
     expect(contentOrigin({ origin: 'imgur' })).toBe('imgur')
+    expect(contentOrigin({ origin: 'twitter' })).toBe('twitter')
   })
 
   it('lets origin win over a conflicting discord link', () => {
@@ -50,7 +51,8 @@ describe('contentOrigin', () => {
   })
 
   it('rejects an unrecognised origin value rather than passing it through', () => {
-    expect(contentOrigin({ origin: 'twitter' })).toBe(null)
-    expect(contentOrigin({ origin: 'twitter', discord: '' })).toBe('direct')
+    // `twitter` was the example here until the X import made it a real value.
+    expect(contentOrigin({ origin: 'pixeldrain' })).toBe(null)
+    expect(contentOrigin({ origin: 'pixeldrain', discord: '' })).toBe('direct')
   })
 })

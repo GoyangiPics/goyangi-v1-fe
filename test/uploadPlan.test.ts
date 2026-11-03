@@ -153,6 +153,17 @@ describe('buildFormData', () => {
     expect(fd.get('title')).toBeTruthy()
   })
 
+  it('claims an X import only when told to', () => {
+    expect(buildFormData(fileOf('a.jpg'), meta, ctx()).get('origin')).toBeNull()
+    const fd = buildFormData(
+      fileOf('x-1-1.jpg'),
+      meta,
+      ctx({ origin: 'twitter', source: 'https://x.com/nabi/status/1' }),
+    )
+    expect(fd.get('origin')).toBe('twitter')
+    expect(fd.get('source')).toBe('https://x.com/nabi/status/1')
+  })
+
   it('sends preview_format only when given', () => {
     const bare = buildFormData(fileOf('a.gif'), meta, ctx())
     expect(bare.get('preview_format')).toBeNull()

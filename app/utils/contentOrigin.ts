@@ -3,8 +3,11 @@
  * upload page's import — a recovered file, not one of the uploader's own, and
  * the backend stamps it from `mirror`. Discord-ingested imgur links are still
  * `discord`: the bot is the provenance there.
+ *
+ * `twitter` is the same kind of import from an X post (the upload page's "From
+ * X"), with the post as the record's `source`.
  */
-export type ContentOrigin = 'direct' | 'discord' | 'imgur'
+export type ContentOrigin = 'direct' | 'discord' | 'imgur' | 'twitter'
 
 /** The subset of a record this helper reads. */
 interface OriginSource {
@@ -39,7 +42,8 @@ export function contentOrigin(record: OriginSource | null | undefined): ContentO
   if (!record) return null
 
   const origin = record.origin?.trim()
-  if (origin === 'direct' || origin === 'discord' || origin === 'imgur') return origin
+  if (origin === 'direct' || origin === 'discord' || origin === 'imgur' || origin === 'twitter')
+    return origin
 
   if (typeof record.discord === 'string') {
     return record.discord.trim() ? 'discord' : 'direct'

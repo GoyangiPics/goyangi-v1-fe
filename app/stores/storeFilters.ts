@@ -35,6 +35,7 @@ const dateMode = [
 const originTypes = [
   { option: 'Direct', value: 'direct' },
   { option: 'Imgur', value: 'imgur' },
+  { option: 'X', value: 'twitter' },
   { option: 'Discord', value: 'discord' },
 ]
 

@@ -123,6 +123,7 @@ export const ContentsOriginOptions = {
 	"discord": "discord",
 	"imgur": "imgur",
 	"script": "script",
+	"twitter": "twitter",
 } as const
 export type ContentsOriginOptions = typeof ContentsOriginOptions[keyof typeof ContentsOriginOptions]
 export type ContentsRecord = {
@@ -203,6 +204,7 @@ export const ContentsSetsOriginOptions = {
 	"discord": "discord",
 	"imgur": "imgur",
 	"script": "script",
+	"twitter": "twitter",
 } as const
 export type ContentsSetsOriginOptions = typeof ContentsSetsOriginOptions[keyof typeof ContentsSetsOriginOptions]
 export type ContentsSetsRecord = {

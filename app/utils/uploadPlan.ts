@@ -57,6 +57,12 @@ export interface UploadContext {
   previewFormat?: string
   setId?: string | null
   collectionIds?: string[]
+  /**
+   * "twitter" for a file the X import fetched. The one provenance the page
+   * states on a post; the backend keeps it only when `source` is the X post
+   * (hooks/origin.go). An Imgur import needs no claim — `mirror` says it.
+   */
+  origin?: 'twitter'
 }
 
 /** `YYYY-MM-DD` in LOCAL time — `toISOString()` would shift the day near midnight. */
@@ -196,6 +202,7 @@ export function buildFormData(
   // stay on the record; this just stops the upload path pretending to write them.
 
   if (mirror) formData.append('mirror', mirror)
+  if (ctx.origin) formData.append('origin', ctx.origin)
 
   if (ctx.setId) formData.append('set', ctx.setId)
   ctx.collectionIds?.forEach((id) => formData.append('collections', id))

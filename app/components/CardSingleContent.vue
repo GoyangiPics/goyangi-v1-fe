@@ -80,6 +80,7 @@ const ORIGIN_BADGE: Record<
 > = {
   direct: { icon: 'i-lucide-badge-check', color: 'primary', label: 'Direct upload' },
   imgur: { icon: 'i-simple-icons-imgur', color: 'success', label: 'From Imgur' },
+  twitter: { icon: 'i-simple-icons-x', color: 'neutral', label: 'From X' },
   discord: { icon: 'i-simple-icons-discord', color: 'neutral', label: 'From Discord' },
 }
 
